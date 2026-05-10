@@ -1,0 +1,38 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Start Application",
+			"type": "shell",
+			"command": "npm",
+			"args": ["run", "start"],
+			"options": {
+				"cwd": "${workspaceFolder}/app"
+			},
+			"isBackground": true,
+			"problemMatcher": []
+		},
+		{
+			"label": "Run Tests (Jest)",
+			"type": "shell",
+			"command": "npm",
+			"args": ["run", "test"],
+			"options": {
+				"cwd": "${workspaceFolder}/app"
+			},
+			"group": "test",
+			"problemMatcher": []
+		},
+		{
+			"label": "Run Tests (Jest Watch)",
+			"type": "shell",
+			"command": "npm",
+			"args": ["run", "test:watch"],
+			"options": {
+				"cwd": "${workspaceFolder}/app"
+			},
+			"isBackground": true,
+			"problemMatcher": []
+		}
+	]
+}
