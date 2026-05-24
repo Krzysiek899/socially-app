@@ -1,0 +1,103 @@
+/**
+ * Input — Socially Design System
+ *
+ * All values reference semantic tokens exclusively.
+ */
+
+/* ── Wrapper ── */
+.input-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+/* ── Label ── */
+.input-label {
+  font-family: var(--typography-font-sans);
+  font-size: var(--typography-label-size);
+  font-weight: var(--typography-label-weight);
+  line-height: var(--typography-label-line-height);
+  color: var(--color-text-default);
+}
+
+.input-label--required::after {
+  content: ' *';
+  color: var(--color-danger);
+}
+
+/* ── Field ── */
+.input-field {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  background-color: var(--color-surface-default);
+  border: var(--border-width-default) solid var(--color-border-default);
+  border-radius: var(--radius-sm);
+  color: var(--color-text-default);
+  font-family: var(--typography-font-sans);
+  font-size: var(--typography-body-size);
+  font-weight: var(--typography-body-weight);
+  line-height: var(--typography-body-line-height);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.input-field::placeholder {
+  color: var(--color-text-subtle);
+}
+
+/* ── Sizes ── */
+.input-field--sm {
+  padding: var(--space-1) var(--space-2);
+  font-size: var(--font-size-xs);
+}
+
+.input-field--md {
+  padding: var(--space-2) var(--space-3);
+}
+
+.input-field--lg {
+  padding: var(--space-3) var(--space-4);
+  font-size: var(--font-size-lg);
+}
+
+/* ── Variant: default ── */
+.input-field--default:hover:not(:disabled) {
+  border-color: var(--color-border-strong);
+}
+
+/* ── Variant: error ── */
+.input-field--error {
+  border-color: var(--color-danger);
+}
+
+.input-field--error:hover:not(:disabled) {
+  border-color: var(--color-danger);
+}
+
+/* ── Focus-visible ── */
+.input-field:focus-visible {
+  outline: var(--border-width-strong) solid var(--color-border-focus);
+  outline-offset: 2px;
+  border-color: var(--color-border-focus);
+}
+
+/* ── Disabled ── */
+.input-field:disabled {
+  cursor: not-allowed;
+  color: var(--color-text-disabled);
+  background-color: var(--color-surface-overlay);
+  border-color: var(--color-border-default);
+}
+
+/* ── Helper / error text ── */
+.input-helper {
+  font-family: var(--typography-font-sans);
+  font-size: var(--typography-body-sm-size);
+  font-weight: var(--typography-body-sm-weight);
+  line-height: var(--typography-body-sm-line-height);
+  color: var(--color-text-subtle);
+}
+
+.input-helper--error {
+  color: var(--color-danger);
+}

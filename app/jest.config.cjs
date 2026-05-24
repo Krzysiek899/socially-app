@@ -8,5 +8,7 @@ module.exports = {
     // Stub CSS imports — tokens are tested via the JS constants module
     '\\.(css|less|scss|sass)$': '<rootDir>/src/__mocks__/styleMock.cjs',
   },
+  moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json'],
   testMatch: ['**/__tests__/**/*.[jt]s?(x)'],
+  setupFilesAfterEnv: ['@testing-library/jest-dom'],
 };

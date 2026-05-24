@@ -11,6 +11,10 @@
     "figma": {
        "url": "https://mcp.figma.com/mcp",
        "type": "http"
-     }
+     },
+    "figma-mcp-free": {
+      "command": "node",
+      "args": ["C:\\Users\\krzys\\studia_2_stopien\\figma-mcp-free\\packages\\mcp-server\\dist\\index.js"]
+    }
   }
 }
