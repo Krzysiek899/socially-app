@@ -20,3 +20,10 @@ export type { BadgeProps, BadgeVariant, BadgeSize } from './Badge/Badge.tsx';
 
 export { Accordion } from './Accordion/Accordion.tsx';
 export type { AccordionProps, AccordionItem } from './Accordion/Accordion.tsx';
+
+export { PasswordField } from './PasswordField/PasswordField.tsx';
+export type { PasswordFieldProps } from './PasswordField/PasswordField.tsx';
+
+export { DateField, DATE_FIELD_VARIANTS, DATE_FIELD_SIZES } from './DateField/DateField.tsx';
+export type { DateFieldProps } from './DateField/DateField.tsx';
+

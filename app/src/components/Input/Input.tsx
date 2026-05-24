@@ -19,6 +19,9 @@ export interface InputProps {
   disabled?:            boolean;
   required?:            boolean;
   readOnly?:            boolean;
+  min?:                 string | number;
+  max?:                 string | number;
+  step?:                string | number;
   helperText?:          string;
   errorText?:           string;
   onChange?:            React.ChangeEventHandler<HTMLInputElement>;
@@ -43,6 +46,9 @@ export function Input({
   disabled = false,
   required = false,
   readOnly = false,
+  min,
+  max,
+  step,
   helperText,
   errorText,
   onChange,
@@ -77,6 +83,9 @@ export function Input({
         disabled={disabled}
         required={required}
         readOnly={readOnly}
+        min={min}
+        max={max}
+        step={step}
         onChange={onChange}
         aria-invalid={isError || undefined}
         aria-describedby={describedBy}
