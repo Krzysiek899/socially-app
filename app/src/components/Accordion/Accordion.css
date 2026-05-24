@@ -106,3 +106,24 @@
   font-weight: var(--typography-body-weight);
   line-height: var(--typography-body-line-height);
 }
+
+/* ── Focused variant ── */
+.accordion--focused .accordion__item {
+  border-color: var(--color-border-strong);
+  border-width: var(--border-width-strong);
+}
+
+.accordion--focused .accordion__trigger {
+  background-color: var(--color-surface-overlay);
+  color: var(--color-text-subtle);
+}
+
+.accordion--focused .accordion__trigger:hover:not(:disabled) {
+  background-color: var(--color-surface-subtle);
+  color: var(--color-text-default);
+}
+
+.accordion--focused .accordion__item--expanded .accordion__trigger {
+  background-color: var(--color-surface-overlay);
+  color: var(--color-text-default);
+}

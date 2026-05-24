@@ -273,6 +273,15 @@ export function Playground() {
             />
           </div>
         </Row>
+        <Row label="Focused">
+          <div className="pg__accordion-demo">
+            <Accordion
+              items={ACCORDION_MULTI}
+              focused
+              aria-label="Features — focused style"
+            />
+          </div>
+        </Row>
       </Section>
     </div>
   );

@@ -232,3 +232,22 @@ describe('Accordion — keyboard navigation', () => {
     expect(document.activeElement).toBe(enabled);
   });
 });
+
+describe('Accordion — focused prop', () => {
+  it('adds accordion--focused class when focused=true', () => {
+    const { container } = render(<Accordion items={ITEMS} focused />);
+    expect(container.firstChild).toHaveClass('accordion--focused');
+  });
+
+  it('does not add accordion--focused class by default', () => {
+    const { container } = render(<Accordion items={ITEMS} />);
+    expect(container.firstChild).not.toHaveClass('accordion--focused');
+  });
+
+  it('still expands items normally in focused mode', () => {
+    render(<Accordion items={ITEMS} focused />);
+    const trigger = screen.getByRole('button', { name: /section 1/i });
+    fireEvent.click(trigger);
+    expect(trigger).toHaveAttribute('aria-expanded', 'true');
+  });
+});
