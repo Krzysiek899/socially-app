@@ -1,6 +1,7 @@
 import React from 'react';
 import { Input, INPUT_VARIANTS, INPUT_SIZES } from '../Input/Input.tsx';
 import type { InputVariant, InputSize } from '../Input/Input.tsx';
+import './DateField.css';
 
 export interface DateFieldProps {
   id:                   string;
@@ -47,23 +48,25 @@ export function DateField({
   'aria-describedby': ariaDescribedBy,
 }: DateFieldProps): React.JSX.Element {
   return (
-    <Input
-      id={id}
-      label={label}
-      variant={variant}
-      size={size}
-      type="date"
-      value={value}
-      defaultValue={defaultValue}
-      min={min}
-      max={max}
-      disabled={disabled}
-      required={required}
-      readOnly={readOnly}
-      helperText={helperText}
-      errorText={errorText}
-      onChange={onChange}
-      aria-describedby={ariaDescribedBy}
-    />
+    <div className="date-field">
+      <Input
+        id={id}
+        label={label}
+        variant={variant}
+        size={size}
+        type="date"
+        value={value}
+        defaultValue={defaultValue}
+        min={min}
+        max={max}
+        disabled={disabled}
+        required={required}
+        readOnly={readOnly}
+        helperText={helperText}
+        errorText={errorText}
+        onChange={onChange}
+        aria-describedby={ariaDescribedBy}
+      />
+    </div>
   );
 }
