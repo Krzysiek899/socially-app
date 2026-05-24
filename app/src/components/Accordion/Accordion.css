@@ -109,21 +109,21 @@
 
 /* ── Focused variant ── */
 .accordion--focused .accordion__item {
-  border-color: var(--color-border-strong);
+  border-color: var(--color-text-heading);
   border-width: var(--border-width-strong);
 }
 
 .accordion--focused .accordion__trigger {
   background-color: var(--color-surface-overlay);
-  color: var(--color-text-subtle);
+  color: var(--color-text-heading);
 }
 
 .accordion--focused .accordion__trigger:hover:not(:disabled) {
   background-color: var(--color-surface-subtle);
-  color: var(--color-text-default);
+  color: var(--color-text-heading);
 }
 
 .accordion--focused .accordion__item--expanded .accordion__trigger {
   background-color: var(--color-surface-overlay);
-  color: var(--color-text-default);
+  color: var(--color-text-heading);
 }
