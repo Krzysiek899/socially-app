@@ -1,0 +1,123 @@
+/**
+ * Button — Socially Design System
+ *
+ * All values reference semantic tokens exclusively.
+ * No raw brand values or primitive tokens are used here.
+ */
+
+/* ── Base ── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  border: var(--border-width-default) solid transparent;
+  border-radius: var(--radius-sm);
+  font-family: var(--typography-font-sans);
+  font-size: var(--typography-label-size);
+  font-weight: var(--typography-label-weight);
+  line-height: var(--typography-label-line-height);
+  cursor: pointer;
+  text-decoration: none;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+  white-space: nowrap;
+  user-select: none;
+}
+
+/* ── Sizes ── */
+.btn--sm {
+  padding: var(--space-1) var(--space-3);
+  font-size: var(--font-size-xs);
+}
+
+.btn--md {
+  padding: var(--space-2) var(--space-4);
+}
+
+.btn--lg {
+  padding: var(--space-3) var(--space-6);
+  font-size: var(--font-size-base);
+}
+
+/* ── Variant: primary ── */
+.btn--primary {
+  background-color: var(--color-primary);
+  border-color: var(--color-primary);
+  color: var(--color-text-on-primary);
+}
+
+.btn--primary:hover:not(:disabled) {
+  background-color: var(--color-primary-hover);
+  border-color: var(--color-primary-hover);
+}
+
+.btn--primary:active:not(:disabled) {
+  background-color: var(--color-primary-strong);
+  border-color: var(--color-primary-strong);
+}
+
+/* ── Variant: secondary ── */
+.btn--secondary {
+  background-color: var(--color-surface-default);
+  border-color: var(--color-border-default);
+  color: var(--color-text-default);
+}
+
+.btn--secondary:hover:not(:disabled) {
+  background-color: var(--color-surface-subtle);
+  border-color: var(--color-border-strong);
+}
+
+.btn--secondary:active:not(:disabled) {
+  background-color: var(--color-surface-overlay);
+  border-color: var(--color-border-strong);
+}
+
+/* ── Variant: ghost ── */
+.btn--ghost {
+  background-color: transparent;
+  border-color: transparent;
+  color: var(--color-primary);
+}
+
+.btn--ghost:hover:not(:disabled) {
+  background-color: var(--color-primary-subtle);
+}
+
+.btn--ghost:active:not(:disabled) {
+  background-color: var(--color-primary-subtle);
+  color: var(--color-primary-strong);
+}
+
+/* ── Variant: danger ── */
+.btn--danger {
+  background-color: var(--color-danger);
+  border-color: var(--color-danger);
+  color: var(--color-text-on-primary);
+}
+
+.btn--danger:hover:not(:disabled) {
+  background-color: var(--color-danger-subtle);
+  border-color: var(--color-danger);
+  color: var(--color-danger);
+}
+
+.btn--danger:active:not(:disabled) {
+  background-color: var(--color-danger-subtle);
+}
+
+/* ── Focus-visible ── */
+.btn:focus-visible {
+  outline: var(--border-width-strong) solid var(--color-border-focus);
+  outline-offset: 2px;
+}
+
+/* ── Disabled ── */
+.btn:disabled,
+.btn[aria-disabled="true"] {
+  cursor: not-allowed;
+  opacity: 0.5;
+  color: var(--color-text-disabled);
+  background-color: var(--color-surface-overlay);
+  border-color: var(--color-border-default);
+}

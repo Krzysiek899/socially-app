@@ -9,4 +9,5 @@ module.exports = {
     '\\.(css|less|scss|sass)$': '<rootDir>/src/__mocks__/styleMock.cjs',
   },
   testMatch: ['**/__tests__/**/*.[jt]s?(x)'],
+  setupFilesAfterEnv: ['@testing-library/jest-dom'],
 };
