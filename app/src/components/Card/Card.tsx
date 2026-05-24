@@ -1,28 +1,25 @@
-/**
- * Card — Primitive component
- *
- * @typedef {'default'|'raised'|'subtle'} CardVariant
- */
+import React from 'react';
 import './Card.css';
 
-/** @type {ReadonlyArray<CardVariant>} */
-export const CARD_VARIANTS = /** @type {const} */ (['default', 'raised', 'subtle']);
+export type CardVariant = 'default' | 'raised' | 'subtle';
+
+export const CARD_VARIANTS: ReadonlyArray<CardVariant> = ['default', 'raised', 'subtle'];
+
+export interface CardProps {
+  variant?:            CardVariant;
+  header?:             React.ReactNode;
+  footer?:             React.ReactNode;
+  children:            React.ReactNode;
+  as?:                 keyof React.JSX.IntrinsicElements;
+  'aria-label'?:       string;
+  'aria-labelledby'?:  string;
+}
 
 /**
  * Card primitive.
  *
  * Composes an optional header, body, and footer.
  * Does not accept `className` to prevent ad-hoc styling drift.
- *
- * @param {{
- *   variant?:  CardVariant,
- *   header?:   React.ReactNode,
- *   footer?:   React.ReactNode,
- *   children:  React.ReactNode,
- *   as?:       keyof JSX.IntrinsicElements,
- *   'aria-label'?: string,
- *   'aria-labelledby'?: string,
- * }} props
  */
 export function Card({
   variant = 'default',
@@ -32,7 +29,7 @@ export function Card({
   as: Tag = 'div',
   'aria-label': ariaLabel,
   'aria-labelledby': ariaLabelledBy,
-}) {
+}: CardProps): React.JSX.Element {
   if (!CARD_VARIANTS.includes(variant)) {
     throw new Error(`Card: unknown variant "${variant}". Must be one of: ${CARD_VARIANTS.join(', ')}.`);
   }

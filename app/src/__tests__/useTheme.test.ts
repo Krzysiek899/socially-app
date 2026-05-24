@@ -1,5 +1,5 @@
 import { renderHook, act } from '@testing-library/react';
-import { useTheme, resolveTheme, getStoredPreference } from '../hooks/useTheme.js';
+import { useTheme, resolveTheme, getStoredPreference } from '../hooks/useTheme.ts';
 
 // ─── matchMedia mock ───────────────────────────────────────────────────────
 let mockDarkMode = false;

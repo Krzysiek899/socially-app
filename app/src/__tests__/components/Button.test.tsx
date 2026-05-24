@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { Button, BUTTON_VARIANTS, BUTTON_SIZES } from '../../components/Button/Button.jsx';
+import { Button, BUTTON_VARIANTS, BUTTON_SIZES } from '../../components/Button/Button.tsx';
 
 describe('Button — contract: variant and size APIs', () => {
   it('exposes all four variants', () => {

@@ -3,9 +3,10 @@ import { createRoot } from 'react-dom/client'
 import './tokens/primitive.css'
 import './tokens/semantic.css'
 import './index.css'
-import App from './App.jsx'
+import App from './App.tsx'
 
-createRoot(document.getElementById('root')).render(
+const rootEl = document.getElementById('root')!;
+createRoot(rootEl).render(
   <StrictMode>
     <App />
   </StrictMode>,

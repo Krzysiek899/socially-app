@@ -1,32 +1,27 @@
-/**
- * Button — Primitive component
- *
- * @typedef {'primary'|'secondary'|'ghost'|'danger'} ButtonVariant
- * @typedef {'sm'|'md'|'lg'} ButtonSize
- */
+import React from 'react';
 import './Button.css';
 
-/** @type {ReadonlyArray<ButtonVariant>} */
-export const BUTTON_VARIANTS = /** @type {const} */ (['primary', 'secondary', 'ghost', 'danger']);
+export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger';
+export type ButtonSize = 'sm' | 'md' | 'lg';
 
-/** @type {ReadonlyArray<ButtonSize>} */
-export const BUTTON_SIZES = /** @type {const} */ (['sm', 'md', 'lg']);
+export const BUTTON_VARIANTS: ReadonlyArray<ButtonVariant> = ['primary', 'secondary', 'ghost', 'danger'];
+export const BUTTON_SIZES: ReadonlyArray<ButtonSize> = ['sm', 'md', 'lg'];
+
+export interface ButtonProps {
+  variant?:     ButtonVariant;
+  size?:        ButtonSize;
+  disabled?:    boolean;
+  type?:        'button' | 'submit' | 'reset';
+  onClick?:     React.MouseEventHandler<HTMLButtonElement>;
+  children:     React.ReactNode;
+  'aria-label'?: string;
+}
 
 /**
  * Button primitive.
  *
  * Accepts only constrained `variant` and `size` values.
  * Does not accept a `className` prop to prevent ad-hoc styling drift.
- *
- * @param {{
- *   variant?:   ButtonVariant,
- *   size?:      ButtonSize,
- *   disabled?:  boolean,
- *   type?:      'button'|'submit'|'reset',
- *   onClick?:   React.MouseEventHandler<HTMLButtonElement>,
- *   children:   React.ReactNode,
- *   'aria-label'?: string,
- * }} props
  */
 export function Button({
   variant = 'primary',
@@ -36,7 +31,7 @@ export function Button({
   onClick,
   children,
   'aria-label': ariaLabel,
-}) {
+}: ButtonProps): React.JSX.Element {
   if (!BUTTON_VARIANTS.includes(variant)) {
     throw new Error(`Button: unknown variant "${variant}". Must be one of: ${BUTTON_VARIANTS.join(', ')}.`);
   }

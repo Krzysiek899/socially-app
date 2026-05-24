@@ -2,21 +2,21 @@ import { useState, useEffect, useCallback } from 'react';
 
 const STORAGE_KEY = 'socially-theme';
 
+export type ThemePreference = 'light' | 'dark' | 'system';
+export type Theme = 'light' | 'dark';
+
 /** Valid theme preference values. */
-export const THEME_PREFERENCES = /** @type {const} */ ({
+export const THEME_PREFERENCES = {
   LIGHT:  'light',
   DARK:   'dark',
   SYSTEM: 'system',
-});
+} as const satisfies Record<string, ThemePreference>;
 
 /**
- * Resolve the concrete theme ('light' | 'dark') from a stored preference.
+ * Resolve the concrete theme from a stored preference.
  * Pure function — safe to call outside React.
- *
- * @param {'light'|'dark'|'system'} preference
- * @returns {'light'|'dark'}
  */
-export function resolveTheme(preference) {
+export function resolveTheme(preference: ThemePreference): Theme {
   if (preference === 'system') {
     return typeof window !== 'undefined' &&
       window.matchMedia('(prefers-color-scheme: dark)').matches
@@ -29,10 +29,8 @@ export function resolveTheme(preference) {
 /**
  * Read the stored preference from localStorage (SSR-safe).
  * Falls back to 'system' when nothing is stored.
- *
- * @returns {'light'|'dark'|'system'}
  */
-export function getStoredPreference() {
+export function getStoredPreference(): ThemePreference {
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored === 'light' || stored === 'dark' || stored === 'system') {
@@ -44,31 +42,23 @@ export function getStoredPreference() {
   return 'system';
 }
 
+export interface UseThemeReturn {
+  theme:      Theme;
+  preference: ThemePreference;
+  setTheme:   (pref: ThemePreference) => void;
+}
+
 /**
  * React hook for theme preference management.
- *
- * - Reads initial preference from localStorage (falls back to 'system').
- * - Resolves 'system' to the actual OS preference via matchMedia.
- * - Writes `data-theme` attribute to `<html>` on every resolved-theme change.
- * - Listens for OS preference changes when preference is 'system'.
- * - Persists manual overrides to localStorage.
- *
- * @returns {{
- *   theme:      'light'|'dark',
- *   preference: 'light'|'dark'|'system',
- *   setTheme:   (pref: 'light'|'dark'|'system') => void,
- * }}
  */
-export function useTheme() {
-  const [preference, setPreferenceState] = useState(getStoredPreference);
+export function useTheme(): UseThemeReturn {
+  const [preference, setPreferenceState] = useState<ThemePreference>(getStoredPreference);
 
   const theme = resolveTheme(preference);
 
-  // Apply data-theme attribute to <html> and listen for OS preference changes.
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
 
-    // When following system preference, listen for OS changes.
     if (preference !== 'system') return;
 
     const mq = window.matchMedia('(prefers-color-scheme: dark)');
@@ -83,7 +73,7 @@ export function useTheme() {
     return () => mq.removeEventListener('change', handler);
   }, [theme, preference]);
 
-  const setTheme = useCallback((newPreference) => {
+  const setTheme = useCallback((newPreference: ThemePreference) => {
     try {
       localStorage.setItem(STORAGE_KEY, newPreference);
     } catch {

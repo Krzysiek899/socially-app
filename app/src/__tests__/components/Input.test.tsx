@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { Input, INPUT_VARIANTS, INPUT_SIZES } from '../../components/Input/Input.jsx';
+import { Input, INPUT_VARIANTS, INPUT_SIZES } from '../../components/Input/Input.tsx';
 
 describe('Input — contract: variant and size APIs', () => {
   it('exposes both variants', () => {

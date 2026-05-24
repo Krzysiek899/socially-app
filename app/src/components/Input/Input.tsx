@@ -1,40 +1,35 @@
-/**
- * Input — Primitive component
- *
- * @typedef {'default'|'error'} InputVariant
- * @typedef {'sm'|'md'|'lg'} InputSize
- */
+import React from 'react';
 import './Input.css';
 
-/** @type {ReadonlyArray<InputVariant>} */
-export const INPUT_VARIANTS = /** @type {const} */ (['default', 'error']);
+export type InputVariant = 'default' | 'error';
+export type InputSize = 'sm' | 'md' | 'lg';
 
-/** @type {ReadonlyArray<InputSize>} */
-export const INPUT_SIZES = /** @type {const} */ (['sm', 'md', 'lg']);
+export const INPUT_VARIANTS: ReadonlyArray<InputVariant> = ['default', 'error'];
+export const INPUT_SIZES: ReadonlyArray<InputSize> = ['sm', 'md', 'lg'];
+
+export interface InputProps {
+  id:                   string;
+  label:                string;
+  variant?:             InputVariant;
+  size?:                InputSize;
+  type?:                string;
+  value?:               string;
+  defaultValue?:        string;
+  placeholder?:         string;
+  disabled?:            boolean;
+  required?:            boolean;
+  readOnly?:            boolean;
+  helperText?:          string;
+  errorText?:           string;
+  onChange?:            React.ChangeEventHandler<HTMLInputElement>;
+  'aria-describedby'?:  string;
+}
 
 /**
  * Input primitive.
  *
  * Wraps a labelled `<input>` with constrained variant/size API.
  * Does not accept `className` to prevent ad-hoc styling drift.
- *
- * @param {{
- *   id:           string,
- *   label:        string,
- *   variant?:     InputVariant,
- *   size?:        InputSize,
- *   type?:        string,
- *   value?:       string,
- *   defaultValue?: string,
- *   placeholder?: string,
- *   disabled?:    boolean,
- *   required?:    boolean,
- *   readOnly?:    boolean,
- *   helperText?:  string,
- *   errorText?:   string,
- *   onChange?:    React.ChangeEventHandler<HTMLInputElement>,
- *   'aria-describedby'?: string,
- * }} props
  */
 export function Input({
   id,
@@ -52,7 +47,7 @@ export function Input({
   errorText,
   onChange,
   'aria-describedby': ariaDescribedBy,
-}) {
+}: InputProps): React.JSX.Element {
   if (!INPUT_VARIANTS.includes(variant)) {
     throw new Error(`Input: unknown variant "${variant}". Must be one of: ${INPUT_VARIANTS.join(', ')}.`);
   }

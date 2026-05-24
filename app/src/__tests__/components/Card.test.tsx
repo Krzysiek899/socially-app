@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { Card, CARD_VARIANTS } from '../../components/Card/Card.jsx';
+import { Card, CARD_VARIANTS } from '../../components/Card/Card.tsx';
 
 describe('Card — contract: variant API', () => {
   it('exposes all three variants', () => {

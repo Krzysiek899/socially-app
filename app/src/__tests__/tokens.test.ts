@@ -6,7 +6,7 @@ import {
   BRAND_COLORS,
   TYPOGRAPHY_TOKENS,
   TYPOGRAPHY_ROLE_MAPPING,
-} from '../tokens/tokens.js';
+} from '../tokens/tokens.ts';
 
 describe('Token architecture — primitive values', () => {
   it('primary maps to approved brand color', () => {

@@ -3,9 +3,14 @@ import reactLogo from './assets/react.svg'
 import viteLogo from './assets/vite.svg'
 import heroImg from './assets/hero.png'
 import './App.css'
+import { Playground } from './playground/Playground.tsx'
 
 function App() {
   const [count, setCount] = useState(0)
+
+  if (window.location.pathname === '/playground') {
+    return <Playground />
+  }
 
   return (
     <>

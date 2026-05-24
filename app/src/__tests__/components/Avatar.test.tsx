@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { Avatar, AVATAR_SIZES } from '../../components/Avatar/Avatar.jsx';
+import { Avatar, AVATAR_SIZES } from '../../components/Avatar/Avatar.tsx';
 
 describe('Avatar — contract: size API', () => {
   it('exposes all four sizes', () => {
