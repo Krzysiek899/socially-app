@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
 import './Playground.css';
 import {
-  Button,  BUTTON_VARIANTS, BUTTON_SIZES,
-  Input,   INPUT_SIZES,
-  Card,    CARD_VARIANTS,
-  Avatar,  AVATAR_SIZES,
-  Badge,   BADGE_VARIANTS, BADGE_SIZES,
+  Button,    BUTTON_VARIANTS, BUTTON_SIZES,
+  Input,     INPUT_SIZES,
+  Card,      CARD_VARIANTS,
+  Avatar,    AVATAR_SIZES,
+  Badge,     BADGE_VARIANTS, BADGE_SIZES,
+  Accordion,
 } from '../components/index.ts';
+import type { AccordionItem } from '../components/index.ts';
 import type { ThemePreference } from '../hooks/useTheme.ts';
 import { useTheme } from '../hooks/useTheme.ts';
 
@@ -30,6 +32,48 @@ function Row({ label, children }: { label: string; children: React.ReactNode }) 
 }
 
 /* ─── Playground ──────────────────────────────────────────────────────────── */
+const ACCORDION_SINGLE: AccordionItem[] = [
+  {
+    id: 'what',
+    heading: 'What is the Socially Design System?',
+    content: 'A token-driven, accessible component library built for the Socially app. All styles reference semantic tokens — never raw primitives or hard-coded values.',
+  },
+  {
+    id: 'why',
+    heading: 'Why use semantic tokens?',
+    content: 'Semantic tokens decouple intent (e.g. "primary") from raw values, making it trivial to swap themes without touching component code.',
+  },
+  {
+    id: 'how',
+    heading: 'How does keyboard navigation work?',
+    content: 'Arrow Down / Arrow Up moves focus between headers. Home jumps to the first, End to the last. Enter or Space toggles the focused item.',
+  },
+  {
+    id: 'disabled',
+    heading: 'This item is disabled',
+    content: 'You should never see this.',
+    disabled: true,
+  },
+];
+
+const ACCORDION_MULTI: AccordionItem[] = [
+  {
+    id: 'a',
+    heading: 'Design tokens',
+    content: 'Primitive → Semantic → Component. Every layer only references the layer above.',
+  },
+  {
+    id: 'b',
+    heading: 'Accessible by default',
+    content: 'WAI-ARIA patterns, focus management, and keyboard contracts are built in — not bolted on.',
+  },
+  {
+    id: 'c',
+    heading: 'Dark mode support',
+    content: 'Set data-theme="dark" on <html> or let the OS preference drive it automatically via prefers-color-scheme.',
+  },
+];
+
 export function Playground() {
   const { theme, preference, setTheme } = useTheme();
   const [inputValue, setInputValue] = useState('');
@@ -40,7 +84,7 @@ export function Playground() {
       <header className="pg__header">
         <div>
           <h1 className="pg__title">Component Playground</h1>
-          <p className="pg__subtitle">Socially Design System — Primitive Components v1</p>
+          <p className="pg__subtitle">Socially Design System — Primitive Components + Disclosure</p>
         </div>
         <div className="pg__theme-toggle" role="group" aria-label="Theme selector">
           {(['light', 'dark', 'system'] as ThemePreference[]).map((p) => (
@@ -204,6 +248,39 @@ export function Playground() {
           <span style={{ fontSize: 'var(--typography-body-size)', fontWeight: 'var(--font-weight-medium)' }}>Jane Doe</span>
           <Badge variant="success">Online</Badge>
           <Badge variant="primary" size="sm">Admin</Badge>
+        </Row>
+      </Section>
+
+      <hr className="pg__divider" />
+
+      {/* ── Accordion ── */}
+      <Section title="Accordion">
+        <Row label="Single (default)">
+          <div className="pg__accordion-demo">
+            <Accordion
+              items={ACCORDION_SINGLE}
+              aria-label="FAQ — single open"
+            />
+          </div>
+        </Row>
+        <Row label="Multi-open">
+          <div className="pg__accordion-demo">
+            <Accordion
+              items={ACCORDION_MULTI}
+              allowMultiple
+              defaultExpanded={['a', 'b']}
+              aria-label="Features — multi open"
+            />
+          </div>
+        </Row>
+        <Row label="Focused">
+          <div className="pg__accordion-demo">
+            <Accordion
+              items={ACCORDION_MULTI}
+              focused
+              aria-label="Features — focused style"
+            />
+          </div>
         </Row>
       </Section>
     </div>

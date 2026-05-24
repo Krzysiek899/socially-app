@@ -84,7 +84,12 @@
   gap: var(--space-4);
 }
 
-/* ── Divider ── */
+/* ── Accordion demo ── */
+.pg__accordion-demo {
+  flex: 1;
+  min-width: 0;
+  max-width: 640px;
+}
 .pg__divider {
   border: none;
   border-top: var(--border-width-default) solid var(--color-border-default);
