@@ -5,6 +5,19 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>socially-app</title>
+    <!-- Theme init: must run before first paint to prevent flash of unstyled content -->
+    <script>
+      (function () {
+        var pref = localStorage.getItem('socially-theme') || 'system';
+        var resolved =
+          pref === 'system'
+            ? window.matchMedia('(prefers-color-scheme: dark)').matches
+              ? 'dark'
+              : 'light'
+            : pref === 'dark' ? 'dark' : 'light';
+        document.documentElement.setAttribute('data-theme', resolved);
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>
