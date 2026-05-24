@@ -27,3 +27,6 @@ export type { PasswordFieldProps } from './PasswordField/PasswordField.tsx';
 export { DateField, DATE_FIELD_VARIANTS, DATE_FIELD_SIZES } from './DateField/DateField.tsx';
 export type { DateFieldProps } from './DateField/DateField.tsx';
 
+export { Dropdown, DROPDOWN_VARIANTS, DROPDOWN_SIZES } from './Dropdown/Dropdown.tsx';
+export type { DropdownProps, DropdownOption } from './Dropdown/Dropdown.tsx';
+

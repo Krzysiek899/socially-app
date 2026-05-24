@@ -1,0 +1,76 @@
+/**
+ * Dropdown — Socially Design System
+ *
+ * Styles the native <select> with a custom chevron indicator.
+ * `appearance: none` removes the native arrow so the custom chevron
+ * rendered via a sibling <span> can take its place.
+ *
+ * All values reference semantic tokens exclusively.
+ */
+
+/* ── Wrapper: positions the chevron over the select ── */
+.dropdown__wrapper {
+  position: relative;
+  display: block;
+}
+
+/* ── Select: reuse input-field styles, override native arrow ── */
+.dropdown__select {
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+  /* Extra right padding reserves space for the chevron */
+  padding-right: var(--space-8);
+}
+
+.dropdown__select:disabled {
+  cursor: not-allowed;
+}
+
+/* ── Chevron icon ── */
+.dropdown__chevron {
+  position: absolute;
+  right: var(--space-3);
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  color: var(--color-text-subtle);
+  display: flex;
+  align-items: center;
+  transition: color 0.15s ease;
+}
+
+.dropdown__chevron svg {
+  display: block;
+}
+
+/* Chevron sizes */
+.dropdown__chevron--sm svg {
+  width: 14px;
+  height: 14px;
+}
+
+.dropdown__chevron--md svg {
+  width: 16px;
+  height: 16px;
+}
+
+.dropdown__chevron--lg svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* Focus: highlight chevron to match focused border */
+.dropdown__select:focus-visible ~ .dropdown__chevron {
+  color: var(--color-border-focus);
+}
+
+/* Error: tint chevron with danger color */
+.input-field--error ~ .dropdown__chevron {
+  color: var(--color-danger);
+}
+
+/* Disabled: dim the chevron */
+.dropdown__select:disabled ~ .dropdown__chevron {
+  color: var(--color-text-disabled);
+}
