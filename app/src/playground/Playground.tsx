@@ -9,7 +9,7 @@ import {
   Accordion,
   PasswordField,
   DateField,
-  Dropdown,  DROPDOWN_VARIANTS, DROPDOWN_SIZES,
+  Dropdown, DROPDOWN_VARIANTS, DROPDOWN_SIZES,
 } from '../components/index.ts';
 import type { AccordionItem } from '../components/index.ts';
 import type { ThemePreference } from '../hooks/useTheme.ts';

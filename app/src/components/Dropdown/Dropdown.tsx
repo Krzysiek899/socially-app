@@ -84,7 +84,7 @@ export function Dropdown({
           aria-describedby={describedBy}
         >
           {placeholder !== undefined && (
-            <option value="" disabled={required}>
+            <option value="" disabled>
               {placeholder}
             </option>
           )}
