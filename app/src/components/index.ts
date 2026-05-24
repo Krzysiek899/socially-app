@@ -17,3 +17,6 @@ export type { AvatarProps, AvatarSize } from './Avatar/Avatar.tsx';
 
 export { Badge, BADGE_VARIANTS, BADGE_SIZES } from './Badge/Badge.tsx';
 export type { BadgeProps, BadgeVariant, BadgeSize } from './Badge/Badge.tsx';
+
+export { Accordion } from './Accordion/Accordion.tsx';
+export type { AccordionProps, AccordionItem } from './Accordion/Accordion.tsx';

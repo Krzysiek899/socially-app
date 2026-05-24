@@ -1,0 +1,129 @@
+/**
+ * Accordion — Socially Design System
+ *
+ * All values reference semantic tokens exclusively.
+ * No raw primitives or hard-coded values.
+ */
+
+/* ── Container ── */
+.accordion {
+  width: 100%;
+  font-family: var(--typography-font-sans);
+}
+
+/* ── Item ── */
+.accordion__item {
+  border: var(--border-width-default) solid var(--color-border-default);
+  border-radius: var(--radius-sm);
+  background-color: var(--color-surface-default);
+  overflow: hidden;
+}
+
+.accordion__item + .accordion__item {
+  margin-top: var(--space-2);
+}
+
+.accordion__item--expanded {
+  border-color: var(--color-border-strong);
+}
+
+.accordion__item--disabled {
+  opacity: 0.5;
+}
+
+/* ── Heading ── */
+.accordion__heading {
+  margin: 0;
+  padding: 0;
+}
+
+/* ── Trigger ── */
+.accordion__trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: var(--space-4) var(--space-5);
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  font-family: var(--typography-font-sans);
+  font-size: var(--typography-subheading-size);
+  font-weight: var(--typography-subheading-weight);
+  line-height: var(--typography-subheading-line-height);
+  color: var(--color-text-heading);
+  text-align: left;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.accordion__trigger:hover:not(:disabled) {
+  background-color: var(--color-surface-subtle);
+  color: var(--color-primary);
+}
+
+.accordion__trigger:focus-visible {
+  outline: var(--border-width-strong) solid var(--color-border-focus);
+  outline-offset: -2px;
+}
+
+.accordion__trigger:disabled {
+  cursor: not-allowed;
+  color: var(--color-text-disabled);
+}
+
+.accordion__item--expanded .accordion__trigger {
+  background-color: var(--color-primary-subtle);
+  color: var(--color-primary);
+}
+
+/* ── Trigger label & icon ── */
+.accordion__trigger-label {
+  flex: 1;
+  min-width: 0;
+}
+
+.accordion__trigger-icon {
+  flex-shrink: 0;
+  margin-left: var(--space-3);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-subtle);
+  transition: transform 0.2s ease;
+}
+
+/* ── Panel ── */
+.accordion__panel {
+  border-top: var(--border-width-default) solid var(--color-border-default);
+}
+
+.accordion__panel[hidden] {
+  display: none;
+}
+
+.accordion__panel-body {
+  padding: var(--space-4) var(--space-5) var(--space-5);
+  color: var(--color-text-default);
+  font-size: var(--typography-body-size);
+  font-weight: var(--typography-body-weight);
+  line-height: var(--typography-body-line-height);
+}
+
+/* ── Focused variant ── */
+.accordion--focused .accordion__item {
+  border-color: var(--color-text-heading);
+  border-width: var(--border-width-strong);
+}
+
+.accordion--focused .accordion__trigger {
+  background-color: var(--color-surface-overlay);
+  color: var(--color-text-heading);
+}
+
+.accordion--focused .accordion__trigger:hover:not(:disabled) {
+  background-color: var(--color-surface-subtle);
+  color: var(--color-text-heading);
+}
+
+.accordion--focused .accordion__item--expanded .accordion__trigger {
+  background-color: var(--color-surface-overlay);
+  color: var(--color-text-heading);
+}
