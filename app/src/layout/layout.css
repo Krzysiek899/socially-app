@@ -1,0 +1,102 @@
+/**
+ * Layout Primitive Tokens + Styles — Socially Design System
+ *
+ * Defines max-width tiers and base styles for the six layout primitives:
+ * Page, Section, Stack, Cluster, Split, and Grid.
+ *
+ * All spacing references --space-* from primitive.css.
+ * Components use CSS custom properties for dynamic values set inline by React.
+ */
+
+/* ─── Layout tier tokens ────────────────────────────────────────────────── */
+:root {
+  --layout-max-width-sm: 640px;
+  --layout-max-width-md: 768px;
+  --layout-max-width-lg: 1024px;
+  --layout-max-width-xl: 1280px;
+}
+
+/* ── Page ──────────────────────────────────────────────────────────────────
+   Centered page shell with fluid padding + max-width tier constraint.
+   ────────────────────────────────────────────────────────────────────────── */
+[data-layout="page"] {
+  width: 100%;
+  margin-inline: auto;
+  padding-inline: var(--space-4);
+  max-width: var(--layout-page-max-width, var(--layout-max-width-lg));
+  box-sizing: border-box;
+}
+
+@media (min-width: 640px) {
+  [data-layout="page"] {
+    padding-inline: var(--space-6);
+  }
+}
+
+/* ── Section ───────────────────────────────────────────────────────────────
+   Vertical-rhythm section with configurable block padding.
+   ────────────────────────────────────────────────────────────────────────── */
+[data-layout="section"] {
+  padding-block: var(--layout-section-spacing, var(--space-8));
+}
+
+/* ── Stack ─────────────────────────────────────────────────────────────────
+   Vertical flex container with configurable gap and alignment.
+   ────────────────────────────────────────────────────────────────────────── */
+[data-layout="stack"] {
+  display: flex;
+  flex-direction: column;
+  gap: var(--layout-gap, var(--space-4));
+  align-items: var(--layout-align, stretch);
+}
+
+/* ── Cluster ───────────────────────────────────────────────────────────────
+   Horizontal flex container with wrapping for inline item groups.
+   ────────────────────────────────────────────────────────────────────────── */
+[data-layout="cluster"] {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--layout-gap, var(--space-2));
+  align-items: var(--layout-align, center);
+  justify-content: var(--layout-justify, flex-start);
+}
+
+/* ── Split ─────────────────────────────────────────────────────────────────
+   Two-column CSS grid with configurable fraction ratio.
+   Stacks to a single column below the sm breakpoint.
+   ────────────────────────────────────────────────────────────────────────── */
+[data-layout="split"] {
+  display: grid;
+  grid-template-columns: var(--layout-split-template, 1fr 1fr);
+  gap: var(--layout-gap, var(--space-4));
+}
+
+@media (max-width: 639px) {
+  [data-layout="split"] {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── Grid ──────────────────────────────────────────────────────────────────
+   Multi-column CSS grid.
+   - Collapses to 1 column below sm breakpoint.
+   - 3- and 4-column grids step down to 2 columns at sm–lg range.
+   ────────────────────────────────────────────────────────────────────────── */
+[data-layout="grid"] {
+  display: grid;
+  grid-template-columns: repeat(var(--layout-columns, 3), 1fr);
+  gap: var(--layout-gap, var(--space-4));
+}
+
+@media (max-width: 639px) {
+  [data-layout="grid"] {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (min-width: 640px) and (max-width: 1023px) {
+  [data-layout="grid"][data-columns="3"],
+  [data-layout="grid"][data-columns="4"] {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}

@@ -11,6 +11,7 @@ import {
 import type { AccordionItem } from '../components/index.ts';
 import type { ThemePreference } from '../hooks/useTheme.ts';
 import { useTheme } from '../hooks/useTheme.ts';
+import { Page, Section as LayoutSection, Stack, Cluster, Split, Grid } from '../layout/index.tsx';
 
 /* ─── Section wrapper ─────────────────────────────────────────────────────── */
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
@@ -252,6 +253,106 @@ export function Playground() {
       </Section>
 
       <hr className="pg__divider" />
+
+      {/* ── Layout Primitives ── */}
+      <Section title="Layout Primitives">
+
+        {/* Stack */}
+        <Row label="Stack (gap 2/4/8)">
+          {(['2', '4', '8'] as const).map((gap) => (
+            <div key={gap} style={{ flex: '1', border: '1px solid var(--color-border-default)', borderRadius: 'var(--radius-sm)', padding: 'var(--space-3)', minWidth: 120 }}>
+              <span style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-text-subtle)', display: 'block', marginBottom: 'var(--space-2)' }}>gap="{gap}"</span>
+              <Stack gap={gap}>
+                {[1, 2, 3].map((n) => (
+                  <div key={n} style={{ background: 'var(--color-primary-subtle)', borderRadius: 'var(--radius-xs)', padding: 'var(--space-2) var(--space-3)', fontSize: 'var(--font-size-sm)', color: 'var(--color-text-default)' }}>
+                    Item {n}
+                  </div>
+                ))}
+              </Stack>
+            </div>
+          ))}
+        </Row>
+
+        {/* Cluster */}
+        <Row label="Cluster (tags)">
+          <Cluster gap="2">
+            {['Design', 'System', 'Tokens', 'Layout', 'React', 'TypeScript', 'CSS'].map((tag) => (
+              <Badge key={tag} variant="neutral">{tag}</Badge>
+            ))}
+          </Cluster>
+        </Row>
+        <Row label="Cluster (justify space-between)">
+          <div style={{ width: '100%', border: '1px solid var(--color-border-default)', borderRadius: 'var(--radius-sm)', padding: 'var(--space-3)' }}>
+            <Cluster justify="space-between" align="center">
+              <span style={{ fontWeight: 'var(--font-weight-semibold)', color: 'var(--color-text-heading)' }}>Card Title</span>
+              <Cluster gap="2">
+                <Button variant="ghost" size="sm">Edit</Button>
+                <Button variant="danger" size="sm">Delete</Button>
+              </Cluster>
+            </Cluster>
+          </div>
+        </Row>
+
+        {/* Split */}
+        <Row label="Split fractions">
+          <Stack gap="3" style={{ width: '100%' }}>
+            {(['1/3', '1/2', '2/3'] as const).map((fraction) => (
+              <div key={fraction}>
+                <span style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-text-subtle)', display: 'block', marginBottom: 'var(--space-1)' }}>fraction="{fraction}"</span>
+                <Split fraction={fraction} gap="3">
+                  <div style={{ background: 'var(--color-primary-subtle)', borderRadius: 'var(--radius-xs)', padding: 'var(--space-2) var(--space-3)', fontSize: 'var(--font-size-sm)', color: 'var(--color-text-default)', textAlign: 'center' }}>
+                    Primary
+                  </div>
+                  <div style={{ background: 'var(--color-surface-overlay)', borderRadius: 'var(--radius-xs)', padding: 'var(--space-2) var(--space-3)', fontSize: 'var(--font-size-sm)', color: 'var(--color-text-default)', textAlign: 'center' }}>
+                    Secondary
+                  </div>
+                </Split>
+              </div>
+            ))}
+          </Stack>
+        </Row>
+
+        {/* Grid */}
+        <Row label="Grid (2 / 3 / 4 columns)">
+          <Stack gap="3" style={{ width: '100%' }}>
+            {([2, 3, 4] as const).map((cols) => (
+              <div key={cols}>
+                <span style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-text-subtle)', display: 'block', marginBottom: 'var(--space-1)' }}>columns={cols}</span>
+                <Grid columns={cols} gap="2">
+                  {Array.from({ length: cols }).map((_, i) => (
+                    <div key={i} style={{ background: 'var(--color-surface-overlay)', borderRadius: 'var(--radius-xs)', padding: 'var(--space-2)', fontSize: 'var(--font-size-sm)', color: 'var(--color-text-default)', textAlign: 'center' }}>
+                      Cell {i + 1}
+                    </div>
+                  ))}
+                </Grid>
+              </div>
+            ))}
+          </Stack>
+        </Row>
+
+        {/* Page shell composition */}
+        <Row label="Page shell (lg max-width, Section + Stack)">
+          <div style={{ width: '100%', border: '1px dashed var(--color-border-default)', borderRadius: 'var(--radius-sm)', background: 'var(--color-surface-subtle)' }}>
+            <Page maxWidth="lg" as="div" style={{ background: 'var(--color-surface-raised)', borderRadius: 'var(--radius-sm)' }}>
+              <LayoutSection spacing="sm" as="div">
+                <Stack gap="2">
+                  <h3 style={{ margin: 0, fontSize: 'var(--typography-subheading-size)', fontWeight: 'var(--typography-subheading-weight)', color: 'var(--color-text-heading)' }}>
+                    Page › Section › Stack
+                  </h3>
+                  <p style={{ margin: 0, fontSize: 'var(--typography-body-sm-size)', color: 'var(--color-text-subtle)' }}>
+                    Composable layout primitives. Padding and gaps consume spacing tokens; max-width comes from the layout tier token.
+                  </p>
+                  <Cluster gap="2">
+                    <Badge variant="primary">Page</Badge>
+                    <Badge variant="info">Section</Badge>
+                    <Badge variant="success">Stack</Badge>
+                    <Badge variant="warning">Cluster</Badge>
+                  </Cluster>
+                </Stack>
+              </LayoutSection>
+            </Page>
+          </div>
+        </Row>
 
       {/* ── Accordion ── */}
       <Section title="Accordion">
