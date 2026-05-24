@@ -7,6 +7,8 @@ import {
   Avatar,    AVATAR_SIZES,
   Badge,     BADGE_VARIANTS, BADGE_SIZES,
   Accordion,
+  PasswordField,
+  DateField,
 } from '../components/index.ts';
 import type { AccordionItem } from '../components/index.ts';
 import type { ThemePreference } from '../hooks/useTheme.ts';
@@ -353,6 +355,91 @@ export function Playground() {
             </Page>
           </div>
         </Row>
+
+      </Section>
+
+      <hr className="pg__divider" />
+
+      {/* ── PasswordField ── */}
+      <Section title="PasswordField">
+        <div className="pg__input-grid">
+          <PasswordField
+            id="pg-pwd-default"
+            label="Password"
+            placeholder="Enter password…"
+            helperText="Min 8 characters"
+          />
+          <PasswordField
+            id="pg-pwd-error"
+            label="Password (error)"
+            variant="error"
+            defaultValue="short"
+            errorText="Password must be at least 8 characters"
+          />
+          <PasswordField
+            id="pg-pwd-disabled"
+            label="Password (disabled)"
+            disabled
+            defaultValue="locked-value"
+          />
+          <PasswordField
+            id="pg-pwd-required"
+            label="Password (required)"
+            required
+            placeholder="Cannot be empty"
+          />
+        </div>
+        <div className="pg__row" style={{ marginTop: 'var(--space-4)' }}>
+          <span className="pg__row-label">Sizes</span>
+          {(['sm', 'md', 'lg'] as const).map((s) => (
+            <div key={s} style={{ flex: '0 0 200px' }}>
+              <PasswordField id={`pg-pwd-size-${s}`} label={`Size ${s}`} size={s} placeholder={s} />
+            </div>
+          ))}
+        </div>
+      </Section>
+
+      <hr className="pg__divider" />
+
+      {/* ── DateField ── */}
+      <Section title="DateField">
+        <div className="pg__input-grid">
+          <DateField
+            id="pg-date-default"
+            label="Date"
+            helperText="Select a date"
+          />
+          <DateField
+            id="pg-date-range"
+            label="Date with range"
+            min="2020-01-01"
+            max="2030-12-31"
+            helperText="Between 2020 and 2030"
+          />
+          <DateField
+            id="pg-date-error"
+            label="Date (error)"
+            variant="error"
+            errorText="Date is required"
+          />
+          <DateField
+            id="pg-date-disabled"
+            label="Date (disabled)"
+            disabled
+            defaultValue="2024-01-01"
+          />
+        </div>
+        <div className="pg__row" style={{ marginTop: 'var(--space-4)' }}>
+          <span className="pg__row-label">Sizes</span>
+          {(['sm', 'md', 'lg'] as const).map((s) => (
+            <div key={s} style={{ flex: '0 0 200px' }}>
+              <DateField id={`pg-date-size-${s}`} label={`Size ${s}`} size={s} />
+            </div>
+          ))}
+        </div>
+      </Section>
+
+      <hr className="pg__divider" />
 
       {/* ── Accordion ── */}
       <Section title="Accordion">
