@@ -1,10 +1,10 @@
 import React from 'react';
 import './Button.css';
 
-export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger';
+export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger' | 'ok' | 'attention';
 export type ButtonSize = 'sm' | 'md' | 'lg';
 
-export const BUTTON_VARIANTS: ReadonlyArray<ButtonVariant> = ['primary', 'secondary', 'ghost', 'danger'];
+export const BUTTON_VARIANTS: ReadonlyArray<ButtonVariant> = ['primary', 'secondary', 'ghost', 'danger', 'ok', 'attention'];
 export const BUTTON_SIZES: ReadonlyArray<ButtonSize> = ['sm', 'md', 'lg'];
 
 export interface ButtonProps {

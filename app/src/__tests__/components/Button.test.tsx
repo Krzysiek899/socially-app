@@ -3,8 +3,8 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { Button, BUTTON_VARIANTS, BUTTON_SIZES } from '../../components/Button/Button.tsx';
 
 describe('Button — contract: variant and size APIs', () => {
-  it('exposes all four variants', () => {
-    expect(BUTTON_VARIANTS).toEqual(['primary', 'secondary', 'ghost', 'danger']);
+  it('exposes all six variants', () => {
+    expect(BUTTON_VARIANTS).toEqual(['primary', 'secondary', 'ghost', 'danger', 'ok', 'attention']);
   });
 
   it('exposes all three sizes', () => {
