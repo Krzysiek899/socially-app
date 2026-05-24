@@ -9,6 +9,7 @@ import {
   Accordion,
   PasswordField,
   DateField,
+  Dropdown,  DROPDOWN_VARIANTS, DROPDOWN_SIZES,
 } from '../components/index.ts';
 import type { AccordionItem } from '../components/index.ts';
 import type { ThemePreference } from '../hooks/useTheme.ts';
@@ -441,7 +442,88 @@ export function Playground() {
 
       <hr className="pg__divider" />
 
-      {/* ── Accordion ── */}
+      {/* ── Dropdown ── */}
+      <Section title="Dropdown">
+        <div className="pg__input-grid">
+          <Dropdown
+            id="pg-dropdown-default"
+            label="Favourite fruit"
+            options={[
+              { value: 'apple', label: 'Apple' },
+              { value: 'banana', label: 'Banana' },
+              { value: 'cherry', label: 'Cherry' },
+            ]}
+            placeholder="Choose a fruit…"
+            helperText="Select your favourite"
+          />
+          <Dropdown
+            id="pg-dropdown-error"
+            label="Fruit (error)"
+            options={[
+              { value: 'apple', label: 'Apple' },
+              { value: 'banana', label: 'Banana' },
+            ]}
+            variant="error"
+            errorText="Selection is required"
+          />
+          <Dropdown
+            id="pg-dropdown-disabled"
+            label="Fruit (disabled)"
+            options={[
+              { value: 'apple', label: 'Apple' },
+              { value: 'banana', label: 'Banana' },
+            ]}
+            disabled
+            defaultValue="apple"
+          />
+          <Dropdown
+            id="pg-dropdown-required"
+            label="Fruit (required)"
+            options={[
+              { value: 'apple', label: 'Apple' },
+              { value: 'banana', label: 'Banana', disabled: true },
+            ]}
+            placeholder="Must choose…"
+            required
+          />
+        </div>
+        <div className="pg__row" style={{ marginTop: 'var(--space-4)' }}>
+          <span className="pg__row-label">Sizes</span>
+          {DROPDOWN_SIZES.map((s) => (
+            <div key={s} style={{ flex: '0 0 200px' }}>
+              <Dropdown
+                id={`pg-dropdown-size-${s}`}
+                label={`Size ${s}`}
+                size={s}
+                options={[
+                  { value: 'a', label: 'Option A' },
+                  { value: 'b', label: 'Option B' },
+                ]}
+                placeholder={s}
+              />
+            </div>
+          ))}
+        </div>
+        <div className="pg__row" style={{ marginTop: 'var(--space-4)' }}>
+          <span className="pg__row-label">Variants</span>
+          {DROPDOWN_VARIANTS.map((v) => (
+            <div key={v} style={{ flex: '0 0 200px' }}>
+              <Dropdown
+                id={`pg-dropdown-variant-${v}`}
+                label={`Variant: ${v}`}
+                variant={v}
+                options={[
+                  { value: 'a', label: 'Option A' },
+                  { value: 'b', label: 'Option B' },
+                ]}
+                placeholder={v}
+              />
+            </div>
+          ))}
+        </div>
+      </Section>
+
+      <hr className="pg__divider" />
       <Section title="Accordion">
         <Row label="Single (default)">
           <div className="pg__accordion-demo">
