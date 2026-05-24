@@ -67,6 +67,28 @@ export const PRIMITIVE_TOKEN_VALUES = {
   '--primitive-dark-600': '#1E293B',
   '--primitive-dark-700': '#0F172A',
   '--primitive-dark-800': '#090E1A',
+
+  /* Font sizes */
+  '--font-size-xs':   '12px',
+  '--font-size-sm':   '14px',
+  '--font-size-base': '16px',
+  '--font-size-lg':   '18px',
+  '--font-size-xl':   '20px',
+  '--font-size-2xl':  '24px',
+  '--font-size-3xl':  '30px',
+  '--font-size-4xl':  '36px',
+
+  /* Font weights */
+  '--font-weight-regular':  '400',
+  '--font-weight-medium':   '500',
+  '--font-weight-semibold': '600',
+  '--font-weight-bold':     '700',
+
+  /* Line heights */
+  '--line-height-tight':   '1.25',
+  '--line-height-snug':    '1.375',
+  '--line-height-normal':  '1.5',
+  '--line-height-relaxed': '1.625',
 };
 
 /**
@@ -190,6 +212,69 @@ export const DARK_THEME_MAPPING = {
   '--color-border-default':  '--primitive-dark-500',
   '--color-border-strong':   '--primitive-dark-400',
   '--color-border-focus':    '--primitive-blue-400',
+};
+
+/**
+ * Semantic typography token CSS custom-property names.
+ * One entry per role × property combination.
+ */
+export const TYPOGRAPHY_TOKENS = {
+  fontSans: '--typography-font-sans',
+  fontMono: '--typography-font-mono',
+
+  titleSize:       '--typography-title-size',
+  titleWeight:     '--typography-title-weight',
+  titleLineHeight: '--typography-title-line-height',
+
+  headingSize:       '--typography-heading-size',
+  headingWeight:     '--typography-heading-weight',
+  headingLineHeight: '--typography-heading-line-height',
+
+  subheadingSize:       '--typography-subheading-size',
+  subheadingWeight:     '--typography-subheading-weight',
+  subheadingLineHeight: '--typography-subheading-line-height',
+
+  bodySize:       '--typography-body-size',
+  bodyWeight:     '--typography-body-weight',
+  bodyLineHeight: '--typography-body-line-height',
+
+  bodySmSize:       '--typography-body-sm-size',
+  bodySmWeight:     '--typography-body-sm-weight',
+  bodySmLineHeight: '--typography-body-sm-line-height',
+
+  labelSize:       '--typography-label-size',
+  labelWeight:     '--typography-label-weight',
+  labelLineHeight: '--typography-label-line-height',
+};
+
+/**
+ * Typography semantic token → primitive token mapping.
+ * Mirrors the declarations in semantic.css.
+ */
+export const TYPOGRAPHY_ROLE_MAPPING = {
+  '--typography-title-size':        '--font-size-4xl',
+  '--typography-title-weight':      '--font-weight-bold',
+  '--typography-title-line-height': '--line-height-tight',
+
+  '--typography-heading-size':        '--font-size-2xl',
+  '--typography-heading-weight':      '--font-weight-semibold',
+  '--typography-heading-line-height': '--line-height-tight',
+
+  '--typography-subheading-size':        '--font-size-xl',
+  '--typography-subheading-weight':      '--font-weight-semibold',
+  '--typography-subheading-line-height': '--line-height-snug',
+
+  '--typography-body-size':        '--font-size-base',
+  '--typography-body-weight':      '--font-weight-regular',
+  '--typography-body-line-height': '--line-height-normal',
+
+  '--typography-body-sm-size':        '--font-size-sm',
+  '--typography-body-sm-weight':      '--font-weight-regular',
+  '--typography-body-sm-line-height': '--line-height-normal',
+
+  '--typography-label-size':        '--font-size-sm',
+  '--typography-label-weight':      '--font-weight-medium',
+  '--typography-label-line-height': '--line-height-snug',
 };
 
 /** All approved brand color hex values. */

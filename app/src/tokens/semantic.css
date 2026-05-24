@@ -12,6 +12,47 @@
  */
 
 /* ═══════════════════════════════════════════════════════════════════════════
+   TYPOGRAPHY ROLES  (theme-independent — same in light and dark)
+   6 roles: title · heading · subheading · body · body-sm · label
+   ═══════════════════════════════════════════════════════════════════════════ */
+:root {
+
+  /* Shared font stacks */
+  --typography-font-sans: var(--font-sans);
+  --typography-font-mono: var(--font-mono);
+
+  /* Title — large display, page-level headings */
+  --typography-title-size:        var(--font-size-4xl);    /* 36px */
+  --typography-title-weight:      var(--font-weight-bold); /* 700  */
+  --typography-title-line-height: var(--line-height-tight); /* 1.25 */
+
+  /* Heading — section headings (h2-equivalent) */
+  --typography-heading-size:        var(--font-size-2xl);      /* 24px */
+  --typography-heading-weight:      var(--font-weight-semibold); /* 600 */
+  --typography-heading-line-height: var(--line-height-tight);   /* 1.25 */
+
+  /* Subheading — sub-sections (h3/h4-equivalent) */
+  --typography-subheading-size:        var(--font-size-xl);       /* 20px */
+  --typography-subheading-weight:      var(--font-weight-semibold); /* 600 */
+  --typography-subheading-line-height: var(--line-height-snug);   /* 1.375 */
+
+  /* Body — default reading text */
+  --typography-body-size:        var(--font-size-base);     /* 16px */
+  --typography-body-weight:      var(--font-weight-regular); /* 400 */
+  --typography-body-line-height: var(--line-height-normal);  /* 1.5 */
+
+  /* Body Small — secondary / supporting text */
+  --typography-body-sm-size:        var(--font-size-sm);      /* 14px */
+  --typography-body-sm-weight:      var(--font-weight-regular); /* 400 */
+  --typography-body-sm-line-height: var(--line-height-normal); /* 1.5 */
+
+  /* Label — UI labels, button text, form labels */
+  --typography-label-size:        var(--font-size-sm);     /* 14px */
+  --typography-label-weight:      var(--font-weight-medium); /* 500 */
+  --typography-label-line-height: var(--line-height-snug);  /* 1.375 */
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
    LIGHT THEME (default + explicit)
    Contrast annotations reference WCAG AA ratios against surface-default.
    ═══════════════════════════════════════════════════════════════════════════ */

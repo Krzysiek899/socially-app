@@ -4,6 +4,8 @@ import {
   LIGHT_THEME_MAPPING,
   DARK_THEME_MAPPING,
   BRAND_COLORS,
+  TYPOGRAPHY_TOKENS,
+  TYPOGRAPHY_ROLE_MAPPING,
 } from '../tokens/tokens.js';
 
 describe('Token architecture — primitive values', () => {
@@ -141,5 +143,92 @@ describe('Token architecture — dark theme mapping', () => {
     const primitive = DARK_THEME_MAPPING['--color-text-heading'];
     // near-white dark neutral
     expect(PRIMITIVE_TOKEN_VALUES[primitive]).toBe('#F8FAFC');
+  });
+});
+
+describe('Token architecture — typography tokens', () => {
+  it('declares all 6 required roles', () => {
+    const roles = ['title', 'heading', 'subheading', 'body', 'bodySm', 'label'];
+    roles.forEach((role) => {
+      const sizeKey   = `${role}Size`;
+      const weightKey = `${role}Weight`;
+      const lhKey     = `${role}LineHeight`;
+      expect(TYPOGRAPHY_TOKENS).toHaveProperty(sizeKey);
+      expect(TYPOGRAPHY_TOKENS).toHaveProperty(weightKey);
+      expect(TYPOGRAPHY_TOKENS).toHaveProperty(lhKey);
+    });
+  });
+
+  it('exposes font-family tokens', () => {
+    expect(TYPOGRAPHY_TOKENS).toHaveProperty('fontSans');
+    expect(TYPOGRAPHY_TOKENS).toHaveProperty('fontMono');
+  });
+
+  it('all typography token names follow --typography-* naming', () => {
+    Object.entries(TYPOGRAPHY_TOKENS)
+      .filter(([key]) => !['fontSans', 'fontMono'].includes(key))
+      .forEach(([, name]) => {
+        expect(name).toMatch(/^--typography-/);
+      });
+  });
+
+  it('every typography role token maps to a known primitive', () => {
+    Object.entries(TYPOGRAPHY_ROLE_MAPPING).forEach(([semantic, primitive]) => {
+      expect(PRIMITIVE_TOKEN_VALUES).toHaveProperty(
+        primitive,
+        expect.any(String),
+      );
+    });
+  });
+
+  it('title uses the largest font size (4xl = 36px)', () => {
+    const primitive = TYPOGRAPHY_ROLE_MAPPING['--typography-title-size'];
+    expect(PRIMITIVE_TOKEN_VALUES[primitive]).toBe('36px');
+  });
+
+  it('title uses bold weight', () => {
+    const primitive = TYPOGRAPHY_ROLE_MAPPING['--typography-title-weight'];
+    expect(PRIMITIVE_TOKEN_VALUES[primitive]).toBe('700');
+  });
+
+  it('heading uses semibold weight', () => {
+    const primitive = TYPOGRAPHY_ROLE_MAPPING['--typography-heading-weight'];
+    expect(PRIMITIVE_TOKEN_VALUES[primitive]).toBe('600');
+  });
+
+  it('body uses base font size (16px)', () => {
+    const primitive = TYPOGRAPHY_ROLE_MAPPING['--typography-body-size'];
+    expect(PRIMITIVE_TOKEN_VALUES[primitive]).toBe('16px');
+  });
+
+  it('body uses regular weight', () => {
+    const primitive = TYPOGRAPHY_ROLE_MAPPING['--typography-body-weight'];
+    expect(PRIMITIVE_TOKEN_VALUES[primitive]).toBe('400');
+  });
+
+  it('label uses medium weight (heavier than body, lighter than headings)', () => {
+    const primitive = TYPOGRAPHY_ROLE_MAPPING['--typography-label-weight'];
+    expect(PRIMITIVE_TOKEN_VALUES[primitive]).toBe('500');
+  });
+
+  it('label and body-sm share the same font size (14px)', () => {
+    const labelPrimitive  = TYPOGRAPHY_ROLE_MAPPING['--typography-label-size'];
+    const bodySmPrimitive = TYPOGRAPHY_ROLE_MAPPING['--typography-body-sm-size'];
+    expect(PRIMITIVE_TOKEN_VALUES[labelPrimitive]).toBe('14px');
+    expect(PRIMITIVE_TOKEN_VALUES[bodySmPrimitive]).toBe('14px');
+  });
+
+  it('heading and title both use tight line-height', () => {
+    const titleLh   = TYPOGRAPHY_ROLE_MAPPING['--typography-title-line-height'];
+    const headingLh = TYPOGRAPHY_ROLE_MAPPING['--typography-heading-line-height'];
+    expect(PRIMITIVE_TOKEN_VALUES[titleLh]).toBe('1.25');
+    expect(PRIMITIVE_TOKEN_VALUES[headingLh]).toBe('1.25');
+  });
+
+  it('body and body-sm use normal line-height', () => {
+    const bodyLh   = TYPOGRAPHY_ROLE_MAPPING['--typography-body-line-height'];
+    const bodySmLh = TYPOGRAPHY_ROLE_MAPPING['--typography-body-sm-line-height'];
+    expect(PRIMITIVE_TOKEN_VALUES[bodyLh]).toBe('1.5');
+    expect(PRIMITIVE_TOKEN_VALUES[bodySmLh]).toBe('1.5');
   });
 });
