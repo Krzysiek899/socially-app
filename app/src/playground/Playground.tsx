@@ -10,6 +10,8 @@ import {
   PasswordField,
   DateField,
   Dropdown, DROPDOWN_VARIANTS, DROPDOWN_SIZES,
+  TopNav,
+  ThemeToggle,
 } from '../components/index.ts';
 import type { AccordionItem } from '../components/index.ts';
 import type { ThemePreference } from '../hooks/useTheme.ts';
@@ -553,6 +555,35 @@ export function Playground() {
           </div>
         </Row>
       </Section>
-    </div>
+
+     <hr className="pg__divider" />
+     <Section title="TopNav">
+       <Row label="default (brand + links + theme toggle)">
+         <div style={{ width: '100%', border: '1px solid var(--color-border-default)', borderRadius: 'var(--radius-sm)', overflow: 'hidden' }}>
+           <TopNav>
+             <TopNav.Brand><span>🌐 Socially</span></TopNav.Brand>
+             <TopNav.NavLink href="#" active>Home</TopNav.NavLink>
+             <TopNav.NavLink href="#">Explore</TopNav.NavLink>
+             <TopNav.NavLink href="#">Messages</TopNav.NavLink>
+             <TopNav.Actions>
+               <ThemeToggle />
+             </TopNav.Actions>
+           </TopNav>
+         </div>
+       </Row>
+       <Row label="no active link">
+         <div style={{ width: '100%', border: '1px solid var(--color-border-default)', borderRadius: 'var(--radius-sm)', overflow: 'hidden' }}>
+           <TopNav>
+             <TopNav.Brand><span>🌐 Socially</span></TopNav.Brand>
+             <TopNav.NavLink href="#">Home</TopNav.NavLink>
+             <TopNav.NavLink href="#">Explore</TopNav.NavLink>
+             <TopNav.Actions>
+               <ThemeToggle />
+             </TopNav.Actions>
+           </TopNav>
+         </div>
+       </Row>
+     </Section>
+   </div>
   );
 }
