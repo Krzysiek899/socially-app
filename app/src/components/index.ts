@@ -30,3 +30,7 @@ export type { DateFieldProps } from './DateField/DateField.tsx';
 export { Dropdown, DROPDOWN_VARIANTS, DROPDOWN_SIZES } from './Dropdown/Dropdown.tsx';
 export type { DropdownProps, DropdownOption } from './Dropdown/Dropdown.tsx';
 
+export { TopNav } from './TopNav/TopNav.tsx';
+export type { TopNavProps, NavLinkProps } from './TopNav/TopNav.tsx';
+
+export { ThemeToggle } from './ThemeToggle/ThemeToggle.tsx';
