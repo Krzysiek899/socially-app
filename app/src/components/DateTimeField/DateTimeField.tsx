@@ -1,13 +1,13 @@
 import React from 'react';
-import { Input, INPUT_VARIANTS, INPUT_SIZES } from '../Input/Input.tsx';
-import type { InputVariant, InputSize } from '../Input/Input.tsx';
+import { TextField, TEXT_FIELD_VARIANTS, TEXT_FIELD_SIZES } from '../TextField/TextField.tsx';
+import type { TextFieldVariant, TextFieldSize } from '../TextField/TextField.tsx';
 import './DateTimeField.css';
 
 export interface DateTimeFieldProps {
   id:                   string;
   label:                string;
-  variant?:             InputVariant;
-  size?:                InputSize;
+  variant?:             TextFieldVariant;
+  size?:                TextFieldSize;
   value?:               string;
   defaultValue?:        string;
   min?:                 string;
@@ -23,7 +23,7 @@ export interface DateTimeFieldProps {
   'aria-describedby'?:  string;
 }
 
-export { INPUT_VARIANTS as DATE_TIME_FIELD_VARIANTS, INPUT_SIZES as DATE_TIME_FIELD_SIZES };
+export { TEXT_FIELD_VARIANTS as DATE_TIME_FIELD_VARIANTS, TEXT_FIELD_SIZES as DATE_TIME_FIELD_SIZES };
 
 /**
  * DateTimeField — Form Component
@@ -53,7 +53,7 @@ export function DateTimeField({
 }: DateTimeFieldProps): React.JSX.Element {
   return (
     <div className="datetime-field">
-      <Input
+      <TextField
         id={id}
         label={label}
         variant={variant}

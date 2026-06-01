@@ -1,17 +1,17 @@
 import React from 'react';
-import './Input.css';
+import './TextField.css';
 
-export type InputVariant = 'default' | 'error';
-export type InputSize = 'sm' | 'md' | 'lg';
+export type TextFieldVariant = 'default' | 'error';
+export type TextFieldSize = 'sm' | 'md' | 'lg';
 
-export const INPUT_VARIANTS: ReadonlyArray<InputVariant> = ['default', 'error'];
-export const INPUT_SIZES: ReadonlyArray<InputSize> = ['sm', 'md', 'lg'];
+export const TEXT_FIELD_VARIANTS: ReadonlyArray<TextFieldVariant> = ['default', 'error'];
+export const TEXT_FIELD_SIZES: ReadonlyArray<TextFieldSize> = ['sm', 'md', 'lg'];
 
-export interface InputProps {
+export interface TextFieldProps {
   id:                   string;
   label:                string;
-  variant?:             InputVariant;
-  size?:                InputSize;
+  variant?:             TextFieldVariant;
+  size?:                TextFieldSize;
   type?:                string;
   value?:               string;
   defaultValue?:        string;
@@ -29,12 +29,12 @@ export interface InputProps {
 }
 
 /**
- * Input primitive.
+ * TextField primitive.
  *
  * Wraps a labelled `<input>` with constrained variant/size API.
  * Does not accept `className` to prevent ad-hoc styling drift.
  */
-export function Input({
+export function TextField({
   id,
   label,
   variant = 'default',
@@ -53,12 +53,12 @@ export function Input({
   errorText,
   onChange,
   'aria-describedby': ariaDescribedBy,
-}: InputProps): React.JSX.Element {
-  if (!INPUT_VARIANTS.includes(variant)) {
-    throw new Error(`Input: unknown variant "${variant}". Must be one of: ${INPUT_VARIANTS.join(', ')}.`);
+}: TextFieldProps): React.JSX.Element {
+  if (!TEXT_FIELD_VARIANTS.includes(variant)) {
+    throw new Error(`TextField: unknown variant "${variant}". Must be one of: ${TEXT_FIELD_VARIANTS.join(', ')}.`);
   }
-  if (!INPUT_SIZES.includes(size)) {
-    throw new Error(`Input: unknown size "${size}". Must be one of: ${INPUT_SIZES.join(', ')}.`);
+  if (!TEXT_FIELD_SIZES.includes(size)) {
+    throw new Error(`TextField: unknown size "${size}". Must be one of: ${TEXT_FIELD_SIZES.join(', ')}.`);
   }
 
   const helperId = helperText || errorText ? `${id}-helper` : undefined;

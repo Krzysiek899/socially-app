@@ -6,8 +6,8 @@
 export { Button, BUTTON_VARIANTS, BUTTON_SIZES } from './Button/Button.tsx';
 export type { ButtonProps, ButtonVariant, ButtonSize } from './Button/Button.tsx';
 
-export { Input, INPUT_VARIANTS, INPUT_SIZES } from './Input/Input.tsx';
-export type { InputProps, InputVariant, InputSize } from './Input/Input.tsx';
+export { TextField, TEXT_FIELD_VARIANTS, TEXT_FIELD_SIZES } from './TextField/TextField.tsx';
+export type { TextFieldProps, TextFieldVariant, TextFieldSize } from './TextField/TextField.tsx';
 
 export { Card, CARD_VARIANTS } from './Card/Card.tsx';
 export type { CardProps, CardVariant } from './Card/Card.tsx';

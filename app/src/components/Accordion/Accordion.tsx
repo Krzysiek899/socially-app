@@ -30,8 +30,6 @@ export interface AccordionProps {
   allowMultiple?: boolean;
   /** Called with the new set of expanded ids after a toggle. */
   onChange?: (expandedIds: string[]) => void;
-  /** When true, renders a stronger border and a muted grey header style. */
-  focused?: boolean;
   /** Accessible label for the accordion landmark region. */
   'aria-label'?: string;
 }
@@ -55,7 +53,6 @@ export function Accordion({
   defaultExpanded = [],
   allowMultiple = false,
   onChange,
-  focused = false,
   'aria-label': ariaLabel,
 }: AccordionProps): React.JSX.Element {
   const isControlled = controlledExpanded !== undefined;
@@ -138,7 +135,7 @@ export function Accordion({
   );
 
   return (
-    <div className={`accordion${focused ? ' accordion--focused' : ''}`} aria-label={ariaLabel}>
+    <div className="accordion" aria-label={ariaLabel}>
       {items.map((item, index) => {
         const isExpanded = expandedIds.includes(item.id);
         const triggerId = `${uid}-trigger-${item.id}`;
