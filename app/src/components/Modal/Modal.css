@@ -104,6 +104,11 @@
   outline-offset: 2px;
 }
 
+.modal-close svg {
+  width: 1em;
+  height: 1em;
+}
+
 /* ── Body ── */
 .modal-body {
   flex: 1;

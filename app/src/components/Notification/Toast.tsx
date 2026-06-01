@@ -1,16 +1,17 @@
 import React, { useEffect, useState } from 'react';
+import { CheckCircle, XCircle, AlertTriangle, Info, X } from 'lucide-react';
 import './Notification.css';
-import type { ToastItem } from './NotificationContext.tsx';
+import type { ToastItem, ToastVariant } from './NotificationContext.tsx';
 
 export interface ToastProps extends ToastItem {
   onDismiss: (id: string) => void;
 }
 
-const ICONS: Record<string, string> = {
-  success: '✓',
-  error:   '✕',
-  warning: '⚠',
-  info:    'ℹ',
+const ICONS: Record<ToastVariant, React.ComponentType> = {
+  success: CheckCircle,
+  error:   XCircle,
+  warning: AlertTriangle,
+  info:    Info,
 };
 
 export function Toast({ id, message, variant, duration, onDismiss }: ToastProps): React.JSX.Element {
@@ -32,7 +33,9 @@ export function Toast({ id, message, variant, duration, onDismiss }: ToastProps)
       aria-live="polite"
       onAnimationEnd={handleAnimationEnd}
     >
-      <span className="toast__icon" aria-hidden="true">{ICONS[variant]}</span>
+      <span className="toast__icon" aria-hidden="true">
+        {React.createElement(ICONS[variant])}
+      </span>
       <span className="toast__message">{message}</span>
       <button
         type="button"
@@ -40,7 +43,7 @@ export function Toast({ id, message, variant, duration, onDismiss }: ToastProps)
         onClick={() => setExiting(true)}
         aria-label="Dismiss notification"
       >
-        ×
+        <X aria-hidden="true" />
       </button>
     </div>
   );

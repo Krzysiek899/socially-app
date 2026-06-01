@@ -5,3 +5,8 @@
   font-size: var(--font-size-base);
   line-height: 1;
 }
+
+.theme-toggle__icon svg {
+  width: 1em;
+  height: 1em;
+}
