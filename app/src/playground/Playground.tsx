@@ -9,6 +9,7 @@ import {
   Accordion,
   PasswordField,
   DateField,
+  DateTimeField,
   Dropdown, DROPDOWN_VARIANTS, DROPDOWN_SIZES,
   TopNav,
   ThemeToggle,
@@ -437,6 +438,52 @@ export function Playground() {
           {(['sm', 'md', 'lg'] as const).map((s) => (
             <div key={s} style={{ flex: '0 0 200px' }}>
               <DateField id={`pg-date-size-${s}`} label={`Size ${s}`} size={s} />
+            </div>
+          ))}
+        </div>
+      </Section>
+
+      <hr className="pg__divider" />
+
+      {/* ── DateTimeField ── */}
+      <Section title="DateTimeField">
+        <div className="pg__input-grid">
+          <DateTimeField
+            id="pg-datetime-default"
+            label="Event Start"
+            helperText="Select date and time"
+          />
+          <DateTimeField
+            id="pg-datetime-range"
+            label="Event Start (range)"
+            min="2024-01-01T00:00"
+            max="2030-12-31T23:59"
+            helperText="Between 2024 and 2030"
+          />
+          <DateTimeField
+            id="pg-datetime-step"
+            label="Schedule Post"
+            step={60}
+            helperText="Minute precision (step=60)"
+          />
+          <DateTimeField
+            id="pg-datetime-error"
+            label="Event Start (error)"
+            variant="error"
+            errorText="Start time is required"
+          />
+          <DateTimeField
+            id="pg-datetime-disabled"
+            label="Event Start (disabled)"
+            disabled
+            defaultValue="2024-06-15T10:00"
+          />
+        </div>
+        <div className="pg__row" style={{ marginTop: 'var(--space-4)' }}>
+          <span className="pg__row-label">Sizes</span>
+          {(['sm', 'md', 'lg'] as const).map((s) => (
+            <div key={s} style={{ flex: '0 0 220px' }}>
+              <DateTimeField id={`pg-datetime-size-${s}`} label={`Size ${s}`} size={s} />
             </div>
           ))}
         </div>
