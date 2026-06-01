@@ -7,6 +7,8 @@ module.exports = {
   moduleNameMapper: {
     // Stub CSS imports — tokens are tested via the JS constants module
     '\\.(css|less|scss|sass)$': '<rootDir>/src/__mocks__/styleMock.cjs',
+    // Stub static assets used by the app shell
+    '\\.(svg|png|jpe?g|gif|webp)$': '<rootDir>/src/__mocks__/fileMock.cjs',
   },
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json'],
   testMatch: ['**/__tests__/**/*.[jt]s?(x)'],

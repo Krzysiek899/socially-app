@@ -11,6 +11,7 @@
 
 - Do not commit work-in-progress documentation or spec files — only commit code.
 - Only comment code when the logic is genuinely tricky. Code should be self-explanatory; avoid comments that restate what the code does.
+- Prefer existing project components whenever possible instead of custom HTML/CSS implementations.
 
 ## Agent skills
 
