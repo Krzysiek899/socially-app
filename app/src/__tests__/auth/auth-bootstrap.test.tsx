@@ -1,28 +1,62 @@
 import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import App from '../../App.tsx';
+import { t } from '../../i18n/index.ts';
 
 const SESSION_KEY = 'auth.session.v1';
 
 describe('Authentication Flow bootstrap', () => {
   beforeEach(() => {
+    const users = new Map<string, { userId: string; password: string }>([
+      ['user@socially.app', { userId: 'user-1', password: 'Password123!' }],
+    ]);
+
     global.fetch = jest.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
       const url = typeof input === 'string' ? input : input.toString();
+      const body = JSON.parse((init?.body as string) ?? '{}') as {
+        fullName?: string;
+        email?: string;
+        password?: string;
+      };
 
       if (url.endsWith('/api/auth/login') && init?.method === 'POST') {
-        const body = JSON.parse((init.body as string) ?? '{}') as { email?: string; password?: string };
+        const found = body.email ? users.get(body.email.toLowerCase()) : null;
 
-        if (body.email === 'user@socially.app' && body.password === 'Password123!') {
+        if (found && body.password === found.password) {
           return {
             ok: true,
             status: 200,
             json: async () => ({
-              token: 'token-123',
-              userId: 'user-1',
+              token: `token-${found.userId}`,
+              userId: found.userId,
               expiresAt: '2099-01-01T00:00:00.000Z',
             }),
           } as Response;
         }
+      }
+
+      if (url.endsWith('/api/auth/register') && init?.method === 'POST') {
+        const normalizedEmail = body.email?.toLowerCase() ?? '';
+        if (normalizedEmail === 'user@socially.app') {
+          return {
+            ok: false,
+            status: 409,
+            json: async () => ({ message: 'email_taken' }),
+          } as Response;
+        }
+
+        const userId = `user-${normalizedEmail.split('@')[0]}`;
+        users.set(normalizedEmail, { userId, password: body.password ?? '' });
+
+        return {
+          ok: true,
+          status: 201,
+          json: async () => ({
+            token: `token-${userId}`,
+            userId,
+            expiresAt: '2099-01-01T00:00:00.000Z',
+          }),
+        } as Response;
       }
 
       return {
@@ -36,44 +70,71 @@ describe('Authentication Flow bootstrap', () => {
   afterEach(() => {
     jest.resetAllMocks();
     localStorage.clear();
-    window.history.replaceState({}, '', '/');
+   sessionStorage.clear();
+   window.history.replaceState({}, '', '/');
   });
 
   it('redirects Visitor from Authenticated Area to Login', async () => {
-    window.history.replaceState({}, '', '/app');
+   window.history.replaceState({}, '', '/app');
 
-    render(<App />);
+   render(<App />);
 
-    expect(await screen.findByRole('heading', { name: 'auth.login.title' })).toBeInTheDocument();
+   expect(await screen.findByRole('heading', { name: t('auth.login.title') })).toBeInTheDocument();
   });
 
-  it('creates Auth Session after successful Login', async () => {
-    window.history.replaceState({}, '', '/login');
+  it('creates persistent Auth Session after successful Login with "remember me"', async () => {
+   window.history.replaceState({}, '', '/login');
 
-    render(<App />);
+   render(<App />);
 
-    const emailInput = await screen.findByRole('textbox', { name: 'auth.login.email' });
-    const passwordInput = screen.getByLabelText('auth.login.password');
+   const emailInput = await screen.findByRole('textbox', { name: t('auth.login.email') });
+   const passwordInput = screen.getByLabelText(t('auth.login.password'));
 
-    fireEvent.change(emailInput, { target: { value: 'user@socially.app' } });
-    fireEvent.change(passwordInput, { target: { value: 'Password123!' } });
-    fireEvent.click(screen.getByRole('button', { name: 'auth.login.submit' }));
+   fireEvent.change(emailInput, { target: { value: 'user@socially.app' } });
+   fireEvent.change(passwordInput, { target: { value: 'Password123!' } });
+   fireEvent.click(screen.getByRole('button', { name: t('auth.login.submit') }));
 
-    expect(await screen.findByRole('heading', { name: 'app.authenticated.title' })).toBeInTheDocument();
+   expect(await screen.findByRole('heading', { name: 'app.authenticated.title' })).toBeInTheDocument();
 
-    await waitFor(() => {
-      const stored = localStorage.getItem(SESSION_KEY);
-      expect(stored).toBeTruthy();
-      expect(JSON.parse(stored as string)).toMatchObject({
-        token: 'token-123',
-        userId: 'user-1',
-      });
-    });
+   await waitFor(() => {
+     const stored = localStorage.getItem(SESSION_KEY);
+     expect(stored).toBeTruthy();
+     expect(sessionStorage.getItem(SESSION_KEY)).toBeNull();
+     expect(JSON.parse(stored as string)).toMatchObject({
+       token: 'token-user-1',
+       userId: 'user-1',
+     });
+   });
+  });
+
+  it('stores Auth Session in sessionStorage when "remember me" is disabled', async () => {
+   window.history.replaceState({}, '', '/login');
+
+   render(<App />);
+
+   const rememberMe = await screen.findByRole('checkbox', { name: t('auth.login.remember_me') });
+   fireEvent.click(rememberMe);
+
+   fireEvent.change(screen.getByRole('textbox', { name: t('auth.login.email') }), {
+     target: { value: 'user@socially.app' },
+   });
+   fireEvent.change(screen.getByLabelText(t('auth.login.password')), {
+     target: { value: 'Password123!' },
+   });
+
+   fireEvent.click(screen.getByRole('button', { name: t('auth.login.submit') }));
+
+   expect(await screen.findByRole('heading', { name: 'app.authenticated.title' })).toBeInTheDocument();
+
+   await waitFor(() => {
+     expect(localStorage.getItem(SESSION_KEY)).toBeNull();
+     expect(sessionStorage.getItem(SESSION_KEY)).toBeTruthy();
+   });
   });
 
   it('restores Auth Session from storage on refresh', async () => {
-    localStorage.setItem(
-      SESSION_KEY,
+   localStorage.setItem(
+     SESSION_KEY,
       JSON.stringify({
         token: 'token-123',
         userId: 'user-1',
@@ -85,5 +146,119 @@ describe('Authentication Flow bootstrap', () => {
     render(<App />);
 
     expect(await screen.findByRole('heading', { name: 'app.authenticated.title' })).toBeInTheDocument();
+  });
+
+  it('preserves full returnTo path with query and hash after Login', async () => {
+    window.history.replaceState({}, '', '/app?tab=discover#upcoming');
+
+    render(<App />);
+
+    const emailInput = await screen.findByRole('textbox', { name: t('auth.login.email') });
+    const passwordInput = screen.getByLabelText(t('auth.login.password'));
+    fireEvent.change(emailInput, { target: { value: 'user@socially.app' } });
+    fireEvent.change(passwordInput, { target: { value: 'Password123!' } });
+    fireEvent.click(screen.getByRole('button', { name: t('auth.login.submit') }));
+
+    await screen.findByRole('heading', { name: 'app.authenticated.title' });
+    expect(window.location.pathname).toBe('/app');
+    expect(window.location.search).toBe('?tab=discover');
+    expect(window.location.hash).toBe('#upcoming');
+  });
+
+  it('keeps returnTo when navigating between Login and Registration', async () => {
+    window.history.replaceState({}, '', '/login?returnTo=%2Fapp%3Ftab%3Ddiscover%23upcoming');
+
+    render(<App />);
+
+    const registerLink = await screen.findByRole('link', { name: t('auth.login.go_to_register') });
+    fireEvent.click(registerLink);
+    expect(window.location.pathname).toBe('/register');
+    expect(window.location.search).toContain('returnTo=');
+
+    const loginLink = await screen.findByRole('link', { name: t('auth.registration.go_to_login') });
+    fireEvent.click(loginLink);
+    expect(window.location.pathname).toBe('/login');
+    expect(window.location.search).toContain('returnTo=');
+  });
+
+  it('validates Registration fields and prevents submit for invalid form', async () => {
+    window.history.replaceState({}, '', '/register');
+
+    render(<App />);
+
+    fireEvent.change(await screen.findByRole('textbox', { name: t('auth.registration.full_name') }), {
+      target: { value: 'A' },
+    });
+    fireEvent.change(screen.getByRole('textbox', { name: t('auth.registration.email') }), {
+      target: { value: 'not-an-email' },
+    });
+    fireEvent.change(screen.getByLabelText(t('auth.registration.password')), {
+      target: { value: 'weak' },
+    });
+    fireEvent.change(screen.getByLabelText(t('auth.registration.confirm_password')), {
+      target: { value: 'different' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: t('auth.registration.submit') }));
+
+    expect(await screen.findByText(t('auth.registration.validation.full_name.length'))).toBeInTheDocument();
+    expect(screen.getByText(t('auth.registration.validation.email.invalid'))).toBeInTheDocument();
+    expect(screen.getByText(t('auth.registration.validation.password.rules'))).toBeInTheDocument();
+    expect(screen.getByText(t('auth.registration.validation.confirm_password.mismatch'))).toBeInTheDocument();
+    expect(screen.getByText(t('auth.registration.validation.consent.required'))).toBeInTheDocument();
+    expect(global.fetch).not.toHaveBeenCalledWith(
+      '/api/auth/register',
+      expect.objectContaining({ method: 'POST' }),
+    );
+  });
+
+  it('shows email_taken error when Registration returns 409', async () => {
+    window.history.replaceState({}, '', '/register');
+
+    render(<App />);
+
+    fireEvent.change(await screen.findByRole('textbox', { name: t('auth.registration.full_name') }), {
+      target: { value: 'Jan Kowalski' },
+    });
+    fireEvent.change(screen.getByRole('textbox', { name: t('auth.registration.email') }), {
+      target: { value: 'user@socially.app' },
+    });
+    fireEvent.change(screen.getByLabelText(t('auth.registration.password')), {
+      target: { value: 'Password123!' },
+    });
+    fireEvent.change(screen.getByLabelText(t('auth.registration.confirm_password')), {
+      target: { value: 'Password123!' },
+    });
+    fireEvent.click(screen.getByRole('checkbox'));
+
+    fireEvent.click(screen.getByRole('button', { name: t('auth.registration.submit') }));
+
+    expect(await screen.findByText(t('auth.registration.email_taken'))).toBeInTheDocument();
+  });
+
+  it('creates Auth Session and redirects to returnTo after successful Registration', async () => {
+    window.history.replaceState({}, '', '/register?returnTo=%2Fapp%3Ftab%3Ddiscover%23upcoming');
+
+    render(<App />);
+
+    fireEvent.change(await screen.findByRole('textbox', { name: t('auth.registration.full_name') }), {
+      target: { value: 'Nowy User' },
+    });
+    fireEvent.change(screen.getByRole('textbox', { name: t('auth.registration.email') }), {
+      target: { value: 'new@socially.app' },
+    });
+    fireEvent.change(screen.getByLabelText(t('auth.registration.password')), {
+      target: { value: 'Password123!' },
+    });
+    fireEvent.change(screen.getByLabelText(t('auth.registration.confirm_password')), {
+      target: { value: 'Password123!' },
+    });
+    fireEvent.click(screen.getByRole('checkbox'));
+
+    fireEvent.click(screen.getByRole('button', { name: t('auth.registration.submit') }));
+
+    expect(await screen.findByRole('heading', { name: 'app.authenticated.title' })).toBeInTheDocument();
+    expect(window.location.pathname).toBe('/app');
+    expect(window.location.search).toBe('?tab=discover');
+    expect(window.location.hash).toBe('#upcoming');
   });
 });

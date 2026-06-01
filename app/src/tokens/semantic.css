@@ -115,7 +115,6 @@
   --color-primary-subtle: var(--primitive-dark-600);   /* #1E293B           */
   --color-primary-hover:  var(--primitive-blue-200);   /* #A8D4EF           */
 
-<<<<<<< HEAD
   --color-success:          var(--primitive-green-300);  /* #9DD89E           */
   --color-success-strong:   var(--primitive-green-500);  /* #63B964           */
   --color-success-subtle:   var(--primitive-dark-600);   /* #1E293B           */
@@ -125,13 +124,6 @@
   --color-warning-strong:   var(--primitive-amber-500);  /* #FBA627           */
   --color-warning-subtle:   var(--primitive-dark-600);   /* #1E293B           */
   --color-text-on-warning:  var(--primitive-dark-700);   /* #0F172A — dark text on amber */
-=======
-  --color-success:        var(--primitive-green-300);  /* #9DD89E           */
-  --color-success-subtle: var(--primitive-dark-600);   /* #1E293B           */
-
-  --color-warning:        var(--primitive-amber-300);  /* #FDCC7E           */
-  --color-warning-subtle: var(--primitive-dark-600);   /* #1E293B           */
->>>>>>> origin/main
 
   --color-info:           var(--primitive-teal-300);   /* #7FCECD           */
   --color-info-subtle:    var(--primitive-dark-600);   /* #1E293B           */
@@ -172,7 +164,6 @@
     --color-primary-subtle: var(--primitive-dark-600);
     --color-primary-hover:  var(--primitive-blue-200);
 
-<<<<<<< HEAD
     --color-success:          var(--primitive-green-300);
     --color-success-strong:   var(--primitive-green-500);
     --color-success-subtle:   var(--primitive-dark-600);
@@ -182,13 +173,6 @@
     --color-warning-strong:   var(--primitive-amber-500);
     --color-warning-subtle:   var(--primitive-dark-600);
     --color-text-on-warning:  var(--primitive-dark-700);
-=======
-    --color-success:        var(--primitive-green-300);
-    --color-success-subtle: var(--primitive-dark-600);
-
-    --color-warning:        var(--primitive-amber-300);
-    --color-warning-subtle: var(--primitive-dark-600);
->>>>>>> origin/main
 
     --color-info:           var(--primitive-teal-300);
     --color-info-subtle:    var(--primitive-dark-600);

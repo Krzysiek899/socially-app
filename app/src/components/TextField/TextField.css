@@ -11,6 +11,25 @@
   gap: var(--space-1);
 }
 
+.input-field__row {
+  position: relative;
+}
+
+.input-field__leading-icon {
+  position: absolute;
+  left: var(--space-3);
+  top: 50%;
+  transform: translateY(-50%);
+  display: inline-flex;
+  color: var(--color-text-subtle);
+  pointer-events: none;
+}
+
+.input-field__leading-icon > svg {
+  width: 16px;
+  height: 16px;
+}
+
 /* ── Label ── */
 .input-label {
   font-family: var(--typography-font-sans);
@@ -58,6 +77,10 @@
 .input-field--lg {
   padding: var(--space-3) var(--space-4);
   font-size: var(--font-size-lg);
+}
+
+.input-field--with-leading-icon {
+  padding-left: var(--space-10);
 }
 
 /* ── Variant: default ── */

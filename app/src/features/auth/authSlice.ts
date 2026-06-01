@@ -1,22 +1,30 @@
 import { createAsyncThunk, createSlice, type PayloadAction } from '@reduxjs/toolkit';
-import { loginRequest } from './authApi.ts';
-import type { AuthSession } from './authSession.ts';
+import { loginRequest, registerRequest } from './authApi.ts';
+import type { AuthSession, SessionPersistencePreference } from './authSession.ts';
 
 type AuthState = {
   session: AuthSession | null;
+  sessionPersistencePreference: SessionPersistencePreference;
   status: 'idle' | 'loading' | 'failed';
   errorKey: string | null;
 };
 
 const initialState: AuthState = {
   session: null,
+  sessionPersistencePreference: 'persistent',
   status: 'idle',
   errorKey: null,
 };
 
 export const login = createAsyncThunk(
   'auth/login',
-  async (payload: { email: string; password: string }) => loginRequest(payload),
+  async (payload: { email: string; password: string; rememberMe: boolean }) =>
+    loginRequest({ email: payload.email, password: payload.password }),
+);
+
+export const register = createAsyncThunk(
+  'auth/register',
+  async (payload: { fullName: string; email: string; password: string }) => registerRequest(payload),
 );
 
 const authSlice = createSlice({
@@ -25,6 +33,12 @@ const authSlice = createSlice({
   reducers: {
     authSessionRestored: (state, action: PayloadAction<AuthSession | null>) => {
       state.session = action.payload;
+    },
+    sessionPersistencePreferenceRestored: (state, action: PayloadAction<SessionPersistencePreference>) => {
+      state.sessionPersistencePreference = action.payload;
+    },
+    sessionPersistencePreferenceSet: (state, action: PayloadAction<SessionPersistencePreference>) => {
+      state.sessionPersistencePreference = action.payload;
     },
     logout: (state) => {
       state.session = null;
@@ -46,9 +60,27 @@ const authSlice = createSlice({
       .addCase(login.rejected, (state) => {
         state.status = 'failed';
         state.errorKey = 'auth.login.invalid_credentials';
+      })
+      .addCase(register.pending, (state) => {
+        state.status = 'loading';
+        state.errorKey = null;
+      })
+      .addCase(register.fulfilled, (state, action) => {
+        state.session = action.payload;
+        state.status = 'idle';
+        state.errorKey = null;
+      })
+      .addCase(register.rejected, (state, action) => {
+        state.status = 'failed';
+        state.errorKey = (action.error.message ?? 'auth.registration.submit_failed');
       });
   },
 });
 
-export const { authSessionRestored, logout } = authSlice.actions;
+export const {
+  authSessionRestored,
+  sessionPersistencePreferenceRestored,
+  sessionPersistencePreferenceSet,
+  logout,
+} = authSlice.actions;
 export const authReducer = authSlice.reducer;

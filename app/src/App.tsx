@@ -7,8 +7,13 @@ import { AuthGuard } from './features/auth/AuthGuard.tsx';
 import { AuthenticatedHomePage } from './features/auth/AuthenticatedHomePage.tsx';
 import { LoginPage } from './features/auth/LoginPage.tsx';
 import { RegistrationPage } from './features/auth/RegistrationPage.tsx';
-import { authSessionRestored } from './features/auth/authSlice.ts';
-import { loadAuthSession, saveAuthSession } from './features/auth/authSession.ts';
+import { authSessionRestored, sessionPersistencePreferenceRestored } from './features/auth/authSlice.ts';
+import {
+  loadAuthSession,
+  loadSessionPersistencePreference,
+  saveAuthSession,
+  saveSessionPersistencePreference,
+} from './features/auth/authSession.ts';
 
 const AppRoutes = () => (
   <Routes>
@@ -26,9 +31,12 @@ const AppRoutes = () => (
 function App() {
   useEffect(() => {
     store.dispatch(authSessionRestored(loadAuthSession()));
+    store.dispatch(sessionPersistencePreferenceRestored(loadSessionPersistencePreference()));
 
     const unsubscribe = store.subscribe(() => {
-      saveAuthSession(store.getState().auth.session);
+      const authState = store.getState().auth;
+      saveAuthSession(authState.session, authState.sessionPersistencePreference);
+      saveSessionPersistencePreference(authState.sessionPersistencePreference);
     });
 
     return unsubscribe;
