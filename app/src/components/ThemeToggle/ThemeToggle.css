@@ -1,0 +1,7 @@
+/**
+ * ThemeToggle — Socially Design System
+ */
+.theme-toggle__icon {
+  font-size: var(--font-size-base);
+  line-height: 1;
+}
