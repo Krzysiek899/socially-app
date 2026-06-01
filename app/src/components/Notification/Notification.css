@@ -1,0 +1,112 @@
+/**
+ * Notification — Socially Design System
+ *
+ * All colours, spacing, and radii reference semantic tokens.
+ * --toast-z-index and --toast-max-width are local custom properties
+ * (no global token exists for z-order or toast sizing).
+ */
+
+/* ── Local custom properties ── */
+:root {
+  /* Sits above modals (--modal-z-index: 1000) */
+  --toast-z-index:   1100;
+  --toast-max-width: 400px;
+}
+
+/* ── Container ── */
+.toast-container {
+  position: fixed;
+  bottom: var(--space-6);
+  right:  var(--space-6);
+  z-index: var(--toast-z-index);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  width: calc(100% - var(--space-12));
+  max-width: var(--toast-max-width);
+  pointer-events: none;
+}
+
+/* ── Individual toast ── */
+.toast {
+  pointer-events: all;
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  box-shadow: var(--elevation-3);
+  border: var(--border-width-default) solid var(--color-border-default);
+  background-color: var(--color-surface-raised);
+  animation: toast-enter 0.25s ease forwards;
+}
+
+.toast--exiting {
+  animation: toast-exit 0.2s ease forwards;
+}
+
+/* ── Variants ── */
+.toast--success { background-color: var(--color-success-subtle); border-color: var(--color-success); }
+.toast--error   { background-color: var(--color-danger-subtle);  border-color: var(--color-danger); }
+.toast--warning { background-color: var(--color-warning-subtle); border-color: var(--color-warning); }
+.toast--info    { background-color: var(--color-info-subtle);    border-color: var(--color-info); }
+
+/* ── Icon ── */
+.toast__icon {
+  flex-shrink: 0;
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-normal);
+}
+
+.toast--success .toast__icon { color: var(--color-success); }
+.toast--error   .toast__icon { color: var(--color-danger); }
+.toast--warning .toast__icon { color: var(--color-warning); }
+.toast--info    .toast__icon { color: var(--color-info); }
+
+/* ── Message ── */
+.toast__message {
+  flex: 1;
+  font-family: var(--typography-font-sans);
+  font-size:   var(--typography-body-sm-size);
+  font-weight: var(--typography-body-sm-weight);
+  line-height: var(--typography-body-sm-line-height);
+  color: var(--color-text-default);
+}
+
+/* ── Close button ── */
+.toast__close {
+  all: unset;
+  cursor: pointer;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width:  var(--space-6);
+  height: var(--space-6);
+  border-radius: var(--radius-xs);
+  color: var(--color-text-subtle);
+  font-size: var(--font-size-xl);
+  line-height: 1;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.toast__close:hover {
+  background-color: var(--color-surface-overlay);
+  color: var(--color-text-default);
+}
+
+.toast__close:focus-visible {
+  outline: var(--border-width-strong) solid var(--color-border-focus);
+  outline-offset: 2px;
+}
+
+/* ── Animations ── */
+@keyframes toast-enter {
+  from { opacity: 0; transform: translateX(100%); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes toast-exit {
+  from { opacity: 1; transform: translateX(0); }
+  to   { opacity: 0; transform: translateX(100%); }
+}

@@ -14,6 +14,9 @@ import {
   Dropdown, DROPDOWN_VARIANTS, DROPDOWN_SIZES,
   TopNav,
   ThemeToggle,
+  NotificationProvider,
+  useNotifications,
+  TOAST_VARIANTS,
 } from '../components/index.ts';
 import type { AccordionItem } from '../components/index.ts';
 import type { ThemePreference } from '../hooks/useTheme.ts';
@@ -82,12 +85,49 @@ const ACCORDION_MULTI: AccordionItem[] = [
   },
 ];
 
+function NotificationSection() {
+  const { notify } = useNotifications();
+  return (
+    <Section title="Notification">
+      <Row label="Variants">
+        {TOAST_VARIANTS.map(variant => (
+          <Button
+            key={variant}
+            size="sm"
+            variant="secondary"
+            onClick={() => notify({ message: `This is a ${variant} notification`, variant })}
+          >
+            {variant}
+          </Button>
+        ))}
+      </Row>
+      <Row label="Custom duration">
+        <Button
+          size="sm"
+          variant="secondary"
+          onClick={() => notify({ message: 'Disappears in 1 second', variant: 'info', duration: 1000 })}
+        >
+          1 s
+        </Button>
+        <Button
+          size="sm"
+          variant="secondary"
+          onClick={() => notify({ message: 'Disappears in 8 seconds', variant: 'info', duration: 8000 })}
+        >
+          8 s
+        </Button>
+      </Row>
+    </Section>
+  );
+}
+
 export function Playground() {
   const { theme, preference, setTheme } = useTheme();
   const [inputValue, setInputValue] = useState('');
   const [modalOpen, setModalOpen] = useState<'sm' | 'md' | 'lg' | 'footer' | 'overflow' | null>(null);
 
   return (
+    <NotificationProvider>
     <div className="pg">
       {/* Header */}
       <header className="pg__header">
@@ -704,6 +744,10 @@ export function Playground() {
         ))}
       </Modal>
     </Section>
+
+    <hr className="pg__divider" />
+    <NotificationSection />
    </div>
+   </NotificationProvider>
   );
 }

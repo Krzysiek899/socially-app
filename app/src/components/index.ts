@@ -36,6 +36,9 @@ export type { DropdownProps, DropdownOption } from './Dropdown/Dropdown.tsx';
 export { Modal, MODAL_SIZES } from './Modal/Modal.tsx';
 export type { ModalProps, ModalSize } from './Modal/Modal.tsx';
 
+export { NotificationProvider, useNotifications, TOAST_VARIANTS } from './Notification/NotificationContext.tsx';
+export type { ToastOptions, ToastItem, ToastVariant } from './Notification/NotificationContext.tsx';
+
 export { TopNav } from './TopNav/TopNav.tsx';
 export type { TopNavProps, NavLinkProps } from './TopNav/TopNav.tsx';
 
