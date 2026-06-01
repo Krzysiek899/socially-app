@@ -27,6 +27,11 @@
   cursor: not-allowed;
 }
 
+.dropdown__select[multiple] {
+  min-height: 112px;
+  padding-right: var(--space-3);
+}
+
 /* ── Chevron icon ── */
 .dropdown__chevron {
   position: absolute;

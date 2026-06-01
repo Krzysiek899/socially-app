@@ -118,6 +118,27 @@ describe('Dropdown — disabled state', () => {
   });
 });
 
+describe('Dropdown — multiple mode', () => {
+  it('renders listbox semantics when multiple is enabled', () => {
+    render(<Dropdown id="d" label="Fruit" options={OPTIONS} multiple value={['apple']} />);
+    expect(screen.getByRole('listbox')).toBeInTheDocument();
+  });
+
+  it('does not render placeholder option in multiple mode', () => {
+    render(
+      <Dropdown
+        id="d"
+        label="Fruit"
+        options={OPTIONS}
+        multiple
+        value={['apple']}
+        placeholder="Choose a fruit"
+      />,
+    );
+    expect(screen.queryByRole('option', { name: 'Choose a fruit' })).not.toBeInTheDocument();
+  });
+});
+
 describe('Dropdown — all variants render', () => {
   DROPDOWN_VARIANTS.forEach((variant) => {
     it(`renders variant="${variant}" without errors`, () => {

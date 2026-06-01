@@ -4,9 +4,10 @@ import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { store } from './app/store.ts';
 import { Playground } from './playground/Playground.tsx';
 import { AuthGuard } from './features/auth/AuthGuard.tsx';
-import { AuthenticatedHomePage } from './features/auth/AuthenticatedHomePage.tsx';
 import { LoginPage } from './features/auth/LoginPage.tsx';
 import { RegistrationPage } from './features/auth/RegistrationPage.tsx';
+import { DiscoverPage } from './features/discover/DiscoverPage.tsx';
+import { EventDetailsPage } from './features/discover/EventDetailsPage.tsx';
 import { authSessionRestored, sessionPersistencePreferenceRestored } from './features/auth/authSlice.ts';
 import {
   loadAuthSession,
@@ -21,7 +22,8 @@ const AppRoutes = () => (
     <Route path="/login" element={<LoginPage />} />
     <Route path="/register" element={<RegistrationPage />} />
     <Route element={<AuthGuard />}>
-      <Route path="/app" element={<AuthenticatedHomePage />} />
+      <Route path="/app" element={<DiscoverPage />} />
+      <Route path="/app/events/:eventId" element={<EventDetailsPage />} />
     </Route>
     <Route path="/" element={<Navigate to="/app" replace />} />
     <Route path="*" element={<Navigate to="/app" replace />} />

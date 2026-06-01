@@ -4,6 +4,37 @@ import App from '../../App.tsx';
 import { t } from '../../i18n/index.ts';
 
 const SESSION_KEY = 'auth.session.v1';
+const DISCOVER_EVENT = {
+  id: 'event-1',
+  title: 'Frontend Meetup',
+  dateTime: '2026-06-15T16:00:00Z',
+  description: 'Opis wydarzenia.',
+  category: 'TECH',
+  address: {
+    city: 'Warszawa',
+    street: 'Prosta',
+    buildingNumber: '1',
+    postalCode: '00-001',
+  },
+  location: {
+    lat: 52.2297,
+    lng: 21.0122,
+  },
+  price: {
+    amount: 40,
+    currency: 'PLN',
+    isFree: false,
+  },
+  organizer: {
+    id: 'org-1',
+    displayName: 'Organizator',
+  },
+  attendeesCount: 2,
+  attendees: [
+    { id: 'u-1', displayName: 'Uczestnik A' },
+    { id: 'u-2', displayName: 'Uczestnik B' },
+  ],
+};
 
 describe('Authentication Flow bootstrap', () => {
   beforeEach(() => {
@@ -59,6 +90,24 @@ describe('Authentication Flow bootstrap', () => {
         } as Response;
       }
 
+      if (url.includes('/api/discover/events') && (!init?.method || init.method === 'GET')) {
+        const headers = new Headers(init?.headers);
+        const authHeader = headers.get('Authorization');
+        if (!authHeader?.startsWith('Bearer token-')) {
+          return {
+            ok: false,
+            status: 401,
+            json: async () => ({ message: 'unauthorized' }),
+          } as Response;
+        }
+
+        return {
+          ok: true,
+          status: 200,
+          json: async () => [DISCOVER_EVENT],
+        } as Response;
+      }
+
       return {
         ok: false,
         status: 401,
@@ -94,7 +143,7 @@ describe('Authentication Flow bootstrap', () => {
    fireEvent.change(passwordInput, { target: { value: 'Password123!' } });
    fireEvent.click(screen.getByRole('button', { name: t('auth.login.submit') }));
 
-   expect(await screen.findByRole('heading', { name: 'app.authenticated.title' })).toBeInTheDocument();
+   expect(await screen.findByRole('heading', { name: t('discover.title') })).toBeInTheDocument();
 
    await waitFor(() => {
      const stored = localStorage.getItem(SESSION_KEY);
@@ -124,7 +173,7 @@ describe('Authentication Flow bootstrap', () => {
 
    fireEvent.click(screen.getByRole('button', { name: t('auth.login.submit') }));
 
-   expect(await screen.findByRole('heading', { name: 'app.authenticated.title' })).toBeInTheDocument();
+   expect(await screen.findByRole('heading', { name: t('discover.title') })).toBeInTheDocument();
 
    await waitFor(() => {
      expect(localStorage.getItem(SESSION_KEY)).toBeNull();
@@ -145,7 +194,7 @@ describe('Authentication Flow bootstrap', () => {
 
     render(<App />);
 
-    expect(await screen.findByRole('heading', { name: 'app.authenticated.title' })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: t('discover.title') })).toBeInTheDocument();
   });
 
   it('preserves full returnTo path with query and hash after Login', async () => {
@@ -159,7 +208,7 @@ describe('Authentication Flow bootstrap', () => {
     fireEvent.change(passwordInput, { target: { value: 'Password123!' } });
     fireEvent.click(screen.getByRole('button', { name: t('auth.login.submit') }));
 
-    await screen.findByRole('heading', { name: 'app.authenticated.title' });
+    await screen.findByRole('heading', { name: t('discover.title') });
     expect(window.location.pathname).toBe('/app');
     expect(window.location.search).toBe('?tab=discover');
     expect(window.location.hash).toBe('#upcoming');
@@ -256,7 +305,7 @@ describe('Authentication Flow bootstrap', () => {
 
     fireEvent.click(screen.getByRole('button', { name: t('auth.registration.submit') }));
 
-    expect(await screen.findByRole('heading', { name: 'app.authenticated.title' })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: t('discover.title') })).toBeInTheDocument();
     expect(window.location.pathname).toBe('/app');
     expect(window.location.search).toBe('?tab=discover');
     expect(window.location.hash).toBe('#upcoming');
