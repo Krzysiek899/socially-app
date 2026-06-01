@@ -1,4 +1,5 @@
 import React, { useCallback, useId, useRef, useState } from 'react';
+import { ChevronUp, ChevronDown } from 'lucide-react';
 import './Accordion.css';
 
 export interface AccordionItem {
@@ -165,7 +166,7 @@ export function Accordion({
               >
                 <span className="accordion__trigger-label">{item.heading}</span>
                 <span className="accordion__trigger-icon" aria-hidden="true">
-                  {isExpanded ? '▲' : '▼'}
+                  {isExpanded ? <ChevronUp /> : <ChevronDown />}
                 </span>
               </button>
             </h3>

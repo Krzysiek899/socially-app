@@ -22,16 +22,16 @@ afterEach(() => {
 });
 
 describe('ThemeToggle — icon', () => {
-  it('shows moon icon (🌙) when theme is light', () => {
+  it('shows moon icon when theme is light', () => {
     mockTheme('light');
     render(<ThemeToggle />);
-    expect(screen.getByRole('button', { name: /toggle theme/i })).toHaveTextContent('🌙');
+    expect(screen.getByTestId('moon-icon')).toBeInTheDocument();
   });
 
-  it('shows sun icon (☀️) when theme is dark', () => {
+  it('shows sun icon when theme is dark', () => {
     mockTheme('dark');
     render(<ThemeToggle />);
-    expect(screen.getByRole('button', { name: /toggle theme/i })).toHaveTextContent('☀️');
+    expect(screen.getByTestId('sun-icon')).toBeInTheDocument();
   });
 });
 

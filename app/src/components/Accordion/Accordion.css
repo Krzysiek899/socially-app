@@ -90,6 +90,11 @@
   transition: transform 0.2s ease;
 }
 
+.accordion__trigger-icon svg {
+  width: 1em;
+  height: 1em;
+}
+
 /* ── Panel ── */
 .accordion__panel {
   border-top: var(--border-width-default) solid var(--color-border-default);

@@ -1,4 +1,5 @@
 import React from 'react';
+import { Sun, Moon } from 'lucide-react';
 import { useTheme } from '../../hooks/useTheme.ts';
 import { Button } from '../Button/Button.tsx';
 import './ThemeToggle.css';
@@ -15,7 +16,9 @@ export function ThemeToggle(): React.JSX.Element {
       onClick={() => setTheme(isDark ? 'light' : 'dark')}
     >
       <span className="theme-toggle__icon" aria-hidden="true">
-        {isDark ? '☀️' : '🌙'}
+        {isDark
+          ? <Sun data-testid="sun-icon" />
+          : <Moon data-testid="moon-icon" />}
       </span>
     </Button>
   );
