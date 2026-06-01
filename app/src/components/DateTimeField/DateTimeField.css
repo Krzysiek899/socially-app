@@ -1,0 +1,110 @@
+/**
+ * DateTimeField — Socially Design System
+ *
+ * Styles the native <input type="datetime-local"> as far as CSS allows.
+ * The datetime popup itself is browser-native and cannot be fully themed,
+ * but `color-scheme` makes it follow the current light/dark theme and
+ * `accent-color` applies the brand primary to selection highlights.
+ *
+ * All values reference semantic tokens exclusively.
+ */
+
+/* ── Base datetime input overrides ── */
+.datetime-field .input-field {
+  cursor: pointer;
+
+  /*
+   * accent-color: colors the selected date/time cell, today indicator,
+   * and any native focus ring inside the popup in supporting browsers.
+   */
+  accent-color: var(--color-primary);
+
+  /*
+   * color-scheme is set per-theme below so the browser renders its
+   * native datetime popup in the matching light or dark palette.
+   */
+}
+
+/* ── Text segments (year / month / day / hour / minute / second / ampm / separators) ── */
+.datetime-field .input-field::-webkit-datetime-edit {
+  color: var(--color-text-default);
+  padding: 0;
+}
+
+.datetime-field .input-field::-webkit-datetime-edit-fields-wrapper {
+  padding: 0;
+}
+
+.datetime-field .input-field::-webkit-datetime-edit-text {
+  color: var(--color-text-subtle);
+  padding: 0 1px;
+}
+
+.datetime-field .input-field::-webkit-datetime-edit-day-field,
+.datetime-field .input-field::-webkit-datetime-edit-month-field,
+.datetime-field .input-field::-webkit-datetime-edit-year-field,
+.datetime-field .input-field::-webkit-datetime-edit-hour-field,
+.datetime-field .input-field::-webkit-datetime-edit-minute-field,
+.datetime-field .input-field::-webkit-datetime-edit-second-field,
+.datetime-field .input-field::-webkit-datetime-edit-ampm-field {
+  border-radius: var(--radius-xs);
+  padding: 0 2px;
+}
+
+/* Active segment highlight uses the primary brand color */
+.datetime-field .input-field::-webkit-datetime-edit-day-field:focus,
+.datetime-field .input-field::-webkit-datetime-edit-month-field:focus,
+.datetime-field .input-field::-webkit-datetime-edit-year-field:focus,
+.datetime-field .input-field::-webkit-datetime-edit-hour-field:focus,
+.datetime-field .input-field::-webkit-datetime-edit-minute-field:focus,
+.datetime-field .input-field::-webkit-datetime-edit-second-field:focus,
+.datetime-field .input-field::-webkit-datetime-edit-ampm-field:focus {
+  background-color: var(--color-primary);
+  color: var(--color-text-on-primary);
+  outline: none;
+}
+
+/* ── Calendar picker indicator (the calendar/clock icon) ── */
+.datetime-field .input-field::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  opacity: 0.55;
+  border-radius: var(--radius-xs);
+  padding: 2px;
+  transition: opacity 0.15s ease, background-color 0.15s ease;
+}
+
+.datetime-field .input-field::-webkit-calendar-picker-indicator:hover {
+  opacity: 1;
+  background-color: var(--color-surface-overlay);
+}
+
+.datetime-field .input-field:disabled::-webkit-calendar-picker-indicator {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+/* ── color-scheme: light theme ── */
+:root .datetime-field .input-field,
+:root[data-theme="light"] .datetime-field .input-field {
+  color-scheme: light;
+}
+
+/* ── color-scheme: dark theme (explicit) ── */
+:root[data-theme="dark"] .datetime-field .input-field {
+  color-scheme: dark;
+}
+
+:root[data-theme="dark"] .datetime-field .input-field::-webkit-calendar-picker-indicator {
+  filter: invert(0.8) hue-rotate(180deg);
+}
+
+/* ── color-scheme: dark theme (OS preference, no explicit attribute) ── */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .datetime-field .input-field {
+    color-scheme: dark;
+  }
+
+  :root:not([data-theme="light"]) .datetime-field .input-field::-webkit-calendar-picker-indicator {
+    filter: invert(0.8) hue-rotate(180deg);
+  }
+}
