@@ -19,6 +19,7 @@ export interface PasswordFieldProps {
   helperText?:          string;
   errorText?:           string;
   onChange?:            React.ChangeEventHandler<HTMLInputElement>;
+  leadingIcon?:         React.ReactNode;
   'aria-describedby'?:  string;
 }
 
@@ -42,6 +43,7 @@ export function PasswordField({
   helperText,
   errorText,
   onChange,
+  leadingIcon,
   'aria-describedby': ariaDescribedBy,
 }: PasswordFieldProps): React.JSX.Element {
   if (!TEXT_FIELD_VARIANTS.includes(variant)) {
@@ -66,10 +68,11 @@ export function PasswordField({
         {label}
       </label>
       <div className="password-field__row">
+        {leadingIcon && <span className="input-field__leading-icon" aria-hidden="true">{leadingIcon}</span>}
         <input
           id={id}
           type={visible ? 'text' : 'password'}
-          className={`input-field input-field--${variant} input-field--${size} password-field__input`}
+          className={`input-field input-field--${variant} input-field--${size} password-field__input${leadingIcon ? ' input-field--with-leading-icon' : ''}`}
           value={value}
           defaultValue={defaultValue}
           placeholder={placeholder}

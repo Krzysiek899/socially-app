@@ -25,6 +25,7 @@ export interface TextFieldProps {
   helperText?:          string;
   errorText?:           string;
   onChange?:            React.ChangeEventHandler<HTMLInputElement>;
+  leadingIcon?:         React.ReactNode;
   'aria-describedby'?:  string;
 }
 
@@ -52,6 +53,7 @@ export function TextField({
   helperText,
   errorText,
   onChange,
+  leadingIcon,
   'aria-describedby': ariaDescribedBy,
 }: TextFieldProps): React.JSX.Element {
   if (!TEXT_FIELD_VARIANTS.includes(variant)) {
@@ -73,23 +75,26 @@ export function TextField({
       >
         {label}
       </label>
-      <input
-        id={id}
-        type={type}
-        className={`input-field input-field--${variant} input-field--${size}`}
-        value={value}
-        defaultValue={defaultValue}
-        placeholder={placeholder}
-        disabled={disabled}
-        required={required}
-        readOnly={readOnly}
-        min={min}
-        max={max}
-        step={step}
-        onChange={onChange}
-        aria-invalid={isError || undefined}
-        aria-describedby={describedBy}
-      />
+      <div className="input-field__row">
+        {leadingIcon && <span className="input-field__leading-icon" aria-hidden="true">{leadingIcon}</span>}
+        <input
+          id={id}
+          type={type}
+          className={`input-field input-field--${variant} input-field--${size}${leadingIcon ? ' input-field--with-leading-icon' : ''}`}
+          value={value}
+          defaultValue={defaultValue}
+          placeholder={placeholder}
+          disabled={disabled}
+          required={required}
+          readOnly={readOnly}
+          min={min}
+          max={max}
+          step={step}
+          onChange={onChange}
+          aria-invalid={isError || undefined}
+          aria-describedby={describedBy}
+        />
+      </div>
       {(helperText || errorText) && (
         <span
           id={helperId}
