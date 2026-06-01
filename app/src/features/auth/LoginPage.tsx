@@ -1,6 +1,7 @@
 import React, { FormEvent, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../../app/hooks.ts';
+import { Button, Card, PasswordField, TextField } from '../../components/index.ts';
 import { login } from './authSlice.ts';
 
 export const LoginPage = () => {
@@ -26,30 +27,35 @@ export const LoginPage = () => {
 
   return (
     <main>
-      <h1>auth.login.title</h1>
-      <form onSubmit={handleSubmit}>
-        <label htmlFor="login-email">auth.login.email</label>
-        <input
-          id="login-email"
-          type="email"
-          value={email}
-          onChange={(event) => setEmail(event.target.value)}
-        />
-
-        <label htmlFor="login-password">auth.login.password</label>
-        <input
-          id="login-password"
-          type="password"
-          value={password}
-          onChange={(event) => setPassword(event.target.value)}
-        />
-
-        <button type="submit" disabled={authStatus === 'loading'}>
-          auth.login.submit
-        </button>
-      </form>
-
-      {errorKey ? <p role="alert">{errorKey}</p> : null}
+      <Card
+        as="section"
+        variant="raised"
+        header={<h1>auth.login.title</h1>}
+      >
+        <form onSubmit={handleSubmit}>
+          <TextField
+            id="login-email"
+            label="auth.login.email"
+            type="email"
+            value={email}
+            onChange={(event) => setEmail(event.target.value)}
+            required
+            variant={errorKey ? 'error' : 'default'}
+            errorText={errorKey ?? undefined}
+          />
+          <PasswordField
+            id="login-password"
+            label="auth.login.password"
+            value={password}
+            onChange={(event) => setPassword(event.target.value)}
+            required
+            variant={errorKey ? 'error' : 'default'}
+          />
+          <Button type="submit" disabled={authStatus === 'loading'}>
+            auth.login.submit
+          </Button>
+        </form>
+      </Card>
     </main>
   );
 };
