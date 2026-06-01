@@ -10,6 +10,7 @@ import {
   PasswordField,
   DateField,
   DateTimeField,
+  Modal,
   Dropdown, DROPDOWN_VARIANTS, DROPDOWN_SIZES,
   TopNav,
   ThemeToggle,
@@ -84,6 +85,7 @@ const ACCORDION_MULTI: AccordionItem[] = [
 export function Playground() {
   const { theme, preference, setTheme } = useTheme();
   const [inputValue, setInputValue] = useState('');
+  const [modalOpen, setModalOpen] = useState<'sm' | 'md' | 'lg' | 'footer' | 'overflow' | null>(null);
 
   return (
     <div className="pg">
@@ -631,6 +633,77 @@ export function Playground() {
          </div>
        </Row>
      </Section>
+
+    <hr className="pg__divider" />
+    {/* ── Modal ── */}
+    <Section title="Modal">
+      <Row label="Sizes">
+        <Button size="sm" variant="secondary" onClick={() => setModalOpen('sm')}>Open sm</Button>
+        <Button size="sm" variant="secondary" onClick={() => setModalOpen('md')}>Open md</Button>
+        <Button size="sm" variant="secondary" onClick={() => setModalOpen('lg')}>Open lg</Button>
+      </Row>
+      <Row label="With footer">
+        <Button size="sm" variant="secondary" onClick={() => setModalOpen('footer')}>Open with footer</Button>
+      </Row>
+      <Row label="Long content (overflow)">
+        <Button size="sm" variant="secondary" onClick={() => setModalOpen('overflow')}>Open overflow</Button>
+      </Row>
+
+      <Modal
+        isOpen={modalOpen === 'sm'}
+        onClose={() => setModalOpen(null)}
+        title="Small Modal"
+        size="sm"
+      >
+        <p>This is a small modal (400px max-width).</p>
+      </Modal>
+
+      <Modal
+        isOpen={modalOpen === 'md'}
+        onClose={() => setModalOpen(null)}
+        title="Medium Modal"
+        size="md"
+      >
+        <p>This is a medium modal (560px max-width). It is the default size.</p>
+      </Modal>
+
+      <Modal
+        isOpen={modalOpen === 'lg'}
+        onClose={() => setModalOpen(null)}
+        title="Large Modal"
+        size="lg"
+      >
+        <p>This is a large modal (720px max-width), useful for detail views and forms.</p>
+      </Modal>
+
+      <Modal
+        isOpen={modalOpen === 'footer'}
+        onClose={() => setModalOpen(null)}
+        title="Confirm Action"
+        size="md"
+        footer={
+          <>
+            <Button variant="ghost" size="sm" onClick={() => setModalOpen(null)}>Cancel</Button>
+            <Button variant="primary" size="sm" onClick={() => setModalOpen(null)}>Confirm</Button>
+          </>
+        }
+      >
+        <p>Are you sure you want to perform this action? This cannot be undone.</p>
+      </Modal>
+
+      <Modal
+        isOpen={modalOpen === 'overflow'}
+        onClose={() => setModalOpen(null)}
+        title="Long Content"
+        size="md"
+      >
+        {Array.from({ length: 20 }, (_, i) => (
+          <p key={i} style={{ marginBottom: 'var(--space-3)' }}>
+            Paragraph {i + 1}: The modal body scrolls independently when content exceeds the maximum height.
+          </p>
+        ))}
+      </Modal>
+    </Section>
    </div>
   );
 }

@@ -1,0 +1,127 @@
+/**
+ * Modal — Socially Design System
+ *
+ * All colours, spacing, radii, and shadows reference semantic tokens.
+ * Modal-specific layout tokens (widths, z-index, backdrop colour) are
+ * defined as local custom properties below since no global token exists.
+ */
+
+/* ── Modal-scoped custom properties ── */
+:root {
+  /* Semi-transparent scrim — no semantic token exists for a backdrop overlay */
+  --modal-backdrop-bg: rgba(0, 0, 0, 0.45);
+  /* Layer ordering: sits above sticky headers, dropdowns, and tooltips */
+  --modal-z-index: 1000;
+  /* Panel max-widths for each size variant */
+  --modal-width-sm: 400px;
+  --modal-width-md: 560px;
+  --modal-width-lg: 720px;
+  /* Body scrolls inside the panel beyond this height */
+  --modal-max-height: 90vh;
+}
+
+/* ── Backdrop (decorative scrim, aria-hidden) ── */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background-color: var(--modal-backdrop-bg);
+  z-index: var(--modal-z-index);
+  cursor: pointer;
+}
+
+/* ── Panel ── */
+.modal-panel {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: calc(var(--modal-z-index) + 1);
+
+  display: flex;
+  flex-direction: column;
+  width: calc(100% - var(--space-8));
+  max-height: var(--modal-max-height);
+
+  background-color: var(--color-surface-raised);
+  border: var(--border-width-default) solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  box-shadow: var(--elevation-3);
+
+  /* Suppress browser focus ring; component manages focus visually */
+  outline: none;
+}
+
+/* ── Size variants ── */
+.modal-panel--sm { max-width: var(--modal-width-sm); }
+.modal-panel--md { max-width: var(--modal-width-md); }
+.modal-panel--lg { max-width: var(--modal-width-lg); }
+
+/* ── Header ── */
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-4) var(--space-6);
+  border-bottom: var(--border-width-default) solid var(--color-border-default);
+  flex-shrink: 0;
+}
+
+/* ── Title ── */
+.modal-title {
+  margin: 0;
+  font-family: var(--typography-font-sans);
+  font-size: var(--typography-subheading-size);
+  font-weight: var(--typography-subheading-weight);
+  line-height: var(--typography-subheading-line-height);
+  color: var(--color-text-heading);
+}
+
+/* ── Close button ── */
+.modal-close {
+  all: unset;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: var(--space-8);
+  height: var(--space-8);
+  border-radius: var(--radius-xs);
+  color: var(--color-text-subtle);
+  font-size: var(--font-size-xl);
+  line-height: 1;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.modal-close:hover {
+  background-color: var(--color-surface-overlay);
+  color: var(--color-text-default);
+}
+
+.modal-close:focus-visible {
+  outline: var(--border-width-strong) solid var(--color-border-focus);
+  outline-offset: 2px;
+}
+
+/* ── Body ── */
+.modal-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--space-6);
+  color: var(--color-text-default);
+  font-family: var(--typography-font-sans);
+  font-size: var(--typography-body-size);
+  font-weight: var(--typography-body-weight);
+  line-height: var(--typography-body-line-height);
+}
+
+/* ── Footer ── */
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-6);
+  border-top: var(--border-width-default) solid var(--color-border-default);
+  flex-shrink: 0;
+}
