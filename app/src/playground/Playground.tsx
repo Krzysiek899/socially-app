@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import './Playground.css';
 import {
   Button,    BUTTON_VARIANTS, BUTTON_SIZES,
-  Input,     INPUT_SIZES,
+  TextField, TEXT_FIELD_SIZES,
   Card,      CARD_VARIANTS,
   Avatar,    AVATAR_SIZES,
   Badge,     BADGE_VARIANTS, BADGE_SIZES,
@@ -177,10 +177,10 @@ export function Playground() {
 
       <hr className="pg__divider" />
 
-      {/* ── Input ── */}
-      <Section title="Input">
+      {/* ── TextField ── */}
+      <Section title="TextField">
         <div className="pg__input-grid">
-          <Input
+          <TextField
             id="pg-default"
             label="Default input"
             placeholder="Type something…"
@@ -188,26 +188,26 @@ export function Playground() {
             onChange={(e) => setInputValue(e.target.value)}
             helperText="This is helper text"
           />
-          <Input
+          <TextField
             id="pg-error"
             label="Error state"
             variant="error"
             defaultValue="bad@value"
             errorText="This field is required"
           />
-          <Input
+          <TextField
             id="pg-disabled"
             label="Disabled"
             disabled
             defaultValue="Locked value"
           />
-          <Input
+          <TextField
             id="pg-required"
             label="Required field"
             required
             placeholder="Cannot be empty"
           />
-          <Input
+          <TextField
             id="pg-password"
             label="Password"
             type="password"
@@ -216,9 +216,9 @@ export function Playground() {
         </div>
         <div className="pg__row" style={{ marginTop: 'var(--space-4)' }}>
           <span className="pg__row-label">Sizes</span>
-          {INPUT_SIZES.map((s) => (
+          {TEXT_FIELD_SIZES.map((s) => (
             <div key={s} style={{ flex: '0 0 200px' }}>
-              <Input id={`pg-size-${s}`} label={`Size ${s}`} size={s} placeholder={s} />
+              <TextField id={`pg-size-${s}`} label={`Size ${s}`} size={s} placeholder={s} />
             </div>
           ))}
         </div>
@@ -631,15 +631,6 @@ export function Playground() {
               allowMultiple
               defaultExpanded={['a', 'b']}
               aria-label="Features — multi open"
-            />
-          </div>
-        </Row>
-        <Row label="Focused">
-          <div className="pg__accordion-demo">
-            <Accordion
-              items={ACCORDION_MULTI}
-              focused
-              aria-label="Features — focused style"
             />
           </div>
         </Row>

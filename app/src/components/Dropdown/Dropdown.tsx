@@ -1,8 +1,8 @@
 import React from 'react';
 import { ChevronDown } from 'lucide-react';
-import { INPUT_VARIANTS, INPUT_SIZES } from '../Input/Input.tsx';
-import type { InputVariant, InputSize } from '../Input/Input.tsx';
-import '../Input/Input.css';
+import { TEXT_FIELD_VARIANTS, TEXT_FIELD_SIZES } from '../TextField/TextField.tsx';
+import type { TextFieldVariant, TextFieldSize } from '../TextField/TextField.tsx';
+import '../TextField/TextField.css';
 import './Dropdown.css';
 
 export interface DropdownOption {
@@ -15,8 +15,8 @@ export interface DropdownProps {
   id:                   string;
   label:                string;
   options:              DropdownOption[];
-  variant?:             InputVariant;
-  size?:                InputSize;
+  variant?:             TextFieldVariant;
+  size?:                TextFieldSize;
   value?:               string;
   defaultValue?:        string;
   placeholder?:         string;
@@ -28,7 +28,7 @@ export interface DropdownProps {
   'aria-describedby'?:  string;
 }
 
-export { INPUT_VARIANTS as DROPDOWN_VARIANTS, INPUT_SIZES as DROPDOWN_SIZES };
+export { TEXT_FIELD_VARIANTS as DROPDOWN_VARIANTS, TEXT_FIELD_SIZES as DROPDOWN_SIZES };
 
 /**
  * Dropdown — Form Component
@@ -53,11 +53,11 @@ export function Dropdown({
   onChange,
   'aria-describedby': ariaDescribedBy,
 }: DropdownProps): React.JSX.Element {
-  if (!INPUT_VARIANTS.includes(variant)) {
-    throw new Error(`Dropdown: unknown variant "${variant}". Must be one of: ${INPUT_VARIANTS.join(', ')}.`);
+  if (!TEXT_FIELD_VARIANTS.includes(variant)) {
+    throw new Error(`Dropdown: unknown variant "${variant}". Must be one of: ${TEXT_FIELD_VARIANTS.join(', ')}.`);
   }
-  if (!INPUT_SIZES.includes(size)) {
-    throw new Error(`Dropdown: unknown size "${size}". Must be one of: ${INPUT_SIZES.join(', ')}.`);
+  if (!TEXT_FIELD_SIZES.includes(size)) {
+    throw new Error(`Dropdown: unknown size "${size}". Must be one of: ${TEXT_FIELD_SIZES.join(', ')}.`);
   }
 
   const helperId = helperText || errorText ? `${id}-helper` : undefined;

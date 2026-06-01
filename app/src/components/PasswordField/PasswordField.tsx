@@ -1,15 +1,15 @@
 import React, { useState } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
-import { INPUT_VARIANTS, INPUT_SIZES } from '../Input/Input.tsx';
-import type { InputVariant, InputSize } from '../Input/Input.tsx';
-import '../Input/Input.css';
+import { TEXT_FIELD_VARIANTS, TEXT_FIELD_SIZES } from '../TextField/TextField.tsx';
+import type { TextFieldVariant, TextFieldSize } from '../TextField/TextField.tsx';
+import '../TextField/TextField.css';
 import './PasswordField.css';
 
 export interface PasswordFieldProps {
   id:                   string;
   label:                string;
-  variant?:             InputVariant;
-  size?:                InputSize;
+  variant?:             TextFieldVariant;
+  size?:                TextFieldSize;
   value?:               string;
   defaultValue?:        string;
   placeholder?:         string;
@@ -44,11 +44,11 @@ export function PasswordField({
   onChange,
   'aria-describedby': ariaDescribedBy,
 }: PasswordFieldProps): React.JSX.Element {
-  if (!INPUT_VARIANTS.includes(variant)) {
-    throw new Error(`PasswordField: unknown variant "${variant}". Must be one of: ${INPUT_VARIANTS.join(', ')}.`);
+  if (!TEXT_FIELD_VARIANTS.includes(variant)) {
+    throw new Error(`PasswordField: unknown variant "${variant}". Must be one of: ${TEXT_FIELD_VARIANTS.join(', ')}.`);
   }
-  if (!INPUT_SIZES.includes(size)) {
-    throw new Error(`PasswordField: unknown size "${size}". Must be one of: ${INPUT_SIZES.join(', ')}.`);
+  if (!TEXT_FIELD_SIZES.includes(size)) {
+    throw new Error(`PasswordField: unknown size "${size}". Must be one of: ${TEXT_FIELD_SIZES.join(', ')}.`);
   }
 
   const [visible, setVisible] = useState(false);
