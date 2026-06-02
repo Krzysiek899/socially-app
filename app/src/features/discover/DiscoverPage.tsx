@@ -1,9 +1,10 @@
 import React, { useMemo, useRef } from 'react';
-import { Bell, CalendarDays, MapPinned, Search, SlidersHorizontal, Users } from 'lucide-react';
+import { CalendarDays, MapPinned, Search, SlidersHorizontal, Users } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../../app/hooks.ts';
-import { Accordion, Avatar, Badge, Button, DateField, Dropdown, TextField, ThemeToggle, TopNav } from '../../components/index.ts';
+import { Accordion, AppNavbar, Avatar, Badge, Button, DateField, Dropdown, TextField } from '../../components/index.ts';
 import { t } from '../../i18n/index.ts';
+import { Cluster, Grid, Page, Section, Split, Stack } from '../../layout/index.tsx';
 import { DiscoverMap } from './DiscoverMap.tsx';
 import {
   categoriesSet,
@@ -13,9 +14,9 @@ import {
   priceFilterSet,
   searchQuerySet,
   selectedEventSet,
-} from './discoverSlice.ts';
-import type { DiscoverCategoryCode, DiscoverEvent } from './discoverContracts.ts';
-import { DISCOVER_CATEGORY_CODES } from './discoverContracts.ts';
+} from './redux/discoverSlice.ts';
+import type { DiscoverCategoryCode, DiscoverEvent } from './domain/discoverModels.ts';
+import { DISCOVER_CATEGORY_CODES } from './domain/discoverModels.ts';
 import './DiscoverPage.css';
 
 const CATEGORY_OPTIONS = DISCOVER_CATEGORY_CODES.map((category) => ({
@@ -125,37 +126,45 @@ export const DiscoverPage = () => {
             </div>
           ),
           content: (
-            <div className="discover-card__body">
+            <Stack gap="2" align="stretch" as="div" style={{ width: '100%' }}>
               <p>{event.description}</p>
               <div className="discover-card__meta">
-                <span><MapPinned size={14} aria-hidden="true" />{formatAddress(event)}</span>
+                <Stack gap="2">
+                  <span><MapPinned size={14} aria-hidden="true" />{formatAddress(event)}</span>
+                </Stack>
               </div>
               <div className="discover-card__organizer">
-                <Avatar name={event.organizer.displayName} src={event.organizer.avatarUrl} size="sm" />
-                <span>{event.organizer.displayName}</span>
-                <Badge variant="info" size="sm">{t(`discover.category.${event.category}`)}</Badge>
+                <Cluster gap="2" align="center">
+                  <Avatar name={event.organizer.displayName} src={event.organizer.avatarUrl} size="sm" />
+                  <span>{event.organizer.displayName}</span>
+                  <Badge variant="info" size="sm">{t(`discover.category.${event.category}`)}</Badge>
+                </Cluster>
               </div>
               <div className="discover-card__attendees" aria-label={t('discover.card.attendees')}>
-                {displayedAttendees.map((attendee) => (
-                  <Avatar
-                    key={attendee.id}
-                    name={attendee.displayName}
-                    src={attendee.avatarUrl}
-                    size="sm"
-                  />
-                ))}
-                {overflow > 0 && <Badge size="sm">+{overflow}</Badge>}
+                <Cluster gap="1" align="center">
+                  {displayedAttendees.map((attendee) => (
+                    <Avatar
+                      key={attendee.id}
+                      name={attendee.displayName}
+                      src={attendee.avatarUrl}
+                      size="sm"
+                    />
+                  ))}
+                  {overflow > 0 && <Badge size="sm">+{overflow}</Badge>}
+                </Cluster>
               </div>
               <div className="discover-card__actions">
-                <Button
-                  type="button"
-                  size="sm"
-                  onClick={() => navigate(`/app/events/${event.id}`)}
-                >
-                  {t('discover.card.join')}
-                </Button>
+                <Cluster justify="flex-end">
+                  <Button
+                    type="button"
+                    size="sm"
+                    onClick={() => navigate(`/app/events/${event.id}`)}
+                  >
+                    {t('discover.card.join')}
+                  </Button>
+                </Cluster>
               </div>
-            </div>
+            </Stack>
           ),
         };
       }),
@@ -168,152 +177,145 @@ export const DiscoverPage = () => {
 
   return (
     <main className="discover">
-      <TopNav>
-        <TopNav.Brand>Socially</TopNav.Brand>
-        <TopNav.NavLink href="/app" active>{t('discover.nav.discover')}</TopNav.NavLink>
-        <TopNav.NavLink href="#my-events">{t('discover.nav.my_events')}</TopNav.NavLink>
-        <TopNav.Actions>
-          <Button type="button" size="sm">{t('discover.nav.create_event')}</Button>
-          <Button
-            type="button"
-            size="sm"
-            variant="ghost"
-            aria-label={t('discover.nav.notifications')}
-          >
-            <Bell size={16} />
-          </Button>
-          <Avatar name={t('discover.nav.profile')} size="sm" />
-          <ThemeToggle />
-        </TopNav.Actions>
-      </TopNav>
+      <AppNavbar active="discover" />
 
-      <section className="discover__content">
+      <Page maxWidth="full">
+        <Section spacing="sm">
         <div className="discover__layout">
-          <aside className="discover__map-panel" aria-label={t('discover.map.label')}>
-            <DiscoverMap
-              events={items}
-              selectedEventId={selectedEventId}
-              onSelectEvent={(eventId) => dispatch(selectedEventSet(eventId))}
-            />
-          </aside>
+          <Split fraction="2/3" gap="3">
+            <aside className="discover__map-panel" aria-label={t('discover.map.label')}>
+              <DiscoverMap
+                events={items}
+                selectedEventId={selectedEventId}
+                onSelectEvent={(eventId) => dispatch(selectedEventSet(eventId))}
+              />
+            </aside>
 
-          <section className="discover__list-column">
-            <header className="discover__header">
-              <h1 id="discover-title">{t('discover.header.nearby')}</h1>
-            </header>
+            <section className="discover__list-column">
+              <Stack gap="2">
+                <header className="discover__header">
+                  <h1 id="discover-title">{t('discover.header.nearby')}</h1>
+                </header>
 
-            <section className="discover__filters" aria-label={t('discover.filters.label')}>
-              <div className="discover__filters-row">
-                <TextField
-                  id="discover-search"
-                  label={t('discover.filters.search')}
-                  value={filters.searchQuery}
-                  placeholder={t('discover.filters.search.placeholder')}
-                  leadingIcon={<Search size={16} />}
-                  onChange={(event) => dispatch(searchQuerySet(event.target.value))}
-                />
-                <Dropdown
-                  id="discover-price"
-                  label={t('discover.filters.price')}
-                  options={PRICE_OPTIONS.map((option) => ({ value: option.value, label: option.label }))}
-                  value={filters.price}
-                  onChange={(event) => dispatch(priceFilterSet(event.target.value as 'all' | 'free' | 'paid'))}
-                />
-                <Button
-                  type="button"
-                  size="sm"
-                  variant={advancedFiltersVisible ? 'primary' : 'secondary'}
-                  onClick={() => setAdvancedFiltersVisible((value) => !value)}
-                  aria-label={t('discover.filters.advanced')}
-                >
-                  <SlidersHorizontal size={16} />
-                </Button>
-              </div>
-              {advancedFiltersVisible && (
-                <div className="discover__filters-grid">
-                  <DateField
-                    id="discover-date-from"
-                    label={t('discover.filters.date.from')}
-                    value={filters.dateFrom}
-                    max={filters.dateTo || undefined}
-                    onChange={(event) => dispatch(dateFromSet(event.target.value))}
-                  />
-                  <DateField
-                    id="discover-date-to"
-                    label={t('discover.filters.date.to')}
-                    value={filters.dateTo}
-                    min={filters.dateFrom || undefined}
-                    onChange={(event) => dispatch(dateToSet(event.target.value))}
-                  />
-                </div>
-              )}
-              <div className="discover__categories-label">{t('discover.filters.category')}</div>
-              <div className="discover__category-chips" aria-label={t('discover.filters.category')}>
-                {CATEGORY_OPTIONS.map((option) => {
-                  const selected = filters.categories.includes(option.value as DiscoverCategoryCode);
-                  return (
-                    <Button
-                      key={option.value}
-                      type="button"
-                      size="sm"
-                      variant={selected ? 'primary' : 'secondary'}
-                      onClick={() => toggleCategory(option.value as DiscoverCategoryCode)}
-                      aria-label={option.label}
-                    >
-                      {option.label}
-                    </Button>
-                  );
-                })}
-                <Button
-                  type="button"
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => dispatch(categoriesSet([]))}
-                  disabled={filters.categories.length === 0}
-                >
-                  {t('discover.filters.category.clear')}
-                </Button>
-              </div>
-            </section>
-
-            <section className="discover__list" aria-live="polite" aria-busy={status === 'loading'}>
-            {status === 'loading' && <p className="discover__state">{t('discover.state.loading')}</p>}
-            {status === 'failed' && (
-              <p className="discover__state discover__state--error" role="alert">
-                {t(errorKey ?? 'discover.errors.fetch_failed')}
-              </p>
-            )}
-            {status === 'succeeded' && items.length === 0 && <p className="discover__state">{t('discover.state.empty')}</p>}
-            {items.length > 0 && (
-              <ul className="discover__cards">
-                {items.map((event) => {
-                  const accordionItem = accordionItemsById.get(event.id);
-                  if (!accordionItem) {
-                    return null;
-                  }
-
-                  return (
-                    <li key={event.id} ref={registerItemRef(event.id)}>
-                      <Accordion
-                        items={[accordionItem]}
-                        expanded={selectedEventId === event.id ? [event.id] : []}
-                        onChange={(expandedIds) => {
-                          const nextId = expandedIds[0];
-                          if (nextId) {
-                            dispatch(selectedEventSet(nextId));
-                          }
-                        }}
-                        aria-label={event.title}
+                <section className="discover__filters" aria-label={t('discover.filters.label')}>
+                  <Grid columns={3} gap="2">
+                    <TextField
+                      id="discover-search"
+                      label={t('discover.filters.search')}
+                      value={filters.searchQuery}
+                      placeholder={t('discover.filters.search.placeholder')}
+                      leadingIcon={<Search size={16} />}
+                      onChange={(event) => dispatch(searchQuerySet(event.target.value))}
+                    />
+                    <Dropdown
+                      id="discover-price"
+                      label={t('discover.filters.price')}
+                      options={PRICE_OPTIONS.map((option) => ({ value: option.value, label: option.label }))}
+                      value={filters.price}
+                      onChange={(event) => dispatch(priceFilterSet(event.target.value as 'all' | 'free' | 'paid'))}
+                    />
+                    <Cluster align="end" justify="flex-start">
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant={advancedFiltersVisible ? 'primary' : 'secondary'}
+                        onClick={() => setAdvancedFiltersVisible((value) => !value)}
+                        aria-label={t('discover.filters.advanced')}
+                      >
+                        <SlidersHorizontal size={16} />
+                      </Button>
+                    </Cluster>
+                  </Grid>
+                  {advancedFiltersVisible && (
+                    <Grid columns={2} gap="2">
+                      <DateField
+                        id="discover-date-from"
+                        label={t('discover.filters.date.from')}
+                        value={filters.dateFrom}
+                        max={filters.dateTo || undefined}
+                        onChange={(event) => dispatch(dateFromSet(event.target.value))}
                       />
-                    </li>
-                  );
-                })}
-              </ul>
-            )}
+                      <DateField
+                        id="discover-date-to"
+                        label={t('discover.filters.date.to')}
+                        value={filters.dateTo}
+                        min={filters.dateFrom || undefined}
+                        onChange={(event) => dispatch(dateToSet(event.target.value))}
+                      />
+                    </Grid>
+                  )}
+                  <div className="discover__categories-label">{t('discover.filters.category')}</div>
+                  <div className="discover__category-chips" aria-label={t('discover.filters.category')}>
+                    <Cluster gap="1">
+                      {CATEGORY_OPTIONS.map((option) => {
+                        const selected = filters.categories.includes(option.value as DiscoverCategoryCode);
+                        return (
+                          <Button
+                            key={option.value}
+                            type="button"
+                            size="sm"
+                            variant={selected ? 'primary' : 'secondary'}
+                            onClick={() => toggleCategory(option.value as DiscoverCategoryCode)}
+                            aria-label={option.label}
+                          >
+                            {option.label}
+                          </Button>
+                        );
+                      })}
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => dispatch(categoriesSet([]))}
+                        disabled={filters.categories.length === 0}
+                      >
+                        {t('discover.filters.category.clear')}
+                      </Button>
+                    </Cluster>
+                  </div>
+                </section>
+
+                <section className="discover__list" aria-live="polite" aria-busy={status === 'loading'}>
+                  {status === 'loading' && <p className="discover__state">{t('discover.state.loading')}</p>}
+                  {status === 'failed' && (
+                    <p className="discover__state discover__state--error" role="alert">
+                      {t(errorKey ?? 'discover.errors.fetch_failed')}
+                    </p>
+                  )}
+                  {status === 'succeeded' && items.length === 0 && <p className="discover__state">{t('discover.state.empty')}</p>}
+                  {items.length > 0 && (
+                    <ul className="discover__cards">
+                      {items.map((event) => {
+                        const accordionItem = accordionItemsById.get(event.id);
+                        if (!accordionItem) {
+                          return null;
+                        }
+
+                        return (
+                          <li key={event.id} ref={registerItemRef(event.id)}>
+                            <Accordion
+                              items={[accordionItem]}
+                              expanded={selectedEventId === event.id ? [event.id] : []}
+                              onChange={(expandedIds) => {
+                                const nextId = expandedIds[0];
+                                if (nextId) {
+                                  dispatch(selectedEventSet(nextId));
+                                }
+                              }}
+                              aria-label={event.title}
+                            />
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  )}
+                </section>
+              </Stack>
             </section>
-          </section>
+          </Split>
         </div>
-      </section>
+        </Section>
+      </Page>
     </main>
   );
 };

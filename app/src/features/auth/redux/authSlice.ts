@@ -1,6 +1,6 @@
 import { createAsyncThunk, createSlice, type PayloadAction } from '@reduxjs/toolkit';
-import { loginRequest, registerRequest } from './authApi.ts';
-import type { AuthSession, SessionPersistencePreference } from './authSession.ts';
+import { loginRequest, registerRequest } from '../api/authApi.ts';
+import type { AuthSession, SessionPersistencePreference } from '../domain/authSession.ts';
 
 type AuthState = {
   session: AuthSession | null;

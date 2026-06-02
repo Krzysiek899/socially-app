@@ -1,12 +1,12 @@
 import { createAsyncThunk, createSlice, type PayloadAction } from '@reduxjs/toolkit';
-import type { RootState } from '../../app/store.ts';
-import { fetchDiscoverEventsRequest } from './discoverApi.ts';
+import type { RootState } from '../../../app/store.ts';
+import { fetchDiscoverEventsRequest } from '../api/discoverApi.ts';
 import type {
   DiscoverCategoryCode,
   DiscoverEvent,
   DiscoverFilters,
   DiscoverPriceFilter,
-} from './discoverContracts.ts';
+} from '../domain/discoverModels.ts';
 
 type DiscoverStatus = 'idle' | 'loading' | 'succeeded' | 'failed';
 

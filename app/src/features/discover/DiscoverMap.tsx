@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import L from 'leaflet';
 import MarkerClusterGroup from 'react-leaflet-cluster';
 import { MapContainer, Marker, Popup, TileLayer, useMap } from 'react-leaflet';
-import type { DiscoverEvent } from './discoverContracts.ts';
+import type { DiscoverEvent } from './domain/discoverModels.ts';
 import { configureLeafletIcons } from './leafletSetup.ts';
 import { t } from '../../i18n/index.ts';
 import 'leaflet/dist/leaflet.css';

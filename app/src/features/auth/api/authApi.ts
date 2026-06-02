@@ -1,19 +1,10 @@
-import { z } from 'zod';
-import { authSessionSchema, type AuthSession } from './authSession.ts';
-
-const loginPayloadSchema = z.object({
-  email: z.string().email(),
-  password: z.string().min(1),
-});
-
-const registerPayloadSchema = z.object({
-  fullName: z.string().trim().min(2).max(80),
-  email: z.string().email(),
-  password: z.string().min(1),
-});
-
-const loginResponseSchema = authSessionSchema;
-const registerResponseSchema = authSessionSchema;
+import type { AuthSession } from '../domain/authSession.ts';
+import {
+  loginPayloadSchema,
+  loginResponseSchema,
+  registerPayloadSchema,
+  registerResponseSchema,
+} from '../dto/authSchemas.ts';
 
 export const loginRequest = async (payload: {
   email: string;

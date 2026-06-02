@@ -1,6 +1,6 @@
-import { requestContract } from '../../app/apiContractGateway.ts';
-import type { DiscoverEvent, DiscoverFilters } from './discoverContracts.ts';
-import { discoverEventSchema, discoverEventsResponseSchema } from './discoverContracts.ts';
+import { requestContract } from '../../../app/apiContractGateway.ts';
+import type { DiscoverEvent, DiscoverFilters } from '../domain/discoverModels.ts';
+import { discoverEventSchema, discoverEventsResponseSchema } from '../dto/discoverSchemas.ts';
 
 const toQueryString = (filters: DiscoverFilters): string => {
   const params = new URLSearchParams();

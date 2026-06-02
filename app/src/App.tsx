@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { Provider } from 'react-redux';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { store } from './app/store.ts';
@@ -8,13 +8,13 @@ import { LoginPage } from './features/auth/LoginPage.tsx';
 import { RegistrationPage } from './features/auth/RegistrationPage.tsx';
 import { DiscoverPage } from './features/discover/DiscoverPage.tsx';
 import { EventDetailsPage } from './features/discover/EventDetailsPage.tsx';
-import { authSessionRestored, sessionPersistencePreferenceRestored } from './features/auth/authSlice.ts';
+import { authSessionRestored, sessionPersistencePreferenceRestored } from './features/auth/redux/authSlice.ts';
 import {
   loadAuthSession,
   loadSessionPersistencePreference,
   saveAuthSession,
   saveSessionPersistencePreference,
-} from './features/auth/authSession.ts';
+} from './features/auth/domain/authSession.ts';
 
 const AppRoutes = () => (
   <Routes>

@@ -4,7 +4,7 @@ import { Lock, Mail, ShieldCheck } from 'lucide-react';
 import { useAppDispatch, useAppSelector } from '../../app/hooks.ts';
 import { Button, Card, PasswordField, TextField } from '../../components/index.ts';
 import { t } from '../../i18n/index.ts';
-import { login, sessionPersistencePreferenceSet } from './authSlice.ts';
+import { login, sessionPersistencePreferenceSet } from './redux/authSlice.ts';
 import { resolveReturnTo, withReturnTo } from './authNavigation.ts';
 import './AuthPage.css';
 
