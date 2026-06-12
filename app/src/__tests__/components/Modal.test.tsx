@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, screen, fireEvent, act } from '@testing-library/react';
-import { Modal, MODAL_SIZES } from '../../components/Modal/Modal.tsx';
+import { Modal, MODAL_SIZES } from '../../shared/components/Modal/Modal.tsx';
 
 /* ── Helpers ── */
 function renderModal(props: Partial<React.ComponentProps<typeof Modal>> = {}) {

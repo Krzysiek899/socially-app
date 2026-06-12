@@ -1,7 +1,7 @@
 import { http, HttpResponse } from 'msw';
 import { z } from 'zod';
-import { DISCOVER_CATEGORY_CODES } from '../../features/discover/domain/discoverModels.ts';
-import { discoverEventsResponseSchema } from '../../features/discover/dto/discoverSchemas.ts';
+import { DISCOVER_CATEGORY_CODES } from '../../pages/discover/domain/discoverModels.ts';
+import { discoverEventsResponseSchema } from '../../pages/discover/dto/discoverSchemas.ts';
 
 const discoverFiltersSchema = z.object({
   q: z.string().optional(),

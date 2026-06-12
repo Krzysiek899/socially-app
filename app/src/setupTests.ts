@@ -47,7 +47,7 @@ beforeEach(() => {
   }));
 });
 
-jest.mock('./features/discover/DiscoverMap.tsx', () => ({
+jest.mock('./pages/discover/DiscoverMap.tsx', () => ({
   DiscoverMap: () => null,
 }));
 

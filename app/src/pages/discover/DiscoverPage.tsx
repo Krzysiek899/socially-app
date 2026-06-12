@@ -1,10 +1,10 @@
 import React, { useMemo, useRef } from 'react';
 import { CalendarDays, MapPinned, Search, SlidersHorizontal, Users } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { useAppDispatch, useAppSelector } from '../../app/hooks.ts';
-import { Accordion, AppNavbar, Avatar, Badge, Button, DateField, Dropdown, TextField } from '../../components/index.ts';
+import { useAppDispatch, useAppSelector } from '../../redux/hooks.ts';
+import { Accordion, AppNavbar, Avatar, Badge, Button, DateField, Dropdown, TextField } from '../../shared/components/index.ts';
 import { t } from '../../i18n/index.ts';
-import { Cluster, Grid, Page, Section, Split, Stack } from '../../layout/index.tsx';
+import { Cluster, Grid, Page, Section, Split, Stack } from '../../shared/layout/index.tsx';
 import { DiscoverMap } from './DiscoverMap.tsx';
 import {
   categoriesSet,
@@ -14,7 +14,7 @@ import {
   priceFilterSet,
   searchQuerySet,
   selectedEventSet,
-} from './redux/discoverSlice.ts';
+} from '../../redux/discover/discoverSlice.ts';
 import type { DiscoverCategoryCode, DiscoverEvent } from './domain/discoverModels.ts';
 import { DISCOVER_CATEGORY_CODES } from './domain/discoverModels.ts';
 import './DiscoverPage.css';

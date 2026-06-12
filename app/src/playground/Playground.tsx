@@ -17,11 +17,11 @@ import {
   NotificationProvider,
   useNotifications,
   TOAST_VARIANTS,
-} from '../components/index.ts';
-import type { AccordionItem } from '../components/index.ts';
+} from '../shared/components/index.ts';
+import type { AccordionItem } from '../shared/components/index.ts';
 import type { ThemePreference } from '../hooks/useTheme.ts';
 import { useTheme } from '../hooks/useTheme.ts';
-import { Page, Section as LayoutSection, Stack, Cluster, Split, Grid } from '../layout/index.tsx';
+import { Page, Section as LayoutSection, Stack, Cluster, Split, Grid } from '../shared/layout/index.tsx';
 
 /* ─── Section wrapper ─────────────────────────────────────────────────────── */
 function Section({ title, children }: { title: string; children: React.ReactNode }) {

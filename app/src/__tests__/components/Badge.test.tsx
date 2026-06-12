@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { Badge, BADGE_VARIANTS, BADGE_SIZES } from '../../components/Badge/Badge.tsx';
+import { Badge, BADGE_VARIANTS, BADGE_SIZES } from '../../shared/components/Badge/Badge.tsx';
 
 describe('Badge — contract: variant and size APIs', () => {
   it('exposes all six variants', () => {

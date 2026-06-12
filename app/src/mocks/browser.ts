@@ -1,5 +1,5 @@
 import { setupWorker } from 'msw/browser';
-import { handlers } from './backend/index.ts';
+import { handlers } from './index.ts';
 
 const worker = setupWorker(...handlers);
 

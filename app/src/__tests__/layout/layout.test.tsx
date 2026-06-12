@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { Page, Section, Stack, Cluster, Split, Grid } from '../../layout/index.tsx';
+import { Page, Section, Stack, Cluster, Split, Grid } from '../../shared/layout/index.tsx';
 import {
   LAYOUT_MAX_WIDTH_TOKENS,
   SPACING_TOKEN_MAP,
@@ -8,7 +8,7 @@ import {
   SPLIT_FRACTION_MAP,
   SECTION_SPACING_MAP,
   SPACING_STEPS,
-} from '../../layout/layout-tokens.ts';
+} from '../../shared/layout/layout-tokens.ts';
 
 /* ── layout-tokens contract ─────────────────────────────────────────────── */
 

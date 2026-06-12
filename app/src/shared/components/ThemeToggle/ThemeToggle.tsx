@@ -1,6 +1,6 @@
 import React from 'react';
 import { Sun, Moon } from 'lucide-react';
-import { useTheme } from '../../hooks/useTheme.ts';
+import { useTheme } from '../../../hooks/useTheme.ts';
 import { Button } from '../Button/Button.tsx';
 import './ThemeToggle.css';
 

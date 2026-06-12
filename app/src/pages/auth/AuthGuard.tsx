@@ -1,6 +1,6 @@
 import React from 'react';
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
-import { useAppSelector } from '../../app/hooks.ts';
+import { useAppSelector } from '../../redux/hooks.ts';
 import { buildReturnTo } from './authNavigation.ts';
 
 export const AuthGuard = () => {
