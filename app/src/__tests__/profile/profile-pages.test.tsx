@@ -1,7 +1,9 @@
 import React from 'react';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import App from '../../App.tsx';
 import { t } from '../../i18n/index.ts';
+import { authSessionRestored, sessionPersistencePreferenceRestored } from '../../redux/auth/authSlice.ts';
+import { store } from '../../redux/store.ts';
 
 jest.mock('../../pages/discover/DiscoverMap.tsx', () => ({
   DiscoverMap: () => <div data-testid="discover-map" />,
@@ -65,20 +67,29 @@ const publicProfileResponse = {
 
 describe('Profile pages', () => {
   beforeEach(() => {
+    const session = {
+      token: 'token-user-1',
+      userId: 'user-1',
+      expiresAt: '2099-01-01T00:00:00.000Z',
+    };
+
     localStorage.setItem(
       SESSION_KEY,
-      JSON.stringify({
-        token: 'token-user-1',
-        userId: 'user-1',
-        expiresAt: '2099-01-01T00:00:00.000Z',
-      }),
+      JSON.stringify(session),
     );
+    act(() => {
+      store.dispatch(authSessionRestored(session));
+      store.dispatch(sessionPersistencePreferenceRestored('persistent'));
+    });
   });
 
   afterEach(() => {
     jest.resetAllMocks();
     localStorage.clear();
     sessionStorage.clear();
+    act(() => {
+      store.dispatch(authSessionRestored(null));
+    });
     window.history.replaceState({}, '', '/');
   });
 
@@ -112,7 +123,9 @@ describe('Profile pages', () => {
 
     render(<App />);
 
-    fireEvent.click(await screen.findByRole('button', { name: 'Wyloguj się' }));
+    await act(async () => {
+      fireEvent.click(await screen.findByRole('button', { name: 'Wyloguj się' }));
+    });
 
     await waitFor(() => {
       expect(window.location.pathname).toBe('/login');
