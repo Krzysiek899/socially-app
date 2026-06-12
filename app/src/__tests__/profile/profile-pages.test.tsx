@@ -112,7 +112,7 @@ describe('Profile pages', () => {
     render(<App />);
 
     expect(await screen.findByRole('heading', { name: 'Twój profil' })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: t('discover.nav.profile') })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Otwórz menu profilu' })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Jan Kowalski' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Edytuj' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Zweryfikuj' })).toBeInTheDocument();
@@ -151,7 +151,7 @@ describe('Profile pages', () => {
     render(<App />);
 
     expect(await screen.findByRole('heading', { name: 'Anna Wójcik' })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: t('discover.nav.profile') })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Otwórz menu profilu' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Dodaj do znajomych' })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Opinie o użytkowniku' })).toBeInTheDocument();
     expect(screen.getByText('Świetna organizacja i bardzo szybki kontakt.')).toBeInTheDocument();
