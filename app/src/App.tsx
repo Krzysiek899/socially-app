@@ -6,8 +6,8 @@ import { Playground } from './playground/Playground.tsx';
 import { AuthGuard } from './pages/auth/AuthGuard.tsx';
 import { LoginPage } from './pages/auth/LoginPage.tsx';
 import { RegistrationPage } from './pages/auth/RegistrationPage.tsx';
-import { DiscoverPage } from './features/discover/DiscoverPage.tsx';
-import { EventDetailsPage } from './features/discover/EventDetailsPage.tsx';
+import { DiscoverPage } from './pages/discover/DiscoverPage.tsx';
+import { EventDetailsPage } from './pages/discover/EventDetailsPage.tsx';
 import { authSessionRestored, sessionPersistencePreferenceRestored } from './redux/auth/authSlice.ts';
 import {
   loadAuthSession,

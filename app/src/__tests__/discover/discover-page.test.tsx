@@ -3,7 +3,7 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import App from '../../App.tsx';
 import { t } from '../../i18n/index.ts';
 
-jest.mock('../../features/discover/DiscoverMap.tsx', () => ({
+jest.mock('../../pages/discover/DiscoverMap.tsx', () => ({
   DiscoverMap: ({
     events,
     selectedEventId,
