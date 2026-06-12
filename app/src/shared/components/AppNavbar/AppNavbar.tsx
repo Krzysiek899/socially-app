@@ -6,6 +6,8 @@ import { Button } from '../Button/Button.tsx';
 import { ThemeToggle } from '../ThemeToggle/ThemeToggle.tsx';
 import { TopNav } from '../TopNav/TopNav.tsx';
 import { t } from '../../../i18n/index.ts';
+import { logout } from '../../../redux/auth/authSlice.ts';
+import { useAppDispatch } from '../../../redux/hooks.ts';
 import './AppNavbar.css';
 
 type AppNavKey = 'discover' | 'my-events' | 'profile';
@@ -15,6 +17,7 @@ export interface AppNavbarProps {
 }
 
 export function AppNavbar({ active = 'discover' }: AppNavbarProps): React.JSX.Element {
+  const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const menuRef = React.useRef<HTMLDivElement | null>(null);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = React.useState(false);
@@ -44,6 +47,12 @@ export function AppNavbar({ active = 'discover' }: AppNavbarProps): React.JSX.El
   const handleOpenProfile = () => {
     setIsProfileMenuOpen(false);
     navigate('/app/profile');
+  };
+
+  const handleLogout = () => {
+    setIsProfileMenuOpen(false);
+    dispatch(logout());
+    navigate('/login', { replace: true });
   };
 
   return (
@@ -89,6 +98,7 @@ export function AppNavbar({ active = 'discover' }: AppNavbarProps): React.JSX.El
                   size="sm"
                   variant="ghost"
                   className="app-navbar__profile-menu-action"
+                  onClick={handleLogout}
                 >
                   {t('profile.actions.logout')}
                 </Button>

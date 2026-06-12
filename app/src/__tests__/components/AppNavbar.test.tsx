@@ -135,4 +135,24 @@ describe('AppNavbar profile menu', () => {
 
     expect(await screen.findByRole('heading', { name: 'Twój profil' })).toBeInTheDocument();
   });
+
+  it('logs out from the avatar dropdown', async () => {
+    window.history.replaceState({}, '', '/app');
+    global.fetch = jest.fn(async () => ({
+      ok: true,
+      status: 200,
+      json: async () => discoverEventsResponse,
+    })) as typeof fetch;
+
+    render(<App />);
+
+    await screen.findByRole('heading', { name: 'Odkrywaj' });
+
+    fireEvent.click(screen.getByRole('button', { name: 'Otwórz menu profilu' }));
+    fireEvent.click(within(screen.getByRole('menu')).getByRole('button', { name: 'Wyloguj się' }));
+
+    await waitFor(() => {
+      expect(window.location.pathname).toBe('/login');
+    });
+  });
 });
