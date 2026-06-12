@@ -1,0 +1,224 @@
+.discover {
+  height: 100svh;
+  background: var(--color-surface-subtle);
+  overflow: hidden;
+}
+
+.discover__header h1 {
+  margin: 0;
+  color: var(--color-text-heading);
+  font-size: clamp(2rem, 2.4vw, 2.25rem);
+  line-height: 1.15;
+}
+
+.discover__filters {
+  margin-top: var(--space-2);
+  padding: var(--space-3);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-primary);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.discover__filters > [data-layout="grid"][data-columns="3"] {
+  grid-template-columns: minmax(0, 1.4fr) minmax(140px, 0.6fr) auto;
+  align-items: end;
+}
+
+.discover__categories-label {
+  color: var(--color-text-default);
+  font-weight: var(--typography-label-weight);
+  font-size: var(--typography-label-size);
+}
+
+.discover__category-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+}
+
+.discover__layout {
+  height: calc(100svh - 84px);
+}
+
+.discover__layout > [data-layout="split"] {
+  --layout-split-template: minmax(620px, 68%) minmax(360px, 32%);
+  align-items: start;
+  height: 100%;
+}
+
+.discover__list-column {
+  height: 100%;
+}
+
+.discover__list-column > [data-layout="stack"] {
+  height: 100%;
+}
+
+.discover__list {
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-primary);
+  padding: var(--space-3);
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+  background: var(--color-surface-subtle);
+}
+
+.discover__state {
+  margin: 0;
+  color: var(--color-text-default);
+}
+
+.discover__state--error {
+  color: var(--color-danger);
+}
+
+.discover__cards {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.discover-card {
+  width: 100%;
+  color: var(--color-text-default);
+}
+
+.discover-accordion__heading {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) auto auto auto;
+  gap: var(--space-2);
+  align-items: center;
+  font-size: var(--typography-body-sm-size);
+}
+
+.discover-accordion__heading strong {
+  font-size: var(--typography-body-size);
+  color: var(--color-text-heading);
+}
+
+.discover-accordion__heading span {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  color: var(--color-text-default);
+}
+
+.discover-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.discover-card__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.discover-card__body h2 {
+  margin: 0;
+  font-size: var(--typography-body-lg-size);
+  line-height: var(--typography-body-lg-line-height);
+}
+
+.discover-card__body p {
+  color: var(--color-text-default);
+  margin: 0;
+}
+
+.discover-card__meta {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.discover-card__meta span {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--typography-body-sm-size);
+  color: var(--color-text-heading);
+}
+
+.discover-card__organizer {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--color-text-default);
+}
+
+.discover-card__attendees {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.discover-card__actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.discover__map-panel {
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-primary);
+  overflow: hidden;
+  position: sticky;
+  top: 64px;
+  height: calc(100svh - 84px);
+}
+
+.discover-map {
+  width: 100%;
+  height: 100%;
+  min-height: 100%;
+}
+
+.discover-map__popup {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.discover .accordion__trigger {
+  padding: var(--space-2) var(--space-3);
+}
+
+.discover .accordion__item--expanded .accordion__trigger {
+  background-color: var(--color-surface-subtle);
+}
+
+@media (max-width: 1023px) {
+  .discover {
+    height: auto;
+    overflow: visible;
+  }
+
+  .discover__layout {
+    height: auto;
+  }
+
+  .discover__layout > [data-layout="split"] {
+    height: auto;
+  }
+
+  .discover__list-column,
+  .discover__list-column > [data-layout="stack"] {
+    height: auto;
+  }
+
+  .discover__map-panel {
+    position: relative;
+    top: 0;
+    height: 360px;
+  }
+}

@@ -17,9 +17,10 @@ export interface DropdownProps {
   options:              DropdownOption[];
   variant?:             TextFieldVariant;
   size?:                TextFieldSize;
-  value?:               string;
-  defaultValue?:        string;
+  value?:               string | string[];
+  defaultValue?:        string | string[];
   placeholder?:         string;
+  multiple?:            boolean;
   disabled?:            boolean;
   required?:            boolean;
   helperText?:          string;
@@ -46,6 +47,7 @@ export function Dropdown({
   value,
   defaultValue,
   placeholder,
+  multiple = false,
   disabled = false,
   required = false,
   helperText,
@@ -78,13 +80,14 @@ export function Dropdown({
           className={`input-field input-field--${variant} input-field--${size} dropdown__select`}
           value={value}
           defaultValue={defaultValue}
+          multiple={multiple}
           disabled={disabled}
           required={required}
           onChange={onChange}
           aria-invalid={isError || undefined}
           aria-describedby={describedBy}
         >
-          {placeholder !== undefined && (
+          {!multiple && placeholder !== undefined && (
             <option value="" disabled>
               {placeholder}
             </option>
@@ -95,9 +98,11 @@ export function Dropdown({
             </option>
           ))}
         </select>
-        <span className={`dropdown__chevron dropdown__chevron--${size}`} aria-hidden="true">
-          <ChevronDown />
-        </span>
+        {!multiple && (
+          <span className={`dropdown__chevron dropdown__chevron--${size}`} aria-hidden="true">
+            <ChevronDown />
+          </span>
+        )}
       </div>
       {(helperText || errorText) && (
         <span

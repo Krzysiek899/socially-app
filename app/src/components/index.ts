@@ -43,3 +43,6 @@ export { TopNav } from './TopNav/TopNav.tsx';
 export type { TopNavProps, NavLinkProps } from './TopNav/TopNav.tsx';
 
 export { ThemeToggle } from './ThemeToggle/ThemeToggle.tsx';
+
+export { AppNavbar } from './AppNavbar/AppNavbar.tsx';
+export type { AppNavbarProps } from './AppNavbar/AppNavbar.tsx';

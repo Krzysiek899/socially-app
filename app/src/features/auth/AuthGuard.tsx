@@ -5,7 +5,12 @@ import { buildReturnTo } from './authNavigation.ts';
 
 export const AuthGuard = () => {
   const session = useAppSelector((state) => state.auth.session);
+  const bootstrapped = useAppSelector((state) => state.auth.bootstrapped);
   const location = useLocation();
+
+  if (!bootstrapped) {
+    return null;
+  }
 
   if (!session) {
     const returnTo = buildReturnTo(location.pathname, location.search, location.hash);

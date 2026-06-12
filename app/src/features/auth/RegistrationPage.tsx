@@ -1,10 +1,10 @@
-import React, { FormEvent, useMemo, useState } from 'react';
+import * as React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Lock, Mail, ShieldCheck, User } from 'lucide-react';
 import { useAppDispatch, useAppSelector } from '../../app/hooks.ts';
 import { Button, Card, PasswordField, TextField } from '../../components/index.ts';
 import { t } from '../../i18n/index.ts';
-import { register, sessionPersistencePreferenceSet } from './authSlice.ts';
+import { register, sessionPersistencePreferenceSet } from './redux/authSlice.ts';
 import { resolveReturnTo, withReturnTo } from './authNavigation.ts';
 import './AuthPage.css';
 
@@ -59,17 +59,17 @@ export const RegistrationPage = () => {
   const authStatus = useAppSelector((state) => state.auth.status);
   const serverErrorKey = useAppSelector((state) => state.auth.errorKey);
 
-  const [fullName, setFullName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [consent, setConsent] = useState(false);
-  const [submitted, setSubmitted] = useState(false);
+  const [fullName, setFullName] = React.useState('');
+  const [email, setEmail] = React.useState('');
+  const [password, setPassword] = React.useState('');
+  const [confirmPassword, setConfirmPassword] = React.useState('');
+  const [consent, setConsent] = React.useState(false);
+  const [submitted, setSubmitted] = React.useState(false);
 
   const params = new URLSearchParams(location.search);
   const returnTo = resolveReturnTo(params.get('returnTo'));
 
-  const validationErrors = useMemo(
+  const validationErrors = React.useMemo(
     () => validateRegistration({ fullName, email, password, confirmPassword, consent }),
     [confirmPassword, consent, email, fullName, password],
   );
@@ -77,7 +77,7 @@ export const RegistrationPage = () => {
   const isSubmitDisabled =
     authStatus === 'loading' || [fullName, email, password, confirmPassword].some((value) => value.trim().length === 0);
 
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setSubmitted(true);
 

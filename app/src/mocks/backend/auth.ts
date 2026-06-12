@@ -1,22 +1,5 @@
 import { http, HttpResponse } from 'msw';
-import { z } from 'zod';
-
-const loginPayloadSchema = z.object({
-  email: z.string().email(),
-  password: z.string().min(1),
-});
-
-const registerPayloadSchema = z.object({
-  fullName: z.string().trim().min(2).max(80),
-  email: z.string().email(),
-  password: z.string().min(1),
-});
-
-const loginResponseSchema = z.object({
-  token: z.string().min(1),
-  userId: z.string().min(1),
-  expiresAt: z.string().datetime(),
-});
+import { loginPayloadSchema, registerPayloadSchema, authSessionSchema } from '../../features/auth/dto/authSchemas.ts';
 
 type MockUser = {
   userId: string;
@@ -47,13 +30,13 @@ const deriveUserId = (email: string): string => {
   return `user-${safeLocalPart || 'new'}`;
 };
 
-const buildSession = (userId: string) => loginResponseSchema.parse({
+const buildSession = (userId: string) => authSessionSchema.parse({
   token: `token-${userId}`,
   userId,
   expiresAt: '2099-01-01T00:00:00.000Z',
 });
 
-export const handlers = [
+export const authHandlers = [
   http.post('/api/auth/login', async ({ request }) => {
     const payload = loginPayloadSchema.parse(await request.json());
     const user = userStore.get(payload.email.toLowerCase());

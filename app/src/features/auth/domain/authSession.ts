@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { authSessionSchema } from '../dto/authSchemas.ts';
 
 export const AUTH_SESSION_STORAGE_KEY = 'auth.session.v1';
 export const AUTH_SESSION_PREFERENCE_STORAGE_KEY = 'auth.session.preference.v1';
@@ -6,6 +7,8 @@ export const AUTH_SESSION_PREFERENCE_STORAGE_KEY = 'auth.session.preference.v1';
 export type SessionPersistencePreference = 'persistent' | 'session';
 
 const SESSION_PREFERENCES: ReadonlyArray<SessionPersistencePreference> = ['persistent', 'session'];
+
+export type AuthSession = z.infer<typeof authSessionSchema>;
 
 const readSessionFrom = (storage: Storage): AuthSession | null => {
   const stored = storage.getItem(AUTH_SESSION_STORAGE_KEY);
@@ -21,14 +24,6 @@ const readSessionFrom = (storage: Storage): AuthSession | null => {
 
   return parsed.data;
 };
-
-export const authSessionSchema = z.object({
-  token: z.string().min(1),
-  userId: z.string().min(1),
-  expiresAt: z.string().datetime(),
-});
-
-export type AuthSession = z.infer<typeof authSessionSchema>;
 
 export const loadAuthSession = (): AuthSession | null => {
   return readSessionFrom(localStorage) ?? readSessionFrom(sessionStorage);

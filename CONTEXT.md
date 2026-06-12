@@ -16,6 +16,10 @@ _Avoid_: Sign in process, entering app
 The action where a Visitor creates a new User identity in Socially.
 _Avoid_: Signup form, onboarding
 
+**Registration Consent**:
+The explicit agreement by a Visitor to Terms and Privacy Policy required to complete Registration.
+_Avoid_: Terms checkbox, legal checkbox
+
 **Visitor**:
 A person using Socially without an authenticated session.
 _Avoid_: Guest user, anonymous account
@@ -36,9 +40,29 @@ _Avoid_: Private routes, logged-in section
 The proof that a User is currently authenticated, used to access the Authenticated Area.
 _Avoid_: Full app state, user cache
 
+**Session Persistence Preference**:
+The User choice that decides whether Auth Session persists across browser restarts.
+_Avoid_: Remember me checkbox, stay signed in toggle
+
 **Discover**:
 The screen where a User browses available events and chooses what to inspect next.
 _Avoid_: Feed, listing page
+
+**Discover Map**:
+The map panel inside Discover that visualizes Event locations as selectable pins synchronized with the event list.
+_Avoid_: Geosearch backend, static map image
+
+**Event Pin**:
+The map marker representing one Event on Discover Map.
+_Avoid_: Venue marker, generic point
+
+**Selected Event**:
+The currently focused Event shared between Discover list cards and Discover Map interactions.
+_Avoid_: Active card only, highlighted pin only
+
+**Discover Filters**:
+The set of User-provided criteria that narrows Discover results (search text, category, price, and date range).
+_Avoid_: Backend query builder, advanced search engine
 
 **Event Details**:
 The detailed view of a single event, including participation-relevant information.
