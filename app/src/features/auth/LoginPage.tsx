@@ -1,10 +1,10 @@
 import * as React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Lock, Mail, ShieldCheck } from 'lucide-react';
-import { useAppDispatch, useAppSelector } from '../../app/hooks.ts';
+import { useAppDispatch, useAppSelector } from '../../redux/hooks.ts';
 import { Button, Card, PasswordField, TextField } from '../../components/index.ts';
 import { t } from '../../i18n/index.ts';
-import { login, sessionPersistencePreferenceSet } from './redux/authSlice.ts';
+import { login, sessionPersistencePreferenceSet } from '../../redux/auth/authSlice.ts';
 import { resolveReturnTo, withReturnTo } from './authNavigation.ts';
 import './AuthPage.css';
 
