@@ -148,8 +148,10 @@ describe('Discover page states', () => {
     }) as typeof fetch;
 
     render(<App />);
-    const joinButton = await screen.findByRole('button', { name: t('discover.card.join') });
-    fireEvent.click(joinButton);
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: t('discover.card.join') }).isConnected).toBe(true);
+    });
+    fireEvent.click(screen.getByRole('button', { name: t('discover.card.join') }));
 
     await waitFor(() => {
       expect(window.location.pathname).toBe('/app/events/event-1');
