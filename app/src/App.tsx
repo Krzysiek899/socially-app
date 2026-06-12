@@ -8,6 +8,8 @@ import { LoginPage } from './pages/auth/LoginPage.tsx';
 import { RegistrationPage } from './pages/auth/RegistrationPage.tsx';
 import { DiscoverPage } from './pages/discover/DiscoverPage.tsx';
 import { EventDetailsPage } from './pages/discover/EventDetailsPage.tsx';
+import { MyProfilePage } from './pages/profile/MyProfilePage.tsx';
+import { PublicProfilePage } from './pages/profile/PublicProfilePage.tsx';
 import { authSessionRestored, sessionPersistencePreferenceRestored } from './redux/auth/authSlice.ts';
 import {
   loadAuthSession,
@@ -24,6 +26,8 @@ const AppRoutes = () => (
     <Route element={<AuthGuard />}>
       <Route path="/app" element={<DiscoverPage />} />
       <Route path="/app/events/:eventId" element={<EventDetailsPage />} />
+      <Route path="/app/profile" element={<MyProfilePage />} />
+      <Route path="/app/users/:userId" element={<PublicProfilePage />} />
     </Route>
     <Route path="/" element={<Navigate to="/app" replace />} />
     <Route path="*" element={<Navigate to="/app" replace />} />

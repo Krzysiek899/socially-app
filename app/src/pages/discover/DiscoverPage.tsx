@@ -138,6 +138,14 @@ export const DiscoverPage = () => {
                   <Avatar name={event.organizer.displayName} src={event.organizer.avatarUrl} size="sm" />
                   <span>{event.organizer.displayName}</span>
                   <Badge variant="info" size="sm">{t(`discover.category.${event.category}`)}</Badge>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => navigate(`/app/users/${event.organizer.id}`)}
+                  >
+                    {t('profile.actions.view_public')}
+                  </Button>
                 </Cluster>
               </div>
               <div className="discover-card__attendees" aria-label={t('discover.card.attendees')}>

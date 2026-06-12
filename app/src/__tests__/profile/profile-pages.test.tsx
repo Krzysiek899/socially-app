@@ -1,9 +1,7 @@
 import React from 'react';
-import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import App from '../../App.tsx';
 import { t } from '../../i18n/index.ts';
-import { authSessionRestored, sessionPersistencePreferenceRestored } from '../../redux/auth/authSlice.ts';
-import { store } from '../../redux/store.ts';
 
 jest.mock('../../pages/discover/DiscoverMap.tsx', () => ({
   DiscoverMap: () => <div data-testid="discover-map" />,
@@ -67,29 +65,20 @@ const publicProfileResponse = {
 
 describe('Profile pages', () => {
   beforeEach(() => {
-    const session = {
-      token: 'token-user-1',
-      userId: 'user-1',
-      expiresAt: '2099-01-01T00:00:00.000Z',
-    };
-
     localStorage.setItem(
       SESSION_KEY,
-      JSON.stringify(session),
+      JSON.stringify({
+        token: 'token-user-1',
+        userId: 'user-1',
+        expiresAt: '2099-01-01T00:00:00.000Z',
+      }),
     );
-    act(() => {
-      store.dispatch(authSessionRestored(session));
-      store.dispatch(sessionPersistencePreferenceRestored('persistent'));
-    });
   });
 
   afterEach(() => {
     jest.resetAllMocks();
     localStorage.clear();
     sessionStorage.clear();
-    act(() => {
-      store.dispatch(authSessionRestored(null));
-    });
     window.history.replaceState({}, '', '/');
   });
 
@@ -113,23 +102,22 @@ describe('Profile pages', () => {
     expect(screen.getByRole('button', { name: 'Zobacz wszystkich' })).toBeInTheDocument();
   });
 
-  it('logs out from my profile and redirects to login', async () => {
+  it('renders empty text when friends or groups are empty', async () => {
     window.history.replaceState({}, '', '/app/profile');
     global.fetch = jest.fn(async () => ({
       ok: true,
       status: 200,
-      json: async () => myProfileResponse,
+      json: async () => ({
+        ...myProfileResponse,
+        friends: [],
+        groups: [],
+      }),
     })) as typeof fetch;
 
     render(<App />);
 
-    await act(async () => {
-      fireEvent.click(await screen.findByRole('button', { name: 'Wyloguj się' }));
-    });
-
-    await waitFor(() => {
-      expect(window.location.pathname).toBe('/login');
-    });
+    expect(await screen.findByText('Brak znajomych do wyświetlenia.')).toBeInTheDocument();
+    expect(screen.getByText('Brak grup do wyświetlenia.')).toBeInTheDocument();
   });
 
   it('renders a public profile route with viewer actions', async () => {
@@ -205,5 +193,22 @@ describe('Profile pages', () => {
       expect(window.location.pathname).toBe('/app/users/org-anna');
     });
     expect(await screen.findByRole('heading', { name: 'Anna Wójcik' })).toBeInTheDocument();
+  });
+
+  it('logs out from my profile and redirects to login', async () => {
+    window.history.replaceState({}, '', '/app/profile');
+    global.fetch = jest.fn(async () => ({
+      ok: true,
+      status: 200,
+      json: async () => myProfileResponse,
+    })) as typeof fetch;
+
+    render(<App />);
+
+    fireEvent.click(await screen.findByRole('button', { name: 'Wyloguj się' }));
+
+    await waitFor(() => {
+      expect(window.location.pathname).toBe('/login');
+    });
   });
 });

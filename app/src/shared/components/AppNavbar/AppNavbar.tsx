@@ -6,7 +6,7 @@ import { ThemeToggle } from '../ThemeToggle/ThemeToggle.tsx';
 import { TopNav } from '../TopNav/TopNav.tsx';
 import { t } from '../../../i18n/index.ts';
 
-type AppNavKey = 'discover' | 'my-events';
+type AppNavKey = 'discover' | 'my-events' | 'profile';
 
 export interface AppNavbarProps {
   active?: AppNavKey;
@@ -18,6 +18,7 @@ export function AppNavbar({ active = 'discover' }: AppNavbarProps): React.JSX.El
       <TopNav.Brand>Socially</TopNav.Brand>
       <TopNav.NavLink href="/app" active={active === 'discover'}>{t('discover.nav.discover')}</TopNav.NavLink>
       <TopNav.NavLink href="#my-events" active={active === 'my-events'}>{t('discover.nav.my_events')}</TopNav.NavLink>
+      <TopNav.NavLink href="/app/profile" active={active === 'profile'}>{t('discover.nav.profile')}</TopNav.NavLink>
       <TopNav.Actions>
         <Button type="button" size="sm">{t('discover.nav.create_event')}</Button>
         <Button
