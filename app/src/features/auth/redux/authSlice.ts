@@ -4,6 +4,7 @@ import type { AuthSession, SessionPersistencePreference } from '../domain/authSe
 
 type AuthState = {
   session: AuthSession | null;
+  bootstrapped: boolean;
   sessionPersistencePreference: SessionPersistencePreference;
   status: 'idle' | 'loading' | 'failed';
   errorKey: string | null;
@@ -11,6 +12,7 @@ type AuthState = {
 
 const initialState: AuthState = {
   session: null,
+  bootstrapped: false,
   sessionPersistencePreference: 'persistent',
   status: 'idle',
   errorKey: null,
@@ -33,6 +35,7 @@ const authSlice = createSlice({
   reducers: {
     authSessionRestored: (state, action: PayloadAction<AuthSession | null>) => {
       state.session = action.payload;
+      state.bootstrapped = true;
     },
     sessionPersistencePreferenceRestored: (state, action: PayloadAction<SessionPersistencePreference>) => {
       state.sessionPersistencePreference = action.payload;
@@ -42,6 +45,7 @@ const authSlice = createSlice({
     },
     logout: (state) => {
       state.session = null;
+      state.bootstrapped = true;
       state.status = 'idle';
       state.errorKey = null;
     },
@@ -54,6 +58,7 @@ const authSlice = createSlice({
       })
       .addCase(login.fulfilled, (state, action) => {
         state.session = action.payload;
+        state.bootstrapped = true;
         state.status = 'idle';
         state.errorKey = null;
       })
@@ -67,6 +72,7 @@ const authSlice = createSlice({
       })
       .addCase(register.fulfilled, (state, action) => {
         state.session = action.payload;
+        state.bootstrapped = true;
         state.status = 'idle';
         state.errorKey = null;
       })

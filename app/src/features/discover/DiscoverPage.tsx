@@ -194,7 +194,7 @@ export const DiscoverPage = () => {
             <section className="discover__list-column">
               <Stack gap="2">
                 <header className="discover__header">
-                  <h1 id="discover-title">{t('discover.header.nearby')}</h1>
+                  <h1 id="discover-title">{t('discover.title')}</h1>
                 </header>
 
                 <section className="discover__filters" aria-label={t('discover.filters.label')}>

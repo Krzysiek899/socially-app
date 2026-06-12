@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import L from 'leaflet';
 import MarkerClusterGroup from 'react-leaflet-cluster';
 import { MapContainer, Marker, Popup, TileLayer, useMap } from 'react-leaflet';
@@ -36,7 +36,7 @@ const formatPrice = (event: DiscoverEvent): string => {
 const FitToEvents = ({ events }: { events: DiscoverEvent[] }) => {
   const map = useMap();
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (events.length === 0) {
       map.setView(DEFAULT_CENTER, DEFAULT_ZOOM, { animate: false });
       return;
@@ -56,7 +56,7 @@ const FocusSelectedEvent = ({
 }) => {
   const map = useMap();
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (!selectedEvent) {
       return;
     }
@@ -72,7 +72,7 @@ const FocusSelectedEvent = ({
 const InvalidateMapSize = ({ dependencyKey }: { dependencyKey: string }) => {
   const map = useMap();
 
-  React.useEffect(() => {
+  useEffect(() => {
     const frame = window.requestAnimationFrame(() => {
       map.invalidateSize({ pan: false });
     });

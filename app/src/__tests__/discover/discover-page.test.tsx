@@ -1,5 +1,5 @@
 import React from 'react';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import App from '../../App.tsx';
 import { t } from '../../i18n/index.ts';
 
@@ -121,7 +121,9 @@ describe('Discover page states', () => {
     const secondPin = await screen.findByRole('button', { name: 'map-pin-Night Run' });
     fireEvent.click(secondPin);
 
-    const selectedCard = await screen.findByRole('button', { name: /Night Run/i });
+    const eventButtons = await screen.findAllByRole('button', { name: /Night Run/i });
+    const selectedCard = eventButtons.find((button) => button.getAttribute('aria-expanded') === 'true');
+    expect(selectedCard).toBeTruthy();
     expect(selectedCard).toHaveAttribute('aria-expanded', 'true');
     expect(await screen.findByText('event-2')).toBeInTheDocument();
   });
@@ -149,7 +151,9 @@ describe('Discover page states', () => {
     const joinButton = await screen.findByRole('button', { name: t('discover.card.join') });
     fireEvent.click(joinButton);
 
-    expect(window.location.pathname).toBe('/app/events/event-1');
+    await waitFor(() => {
+      expect(window.location.pathname).toBe('/app/events/event-1');
+    });
     expect(await screen.findByRole('heading', { name: 'Frontend Meetup' })).toBeInTheDocument();
   });
 });

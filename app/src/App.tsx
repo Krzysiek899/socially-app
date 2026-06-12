@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import * as React from 'react';
 import { Provider } from 'react-redux';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { store } from './app/store.ts';
@@ -31,7 +31,7 @@ const AppRoutes = () => (
 );
 
 function App() {
-  useEffect(() => {
+  React.useEffect(() => {
     store.dispatch(authSessionRestored(loadAuthSession()));
     store.dispatch(sessionPersistencePreferenceRestored(loadSessionPersistencePreference()));
 

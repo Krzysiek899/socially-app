@@ -1,4 +1,4 @@
-import React, { FormEvent, useState } from 'react';
+import * as React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Lock, Mail, ShieldCheck } from 'lucide-react';
 import { useAppDispatch, useAppSelector } from '../../app/hooks.ts';
@@ -15,14 +15,14 @@ export const LoginPage = () => {
   const authStatus = useAppSelector((state) => state.auth.status);
   const errorKey = useAppSelector((state) => state.auth.errorKey);
   const sessionPersistencePreference = useAppSelector((state) => state.auth.sessionPersistencePreference);
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = React.useState('');
+  const [password, setPassword] = React.useState('');
   const rememberMe = sessionPersistencePreference === 'persistent';
 
   const params = new URLSearchParams(location.search);
   const returnTo = resolveReturnTo(params.get('returnTo'));
 
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     dispatch(sessionPersistencePreferenceSet(rememberMe ? 'persistent' : 'session'));
 
