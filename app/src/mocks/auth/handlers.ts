@@ -1,5 +1,5 @@
 import { http, HttpResponse } from 'msw';
-import { loginPayloadSchema, registerPayloadSchema, authSessionSchema } from '../../features/auth/dto/authSchemas.ts';
+import { authSessionSchema, loginPayloadSchema, registerPayloadSchema } from '../../pages/auth/dto/authSchemas.ts';
 
 type MockUser = {
   userId: string;
