@@ -1,0 +1,42 @@
+.app-navbar__profile-menu {
+  position: relative;
+}
+
+.app-navbar__profile-trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  border-radius: 999px;
+}
+
+.app-navbar__profile-trigger:focus-visible {
+  outline: var(--border-width-strong) solid var(--color-border-focus);
+  outline-offset: 2px;
+}
+
+.app-navbar__profile-dropdown {
+  position: absolute;
+  top: calc(100% + var(--space-2));
+  right: 0;
+  min-width: 12rem;
+  padding: var(--space-2);
+  border: var(--border-width-default) solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-default);
+  box-shadow: var(--shadow-md);
+  z-index: 110;
+}
+
+.app-navbar__profile-dropdown-actions {
+  display: grid;
+  gap: var(--space-1);
+}
+
+.app-navbar__profile-menu-action {
+  width: 100%;
+  justify-content: flex-start;
+}

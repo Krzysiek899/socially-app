@@ -1,5 +1,5 @@
 import React from 'react';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import App from '../../App.tsx';
 
 jest.mock('../../pages/discover/DiscoverMap.tsx', () => ({
@@ -89,9 +89,11 @@ describe('AppNavbar profile menu', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Otwórz menu profilu' }));
 
-    expect(screen.getByRole('menu')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Zobacz profil' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Wyloguj się' })).toBeInTheDocument();
+    const menu = screen.getByRole('menu');
+
+    expect(menu).toBeInTheDocument();
+    expect(within(menu).getByRole('button', { name: 'Zobacz profil' })).toBeInTheDocument();
+    expect(within(menu).getByRole('button', { name: 'Wyloguj się' })).toBeInTheDocument();
 
     fireEvent.mouseDown(document.body);
 
@@ -125,7 +127,7 @@ describe('AppNavbar profile menu', () => {
     await screen.findByRole('heading', { name: 'Odkrywaj' });
 
     fireEvent.click(screen.getByRole('button', { name: 'Otwórz menu profilu' }));
-    fireEvent.click(screen.getByRole('button', { name: 'Zobacz profil' }));
+    fireEvent.click(within(screen.getByRole('menu')).getByRole('button', { name: 'Zobacz profil' }));
 
     await waitFor(() => {
       expect(window.location.pathname).toBe('/app/profile');
