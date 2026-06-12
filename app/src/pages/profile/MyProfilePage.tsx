@@ -61,7 +61,6 @@ export const MyProfilePage = (): React.JSX.Element => {
 
   return (
     <ProfileSurface
-      showAppNavbar={false}
       heading={t('profile.my.title')}
       isContentReady={profile !== null}
       status={status}
