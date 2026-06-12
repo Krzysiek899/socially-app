@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen, fireEvent, within } from '@testing-library/react';
-import { Accordion } from '../../components/Accordion/Accordion.tsx';
-import type { AccordionItem } from '../../components/Accordion/Accordion.tsx';
+import { Accordion } from '../../shared/components/Accordion/Accordion.tsx';
+import type { AccordionItem } from '../../shared/components/Accordion/Accordion.tsx';
 
 const ITEMS: AccordionItem[] = [
   { id: 'one',   heading: 'Section 1', content: 'Content for section 1' },

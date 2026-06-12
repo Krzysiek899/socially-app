@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { TopNav } from '../../components/TopNav/TopNav.tsx';
+import { TopNav } from '../../shared/components/TopNav/TopNav.tsx';
 
 describe('TopNav — Brand slot', () => {
   it('renders Brand children', () => {

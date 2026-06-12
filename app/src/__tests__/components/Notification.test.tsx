@@ -4,8 +4,8 @@ import {
   NotificationProvider,
   useNotifications,
   TOAST_VARIANTS,
-} from '../../components/Notification/NotificationContext.tsx';
-import type { ToastOptions } from '../../components/Notification/NotificationContext.tsx';
+} from '../../shared/components/Notification/NotificationContext.tsx';
+import type { ToastOptions } from '../../shared/components/Notification/NotificationContext.tsx';
 
 /* ── Shared helper ── */
 function renderWithNotify(options: ToastOptions) {

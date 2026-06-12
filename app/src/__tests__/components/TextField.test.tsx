@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { TextField, TEXT_FIELD_VARIANTS, TEXT_FIELD_SIZES } from '../../components/TextField/TextField.tsx';
+import { TextField, TEXT_FIELD_VARIANTS, TEXT_FIELD_SIZES } from '../../shared/components/TextField/TextField.tsx';
 
 describe('TextField — contract: variant and size APIs', () => {
   it('exposes both variants', () => {

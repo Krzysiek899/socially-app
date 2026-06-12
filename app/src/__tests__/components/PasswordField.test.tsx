@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { PasswordField } from '../../components/PasswordField/PasswordField.tsx';
+import { PasswordField } from '../../shared/components/PasswordField/PasswordField.tsx';
 
 describe('PasswordField — contract: variant and size APIs', () => {
   it('throws for an unknown variant', () => {

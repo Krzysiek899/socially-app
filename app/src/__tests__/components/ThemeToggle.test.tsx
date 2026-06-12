@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { ThemeToggle } from '../../components/ThemeToggle/ThemeToggle.tsx';
+import { ThemeToggle } from '../../shared/components/ThemeToggle/ThemeToggle.tsx';
 import * as useThemeModule from '../../hooks/useTheme.ts';
 
 const mockSetTheme = jest.fn();

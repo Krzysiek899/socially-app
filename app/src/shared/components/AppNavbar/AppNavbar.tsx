@@ -4,7 +4,7 @@ import { Avatar } from '../Avatar/Avatar.tsx';
 import { Button } from '../Button/Button.tsx';
 import { ThemeToggle } from '../ThemeToggle/ThemeToggle.tsx';
 import { TopNav } from '../TopNav/TopNav.tsx';
-import { t } from '../../i18n/index.ts';
+import { t } from '../../../i18n/index.ts';
 
 type AppNavKey = 'discover' | 'my-events';
 

@@ -1,11 +1,11 @@
 import React from 'react';
 import { CalendarDays, CircleUserRound, Heart, MapPinned, Share2, Users, Wallet } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { AppNavbar, Avatar, Badge, Button } from '../../components/index.ts';
+import { AppNavbar, Avatar, Badge, Button } from '../../shared/components/index.ts';
 import { useAppSelector } from '../../redux/hooks.ts';
 import { fetchDiscoverEventByIdRequest } from './api/discoverApi.ts';
 import type { DiscoverEvent } from './domain/discoverModels.ts';
-import { Cluster, Grid, Page, Section, Split, Stack } from '../../layout/index.tsx';
+import { Cluster, Grid, Page, Section, Split, Stack } from '../../shared/layout/index.tsx';
 import { t } from '../../i18n/index.ts';
 import './EventDetailsPage.css';
 

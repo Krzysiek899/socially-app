@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { DateTimeField, DATE_TIME_FIELD_VARIANTS, DATE_TIME_FIELD_SIZES } from '../../components/DateTimeField/DateTimeField.tsx';
+import { DateTimeField, DATE_TIME_FIELD_VARIANTS, DATE_TIME_FIELD_SIZES } from '../../shared/components/DateTimeField/DateTimeField.tsx';
 
 describe('DateTimeField — contract: variant and size APIs', () => {
   it('exposes variants from Input', () => {

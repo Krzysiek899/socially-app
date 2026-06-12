@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { Dropdown, DROPDOWN_VARIANTS, DROPDOWN_SIZES } from '../../components/Dropdown/Dropdown.tsx';
+import { Dropdown, DROPDOWN_VARIANTS, DROPDOWN_SIZES } from '../../shared/components/Dropdown/Dropdown.tsx';
 
 const OPTIONS = [
   { value: 'apple', label: 'Apple' },

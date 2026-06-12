@@ -2,7 +2,7 @@ import * as React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Lock, Mail, ShieldCheck, User } from 'lucide-react';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks.ts';
-import { Button, Card, PasswordField, TextField } from '../../components/index.ts';
+import { Button, Card, PasswordField, TextField } from '../../shared/components/index.ts';
 import { t } from '../../i18n/index.ts';
 import { register, sessionPersistencePreferenceSet } from '../../redux/auth/authSlice.ts';
 import { resolveReturnTo, withReturnTo } from './authNavigation.ts';
