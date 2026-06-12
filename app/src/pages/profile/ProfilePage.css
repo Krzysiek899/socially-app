@@ -205,11 +205,112 @@
   color: var(--color-primary);
 }
 
+.public-profile__hero {
+  overflow: hidden;
+  border-radius: var(--radius-md);
+}
+
+.public-profile__hero-banner {
+  min-height: 9rem;
+  background: linear-gradient(135deg, rgba(27, 86, 128, 1) 0%, rgba(73, 137, 187, 1) 100%);
+}
+
+.public-profile__hero-content {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--space-6);
+  padding: 0 var(--space-6) var(--space-6);
+  margin-top: calc(var(--space-6) * -1);
+}
+
+.public-profile__hero-main {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--space-4);
+  align-items: end;
+}
+
+.public-profile__hero-name,
+.public-profile__card-title,
+.public-profile__review-author,
+.public-profile__group-name {
+  margin: 0;
+  color: var(--color-text-heading);
+}
+
+.public-profile__hero-bio,
+.public-profile__hero-rating,
+.public-profile__card-subtitle,
+.public-profile__review-meta,
+.public-profile__review-content,
+.public-profile__group-meta,
+.public-profile__empty-text {
+  margin: 0;
+  color: var(--color-text-subtle);
+}
+
+.public-profile__hero-actions {
+  display: flex;
+  align-items: flex-end;
+}
+
+.public-profile__content {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(18rem, 1fr);
+  gap: var(--space-4);
+  align-items: start;
+}
+
+.public-profile__primary-column {
+  min-width: 0;
+}
+
+.public-profile__sidebar {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.public-profile__card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.public-profile__review-item,
+.public-profile__group-row {
+  padding: var(--space-3);
+  border: var(--border-width-default) solid var(--color-border-default);
+  border-radius: var(--radius-sm);
+}
+
+.public-profile__review-header,
+.public-profile__friend-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.public-profile__review-item {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.public-profile__friend-name {
+  color: var(--color-text-default);
+}
+
 @media (max-width: 900px) {
   .profile-page__section-item-top,
   .my-profile__list-header {
     align-items: flex-start;
     flex-direction: column;
+  }
+
+  .public-profile__hero-content,
+  .public-profile__hero-main,
+  .public-profile__content {
+    grid-template-columns: 1fr;
   }
 
   .my-profile__hero {
