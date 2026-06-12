@@ -20,37 +20,37 @@ export const myProfileSchema = z.object({
   })),
 });
 
-export const publicProfileStatSchema = z.object({
-  label: z.string().min(1),
-  value: z.string().min(1),
+export const publicProfileReviewSchema = z.object({
+  id: z.string().min(1),
+  authorName: z.string().min(1),
+  authorAvatarUrl: z.string().url().optional(),
+  rating: z.number().min(0).max(5),
+  publishedAtLabel: z.string().min(1),
+  content: z.string().min(1),
 });
 
-export const publicProfileSectionItemSchema = z.object({
+export const publicProfileMutualFriendSchema = z.object({
   id: z.string().min(1),
-  title: z.string().min(1),
-  subtitle: z.string().min(1),
+  displayName: z.string().min(1),
+  avatarUrl: z.string().url().optional(),
+});
+
+export const publicProfileGroupSchema = z.object({
+  id: z.string().min(1),
+  name: z.string().min(1),
   meta: z.string().min(1),
-  badge: z.string().min(1).optional(),
-});
-
-export const publicProfileSectionSchema = z.object({
-  id: z.string().min(1),
-  title: z.string().min(1),
-  description: z.string().min(1),
-  emptyText: z.string().min(1),
-  items: z.array(publicProfileSectionItemSchema),
 });
 
 export const publicProfileSchema = z.object({
   id: z.string().min(1),
   displayName: z.string().min(1),
-  handle: z.string().min(1),
+  badge: z.string().min(1),
   avatarUrl: z.string().url().optional(),
-  city: z.string().min(1),
-  joinedAt: z.string().datetime(),
   bio: z.string().min(1),
-  badges: z.array(z.string().min(1)),
-  interests: z.array(z.string().min(1)),
-  stats: z.array(publicProfileStatSchema).min(1),
-  sections: z.array(publicProfileSectionSchema).min(1),
+  rating: z.number().min(0).max(5),
+  reviewsCount: z.number().int().min(0),
+  reviews: z.array(publicProfileReviewSchema),
+  mutualFriends: z.array(publicProfileMutualFriendSchema),
+  groups: z.array(publicProfileGroupSchema),
+  friendAction: z.enum(['can_send_request']),
 });

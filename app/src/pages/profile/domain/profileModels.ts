@@ -24,37 +24,39 @@ export type MyProfile = {
   groups: MyProfileGroup[];
 };
 
-export type PublicProfileStat = {
-  label: string;
-  value: string;
+export type PublicProfileReview = {
+  id: string;
+  authorName: string;
+  authorAvatarUrl?: string;
+  rating: number;
+  publishedAtLabel: string;
+  content: string;
 };
 
-export type PublicProfileSectionItem = {
+export type PublicProfileMutualFriend = {
   id: string;
-  title: string;
-  subtitle: string;
+  displayName: string;
+  avatarUrl?: string;
+};
+
+export type PublicProfileGroup = {
+  id: string;
+  name: string;
   meta: string;
-  badge?: string;
 };
 
-export type PublicProfileSection = {
-  id: string;
-  title: string;
-  description: string;
-  emptyText: string;
-  items: PublicProfileSectionItem[];
-};
+export type PublicProfileFriendAction = 'can_send_request';
 
 export type PublicProfile = {
   id: string;
   displayName: string;
-  handle: string;
+  badge: string;
   avatarUrl?: string;
-  city: string;
-  joinedAt: string;
   bio: string;
-  badges: string[];
-  interests: string[];
-  stats: PublicProfileStat[];
-  sections: PublicProfileSection[];
+  rating: number;
+  reviewsCount: number;
+  reviews: PublicProfileReview[];
+  mutualFriends: PublicProfileMutualFriend[];
+  groups: PublicProfileGroup[];
+  friendAction: PublicProfileFriendAction;
 };
