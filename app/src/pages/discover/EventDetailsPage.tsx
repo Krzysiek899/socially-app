@@ -56,6 +56,7 @@ export const EventDetailsPage = () => {
   const navigate = useNavigate();
   const { eventId } = useParams<{ eventId: string }>();
   const token = useAppSelector((state) => state.auth.session?.token);
+  const currentUserId = useAppSelector((state) => state.auth.session?.userId);
   const [status, setStatus] = React.useState<LoadStatus>('loading');
   const [errorKey, setErrorKey] = React.useState<string | null>(null);
   const [event, setEvent] = React.useState<DiscoverEvent | null>(null);
@@ -107,6 +108,16 @@ export const EventDetailsPage = () => {
                 {t('discover.details.back')}
               </Button>
               <Cluster gap="2">
+                {event && currentUserId === event.organizer.id && (
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => navigate(`/app/my-events/${event.id}/manage`)}
+                  >
+                    {t('eventManagement.my_events.manage')}
+                  </Button>
+                )}
                 <Button type="button" variant="secondary" size="sm" aria-label="Udostępnij wydarzenie">
                   <Share2 size={16} />
                 </Button>

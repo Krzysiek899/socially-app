@@ -1,14 +1,24 @@
 import { requestContract } from '../../../app/apiContractGateway.ts';
 import type { AuthoredEvent, CreateEventPayload, GeocodeResult } from '../domain/eventManagementModels.ts';
 import {
+  authoredEventResponseSchema,
   authoredEventsResponseSchema,
   createEventPayloadSchema,
   createEventResponseSchema,
   geocodeSearchPayloadSchema,
   geocodeSearchResponseSchema,
+  handleJoinRequestPayloadSchema,
   reverseGeocodePayloadSchema,
   reverseGeocodeResponseSchema,
+  updateJoinRulesPayloadSchema,
+  updateAuthoredEventPayloadSchema,
 } from '../dto/eventManagementSchemas.ts';
+import type {
+  HandleJoinRequestPayload,
+  JoinRequestAction,
+  UpdateJoinRulesPayload,
+  UpdateAuthoredEventPayload,
+} from '../domain/eventManagementModels.ts';
 
 const resolveHttpErrorKey = (status: number, fallback: string): string => {
   if (status === 401) {
@@ -17,6 +27,18 @@ const resolveHttpErrorKey = (status: number, fallback: string): string => {
 
   if (status === 400) {
     return 'eventManagement.errors.request_invalid';
+  }
+
+  if (status === 403) {
+    return 'eventManagement.errors.forbidden';
+  }
+
+  if (status === 404) {
+    return 'eventManagement.errors.not_found';
+  }
+
+  if (status === 409) {
+    return 'eventManagement.errors.capacity_invalid';
   }
 
   return fallback;
@@ -113,3 +135,88 @@ export const reverseEventAddressRequest = async (
       },
     },
   }).then((response) => response.result);
+
+export const fetchAuthoredEventRequest = async (
+  eventId: string,
+  token: string,
+  signal: AbortSignal,
+): Promise<AuthoredEvent> =>
+  requestContract<never, AuthoredEvent>({
+    url: `/api/events/authored/${eventId}`,
+    token,
+    signal,
+    responseSchema: authoredEventResponseSchema,
+    errorKeys: {
+      requestValidation: 'eventManagement.errors.request_invalid',
+      responseValidation: 'eventManagement.errors.response_invalid',
+      network: 'eventManagement.errors.network',
+      http: (status: number) => resolveHttpErrorKey(status, 'eventManagement.errors.fetch_failed'),
+    },
+  });
+
+export const updateAuthoredEventRequest = async (
+  eventId: string,
+  payload: UpdateAuthoredEventPayload,
+  token: string,
+  signal: AbortSignal,
+): Promise<AuthoredEvent> =>
+  requestContract<UpdateAuthoredEventPayload, AuthoredEvent>({
+    url: `/api/events/authored/${eventId}`,
+    method: 'PATCH',
+    payload,
+    payloadSchema: updateAuthoredEventPayloadSchema,
+    token,
+    signal,
+    responseSchema: authoredEventResponseSchema,
+    errorKeys: {
+      requestValidation: 'eventManagement.errors.request_invalid',
+      responseValidation: 'eventManagement.errors.response_invalid',
+      network: 'eventManagement.errors.network',
+      http: (status: number) => resolveHttpErrorKey(status, 'eventManagement.errors.update_failed'),
+    },
+  });
+
+export const updateJoinRulesRequest = async (
+  eventId: string,
+  payload: UpdateJoinRulesPayload,
+  token: string,
+  signal: AbortSignal,
+): Promise<AuthoredEvent> =>
+  requestContract<UpdateJoinRulesPayload, AuthoredEvent>({
+    url: `/api/events/authored/${eventId}/join-rules`,
+    method: 'PATCH',
+    payload,
+    payloadSchema: updateJoinRulesPayloadSchema,
+    token,
+    signal,
+    responseSchema: authoredEventResponseSchema,
+    errorKeys: {
+      requestValidation: 'eventManagement.errors.request_invalid',
+      responseValidation: 'eventManagement.errors.response_invalid',
+      network: 'eventManagement.errors.network',
+      http: (status: number) => resolveHttpErrorKey(status, 'eventManagement.errors.rules_update_failed'),
+    },
+  });
+
+export const handleJoinRequestActionRequest = async (
+  eventId: string,
+  requestId: string,
+  action: JoinRequestAction,
+  token: string,
+  signal: AbortSignal,
+): Promise<AuthoredEvent> =>
+  requestContract<HandleJoinRequestPayload, AuthoredEvent>({
+    url: `/api/events/authored/${eventId}/requests/${requestId}`,
+    method: 'POST',
+    payload: { action },
+    payloadSchema: handleJoinRequestPayloadSchema,
+    token,
+    signal,
+    responseSchema: authoredEventResponseSchema,
+    errorKeys: {
+      requestValidation: 'eventManagement.errors.request_invalid',
+      responseValidation: 'eventManagement.errors.response_invalid',
+      network: 'eventManagement.errors.network',
+      http: (status: number) => resolveHttpErrorKey(status, 'eventManagement.errors.request_action_failed'),
+    },
+  });

@@ -54,6 +54,16 @@ const createdEventResponse = {
   },
   attendeesCount: 0,
   attendees: [],
+  management: {
+    isActive: true,
+    capacity: null,
+    joinRules: {
+      visibility: 'PUBLIC',
+      approvalRequired: true,
+    },
+    participants: [],
+    joinRequests: [],
+  },
 };
 
 const discoverSeedEvent = {
