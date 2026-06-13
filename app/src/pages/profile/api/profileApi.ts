@@ -1,6 +1,13 @@
 import { requestContract } from '../../../app/apiContractGateway.ts';
-import type { MyProfile, PublicProfile } from '../domain/profileModels.ts';
-import { myProfileSchema, publicProfileSchema } from '../dto/profileSchemas.ts';
+
+import type { MyProfile, PublicProfile, PublicProfileReview } from '../domain/profileModels.ts';
+
+import { 
+  myProfileSchema, 
+  publicProfileSchema, 
+  publicProfileReviewSchema, 
+  type CreateReviewRequestDTO 
+} from '../dto/profileSchemas.ts';
 
 const profileHttpErrorKey = (status: number): string => {
   if (status === 401) {
@@ -41,6 +48,28 @@ export const fetchPublicProfileRequest = async (
     token,
     signal,
     responseSchema: publicProfileSchema,
+    errorKeys: {
+      requestValidation: 'profile.errors.request_invalid',
+      responseValidation: 'profile.errors.response_invalid',
+      network: 'profile.errors.network',
+      http: profileHttpErrorKey,
+    },
+  });
+
+// 👇 NOWA FUNKCJA: Wysłanie opinii
+export const submitProfileReviewRequest = async (
+  userId: string,
+  payload: CreateReviewRequestDTO,
+  token: string,
+  signal: AbortSignal,
+): Promise<PublicProfileReview> =>
+  requestContract<CreateReviewRequestDTO, PublicProfileReview>({
+    url: `/api/profile/users/${userId}/reviews`,
+    method: 'POST', 
+    payload, 
+    token,
+    signal,
+    responseSchema: publicProfileReviewSchema,
     errorKeys: {
       requestValidation: 'profile.errors.request_invalid',
       responseValidation: 'profile.errors.response_invalid',

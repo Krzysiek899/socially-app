@@ -300,6 +300,70 @@
   color: var(--color-text-default);
 }
 
+/* Styl kontenera dla gwiazdek w pojedynczej opinii */
+.public-profile__review-meta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+/* Styl wewnętrzny formularza w Modalu */
+.public-profile__modal-rating-label {
+  font-size: var(--typography-label-size, 14px);
+  font-weight: 500;
+  color: var(--color-text-heading);
+  margin-bottom: var(--space-2, 8px);
+}
+
+/* Wrapper przycisków gwiazdek */
+.public-profile__star-selector {
+  display: flex;
+  gap: var(--space-1, 4px);
+}
+
+/* Interaktywny przycisk pojedynczej gwiazdki (Domyślnie Tryb Jasny) */
+.public-profile__star-button {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  color: var(--color-border-default, #e5e7eb);
+  transition: transform 0.1s ease, color 0.1s ease;
+}
+
+.public-profile__star-button:hover {
+  transform: scale(1.1);
+}
+
+/* Stan aktywnej gwiazdki (Domyślnie Tryb Jasny) */
+.public-profile__star-button--active {
+  color: var(--color-warning-strong, #f59e0b);
+}
+
+/* ════════════════════════════════════════════════════════════════════════
+   🌙 TWEAK DLA TRYBU CIEMNEGO (Zwiększenie widoczności gwiazdek w Modalu)
+   ════════════════════════════════════════════════════════════════════════ */
+
+/* Nadpisanie koloru nieaktywnej gwiazdki na jasny szary o niskiej przezroczystości */
+[data-theme="dark"] .public-profile__star-button {
+  color: rgba(255, 255, 255, 0.25);
+}
+
+/* Nadpisanie i rozświetlenie aktywnej gwiazdki dla lepszego kontrastu na ciemnym tle */
+[data-theme="dark"] .public-profile__star-button--active {
+  color: #fbbf24; /* Cieplejszy, jaśniejszy odcień bursztynowego złota */
+  filter: drop-shadow(0 0 4px rgba(251, 191, 36, 0.35)); /* Efekt delikatnej poświaty */
+}
+
+/* Mini ikonki informacyjne w podglądzie metadanych opinii */
+.public-profile__review-meta-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--color-text-subtle);
+}
+
+/* Responsywność */
 @media (max-width: 900px) {
   .profile-page__section-item-top,
   .my-profile__list-header {

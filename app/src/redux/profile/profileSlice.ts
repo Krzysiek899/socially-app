@@ -1,7 +1,14 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import type { RootState } from '../store.ts';
-import { fetchMyProfileRequest, fetchPublicProfileRequest } from '../../pages/profile/api/profileApi.ts';
-import type { MyProfile, PublicProfile } from '../../pages/profile/domain/profileModels.ts';
+import { 
+  fetchMyProfileRequest, 
+  fetchPublicProfileRequest,
+
+  submitProfileReviewRequest 
+} from '../../pages/profile/api/profileApi.ts';
+import type { MyProfile, PublicProfile, PublicProfileReview } from '../../pages/profile/domain/profileModels.ts';
+
+import type { CreateReviewRequestDTO } from '../../pages/profile/dto/profileSchemas.ts';
 
 type ProfileStatus = 'idle' | 'loading' | 'succeeded' | 'failed';
 
@@ -80,6 +87,25 @@ export const fetchPublicProfile = createAsyncThunk<
   }
 });
 
+export const submitProfileReview = createAsyncThunk<
+  PublicProfileReview, // Zwraca nową opinię
+  { userId: string; payload: CreateReviewRequestDTO },
+  { state: RootState; rejectValue: string }
+>('profile/submitProfileReview', async ({ userId, payload }, thunkApi) => {
+  const token = thunkApi.getState().auth.session?.token;
+
+  if (!token) {
+    return thunkApi.rejectWithValue('profile.errors.unauthorized');
+  }
+
+  try {
+    // Wywołanie żądania z profileApi.ts (upewnij się, że przyjmuje token i sygnał)
+    return await submitProfileReviewRequest(userId, payload, token, thunkApi.signal);
+  } catch (error) {
+    return thunkApi.rejectWithValue(getErrorKey(error, 'profile.errors.submit_review_failed'));
+  }
+});
+
 const profileSlice = createSlice({
   name: 'profile',
   initialState,
@@ -143,6 +169,23 @@ const profileSlice = createSlice({
         state.publicProfile.status = 'failed';
         state.publicProfile.errorKey = action.payload ?? action.error.message ?? 'profile.errors.fetch_failed';
         state.publicProfile.currentRequestId = null;
+      })
+    
+      .addCase(submitProfileReview.fulfilled, (state, action) => {
+        // Wykonaj logikę, tylko jeśli aktualnie przeglądamy profil publiczny
+        if (state.publicProfile.profile) {
+          const newReview = action.payload;
+          const currentProfile = state.publicProfile.profile;
+
+          // 1. Dodaj opinię na początek listy
+          currentProfile.reviews.unshift(newReview);
+
+          // 2. Przelicz średnią ocenę
+          const oldTotalScore = currentProfile.rating * currentProfile.reviewsCount;
+          
+          currentProfile.reviewsCount += 1;
+          currentProfile.rating = (oldTotalScore + newReview.rating) / currentProfile.reviewsCount;
+        }
       });
   },
 });
