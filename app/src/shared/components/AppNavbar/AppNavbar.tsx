@@ -69,7 +69,9 @@ export function AppNavbar({ active = 'discover' }: AppNavbarProps): React.JSX.El
           size="sm"
           variant="ghost"
           aria-label={t('discover.nav.notifications')}
+          onClick={() => navigate('/app/notifications')}
         >
+          
           <Bell size={16} />
         </Button>
         <div className="app-navbar__profile-menu" ref={menuRef}>
