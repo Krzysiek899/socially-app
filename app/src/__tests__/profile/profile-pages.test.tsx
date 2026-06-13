@@ -162,6 +162,23 @@ describe('Profile pages', () => {
     expect(screen.getByText('Jazz Kraków')).toBeInTheDocument();
   });
 
+  it('navigates to group details from public profile groups card', async () => {
+    window.history.replaceState({}, '', '/app/users/org-anna');
+    global.fetch = jest.fn(async () => ({
+      ok: true,
+      status: 200,
+      json: async () => publicProfileResponse,
+    })) as typeof fetch;
+
+    render(<App />);
+
+    fireEvent.click(await screen.findByText('Jazz Kraków'));
+
+    await waitFor(() => {
+      expect(window.location.pathname).toBe('/app/groups/group-1');
+    });
+  });
+
   it('renders dedicated public profile empty states', async () => {
     window.history.replaceState({}, '', '/app/users/org-anna');
     global.fetch = jest.fn(async () => ({
