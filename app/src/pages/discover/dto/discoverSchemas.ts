@@ -38,6 +38,9 @@ export const discoverEventSchema = z.object({
   attendeesCount: z.number().int().min(0),
   photoUrl: z.string().url().optional(),
   category: discoverCategorySchema,
+  participation: z.object({
+    state: z.enum(['joined', 'pending']),
+  }).optional(),
 });
 
 export const discoverEventsResponseSchema = z.array(discoverEventSchema);

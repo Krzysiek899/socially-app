@@ -46,6 +46,9 @@ export type DiscoverEvent = {
   attendeesCount: number;
   photoUrl?: string;
   category: DiscoverCategoryCode;
+  participation?: {
+    state: 'joined' | 'pending';
+  };
 };
 
 export type DiscoverFilters = {
