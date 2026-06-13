@@ -1,0 +1,39 @@
+.my-events-page {
+  min-height: 100svh;
+  background: var(--color-surface-subtle);
+}
+
+.my-events-page__header {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.my-events-page__header h1 {
+  margin: 0;
+  color: var(--color-text-heading);
+  font-size: clamp(1.5rem, 2.5vw, 2rem);
+}
+
+.my-events-page__header p {
+  margin: 0;
+  color: var(--color-text-subtle);
+}
+
+.my-events-page__state {
+  margin: 0;
+}
+
+.my-events-page__state--error {
+  color: var(--color-feedback-error-default);
+}
+
+.my-events-page__card-title {
+  margin: 0;
+  color: var(--color-text-heading);
+  font-size: var(--typography-body-lg-size);
+}
+
+.my-events-page__description {
+  margin: 0;
+  color: var(--color-text-default);
+}
