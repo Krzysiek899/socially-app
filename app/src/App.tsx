@@ -12,6 +12,7 @@ import { EventDetailsPage } from './pages/discover/EventDetailsPage.tsx';
 import { CreateEventPage } from './pages/event-management/CreateEventPage.tsx';
 import { ManageEventPage } from './pages/event-management/ManageEventPage.tsx';
 import { MyEventsPage } from './pages/event-management/MyEventsPage.tsx';
+import { GroupDetailsPage } from './pages/groups/GroupDetailsPage.tsx';
 import { MyProfilePage } from './pages/profile/MyProfilePage.tsx';
 import { PublicProfilePage } from './pages/profile/PublicProfilePage.tsx';
 import { authSessionRestored, sessionPersistencePreferenceRestored } from './redux/auth/authSlice.ts';
@@ -33,6 +34,7 @@ const AppRoutes = () => (
       <Route path="/app/events/create" element={<CreateEventPage />} />
       <Route path="/app/my-events" element={<MyEventsPage />} />
       <Route path="/app/my-events/:eventId/manage" element={<ManageEventPage />} />
+      <Route path="/app/groups/:groupId" element={<GroupDetailsPage />} />
       <Route path="/app/profile" element={<MyProfilePage />} />
       <Route path="/app/users/:userId" element={<PublicProfilePage />} />
     </Route>
