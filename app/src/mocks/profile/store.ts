@@ -1,9 +1,18 @@
+import { groupDetailsSchema } from '../../pages/groups/dto/groupSchemas.ts';
 import { myProfileSchema, publicProfileSchema } from '../../pages/profile/dto/profileSchemas.ts';
 
 type UserDirectoryEntry = {
   id: string;
   displayName: string;
   avatarUrl?: string;
+};
+
+type GroupDirectoryEntry = {
+  id: string;
+  name: string;
+  description: string;
+  meta: string;
+  iconKey: 'sport' | 'book' | 'tech';
 };
 
 type PublicProfileBase = {
@@ -22,11 +31,6 @@ type PublicProfileBase = {
     publishedAtLabel: string;
     content: string;
   }>;
-  groups: Array<{
-    id: string;
-    name: string;
-    meta: string;
-  }>;
 };
 
 type MyProfileBase = {
@@ -35,11 +39,6 @@ type MyProfileBase = {
   badge: string;
   avatarUrl?: string;
   bio: string;
-  groups: Array<{
-    id: string;
-    name: string;
-    iconKey: 'sport' | 'book' | 'tech';
-  }>;
 };
 
 type MutationResult = { type: 'ok' } | { type: 'not_found' } | { type: 'conflict' };
@@ -79,6 +78,39 @@ const userDirectory = new Map<string, UserDirectoryEntry>([
   ],
 ]);
 
+const groupDirectory = new Map<string, GroupDirectoryEntry>([
+  [
+    'group-1',
+    {
+      id: 'group-1',
+      name: 'Biegacze Powiśle',
+      description: 'Spotkania biegowe nad Wisłą dla osób na każdym poziomie.',
+      meta: 'Aktywność outdoor',
+      iconKey: 'sport',
+    },
+  ],
+  [
+    'group-2',
+    {
+      id: 'group-2',
+      name: 'Klub Czytelniczy',
+      description: 'Cotygodniowe dyskusje o książkach i wymiana rekomendacji.',
+      meta: 'Spotkania tematyczne',
+      iconKey: 'book',
+    },
+  ],
+  [
+    'group-3',
+    {
+      id: 'group-3',
+      name: 'Tech Meetup WAW',
+      description: 'Społeczność meetupów technologicznych i krótkich prelekcji.',
+      meta: 'Społeczność technologiczna',
+      iconKey: 'tech',
+    },
+  ],
+]);
+
 const myProfileBaseByUserId = new Map<string, MyProfileBase>([
   [
     'user-1',
@@ -88,11 +120,6 @@ const myProfileBaseByUserId = new Map<string, MyProfileBase>([
       badge: 'Świetny organizator',
       avatarUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=160&q=80',
       bio: 'Pasjonat lokalnych inicjatyw i sportów zespołowych. Od 5 lat organizuję weekendowe turnieje piłki nożnej oraz wspólne wyjścia do kina. Zawsze dbam o to, by nikt nie czuł się wykluczony.',
-      groups: [
-        { id: 'group-1', name: 'Biegacze Powiśle', iconKey: 'sport' },
-        { id: 'group-2', name: 'Klub Czytelniczy', iconKey: 'book' },
-        { id: 'group-3', name: 'Tech Meetup WAW', iconKey: 'tech' },
-      ],
     },
   ],
 ]);
@@ -126,10 +153,6 @@ const publicProfileBaseByUserId = new Map<string, PublicProfileBase>([
           content: 'Bardzo otwarta atmosfera i dopięte szczegóły wydarzenia.',
         },
       ],
-      groups: [
-        { id: 'group-1', name: 'Jazz Kraków', meta: '5 wspólnych wydarzeń' },
-        { id: 'group-2', name: 'Muzyka na żywo', meta: '2 wspólnych znajomych' },
-      ],
     },
   ],
   [
@@ -152,7 +175,6 @@ const publicProfileBaseByUserId = new Map<string, PublicProfileBase>([
           content: 'Świetnie prowadzi spotkania i dobrze wprowadza nowe osoby do grupy.',
         },
       ],
-      groups: [{ id: 'group-1', name: 'Frontend Warsaw', meta: '3 wspólne wydarzenia' }],
     },
   ],
 ]);
@@ -170,8 +192,19 @@ const initialPendingRequests = new Set<string>([
   relationRequestKey('org-anna', 'user-1'),
 ]);
 
+const groupMembershipKey = (userId: string, groupId: string): string => `${userId}::${groupId}`;
+
+const initialGroupMemberships = new Set<string>([
+  groupMembershipKey('user-1', 'group-1'),
+  groupMembershipKey('user-1', 'group-3'),
+  groupMembershipKey('org-anna', 'group-1'),
+  groupMembershipKey('org-anna', 'group-2'),
+  groupMembershipKey('org-dawid', 'group-3'),
+]);
+
 let friendships = new Set(initialFriendships);
 let pendingRequests = new Set(initialPendingRequests);
+let groupMemberships = new Set(initialGroupMemberships);
 
 const getFriendIds = (userId: string): Set<string> => {
   const friends = new Set<string>();
@@ -208,6 +241,12 @@ const relationState = (viewerUserId: string, targetUserId: string): 'none' | 'ou
 const hasKnownUser = (userId: string): boolean =>
   userDirectory.has(userId)
   && (myProfileBaseByUserId.has(userId) || publicProfileBaseByUserId.has(userId));
+
+const getGroupIdsForUser = (userId: string): string[] =>
+  Array.from(groupMemberships)
+    .map((membershipKey) => membershipKey.split('::'))
+    .filter(([memberId]) => memberId === userId)
+    .map(([, groupId]) => groupId);
 
 const toPublicFriendAction = (state: ReturnType<typeof relationState>) => {
   if (state === 'outgoing_pending') {
@@ -248,12 +287,22 @@ export const getMyProfileForUser = (userId: string) => {
       avatarUrl: entry.avatarUrl,
     }));
 
+  const groups = getGroupIdsForUser(userId)
+    .map((groupId) => groupDirectory.get(groupId))
+    .filter((entry): entry is GroupDirectoryEntry => Boolean(entry))
+    .map((entry) => ({
+      id: entry.id,
+      name: entry.name,
+      iconKey: entry.iconKey,
+    }));
+
   return myProfileSchema.parse({
     ...base,
     friendsCount: friends.length,
     friends,
     incomingRequests,
-    groupsCount: base.groups.length,
+    groupsCount: groups.length,
+    groups,
   });
 };
 
@@ -276,10 +325,47 @@ export const getPublicProfileForUser = (viewerUserId: string, targetUserId: stri
       avatarUrl: entry.avatarUrl,
     }));
 
+  const groups = getGroupIdsForUser(targetUserId)
+    .map((groupId) => groupDirectory.get(groupId))
+    .filter((entry): entry is GroupDirectoryEntry => Boolean(entry))
+    .map((entry) => ({
+      id: entry.id,
+      name: entry.name,
+      meta: entry.meta,
+    }));
+
   return publicProfileSchema.parse({
     ...base,
+    groups,
     mutualFriends,
     friendAction: toPublicFriendAction(relationState(viewerUserId, targetUserId)),
+  });
+};
+
+export const getGroupDetailsForUser = (viewerUserId: string, groupId: string) => {
+  const group = groupDirectory.get(groupId);
+  if (!group || !hasKnownUser(viewerUserId)) {
+    return null;
+  }
+
+  const membersPreview = Array.from(groupMemberships)
+    .map((membershipKey) => membershipKey.split('::'))
+    .filter(([, memberGroupId]) => memberGroupId === groupId)
+    .map(([memberUserId]) => userDirectory.get(memberUserId))
+    .filter((entry): entry is UserDirectoryEntry => Boolean(entry))
+    .map((entry) => ({
+      id: entry.id,
+      displayName: entry.displayName,
+      avatarUrl: entry.avatarUrl,
+    }));
+
+  return groupDetailsSchema.parse({
+    id: group.id,
+    name: group.name,
+    description: group.description,
+    membersCount: membersPreview.length,
+    membersPreview,
+    isMember: groupMemberships.has(groupMembershipKey(viewerUserId, groupId)),
   });
 };
 
@@ -339,7 +425,36 @@ export const unfriendUsers = (currentUserId: string, targetUserId: string): Muta
   return { type: 'ok' };
 };
 
+export const joinGroup = (viewerUserId: string, groupId: string): MutationResult => {
+  if (!hasKnownUser(viewerUserId) || !groupDirectory.has(groupId)) {
+    return { type: 'not_found' };
+  }
+
+  const membershipKey = groupMembershipKey(viewerUserId, groupId);
+  if (groupMemberships.has(membershipKey)) {
+    return { type: 'conflict' };
+  }
+
+  groupMemberships.add(membershipKey);
+  return { type: 'ok' };
+};
+
+export const leaveGroup = (viewerUserId: string, groupId: string): MutationResult => {
+  if (!hasKnownUser(viewerUserId) || !groupDirectory.has(groupId)) {
+    return { type: 'not_found' };
+  }
+
+  const membershipKey = groupMembershipKey(viewerUserId, groupId);
+  if (!groupMemberships.has(membershipKey)) {
+    return { type: 'conflict' };
+  }
+
+  groupMemberships.delete(membershipKey);
+  return { type: 'ok' };
+};
+
 export const resetProfileStore = (): void => {
   friendships = new Set(initialFriendships);
   pendingRequests = new Set(initialPendingRequests);
+  groupMemberships = new Set(initialGroupMemberships);
 };
