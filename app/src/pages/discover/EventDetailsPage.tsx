@@ -39,7 +39,7 @@ const getDisplayAttendees = (event: DiscoverEvent) => event.attendees.slice(0, 6
 type MetaCardProps = {
   icon: React.ReactNode;
   label: string;
-  value: string;
+  value: React.ReactNode;
 };
 
 const MetaCard = ({ icon, label, value }: MetaCardProps) => (
@@ -150,8 +150,17 @@ export const EventDetailsPage = () => {
               />
               <MetaCard
                 icon={<CircleUserRound size={16} />}
-                label="Organizator"
-                value={event.organizer.displayName}
+                label={t('discover.details.organizer')}
+                value={(
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => navigate(`/app/users/${event.organizer.id}`)}
+                  >
+                    {event.organizer.displayName}
+                  </Button>
+                )}
               />
             </Grid>
 
@@ -175,6 +184,14 @@ export const EventDetailsPage = () => {
                       <Cluster key={attendee.id} gap="2" align="center">
                         <Avatar name={attendee.displayName} src={attendee.avatarUrl} size="sm" />
                         <span className="event-details__attendee-name">{attendee.displayName}</span>
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => navigate(`/app/users/${attendee.id}`)}
+                        >
+                          {t('profile.actions.view_public')}
+                        </Button>
                       </Cluster>
                     ))}
                     {hiddenAttendeesCount > 0 && (
