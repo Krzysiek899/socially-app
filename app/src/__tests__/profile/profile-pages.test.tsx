@@ -21,6 +21,7 @@ const myProfileResponse = {
     { id: 'friend-2', displayName: 'Marek Wiśniewski', avatarUrl: 'https://images.example.com/marek.png' },
     { id: 'friend-3', displayName: 'Kasia Kowalczyk', avatarUrl: 'https://images.example.com/kasia.png' },
   ],
+  incomingRequests: [],
   groupsCount: 8,
   groups: [
     { id: 'group-1', name: 'Biegacze Powiśle', iconKey: 'sport' },

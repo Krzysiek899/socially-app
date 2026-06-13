@@ -8,7 +8,7 @@ type MyProfileListCardProps = {
   countLabel: string;
   items: React.ReactNode[];
   emptyText: string;
-  ctaLabel: string;
+  ctaLabel?: string;
 };
 
 export const MyProfileListCard = ({
@@ -29,9 +29,11 @@ export const MyProfileListCard = ({
   >
     <Stack gap="2" align="stretch">
       {items.length > 0 ? items : <p className="my-profile__empty-text">{emptyText}</p>}
-      <Button type="button" variant="secondary" size="lg">
-        {ctaLabel}
-      </Button>
+      {ctaLabel ? (
+        <Button type="button" variant="secondary" size="lg">
+          {ctaLabel}
+        </Button>
+      ) : null}
     </Stack>
   </Card>
 );
@@ -39,15 +41,17 @@ export const MyProfileListCard = ({
 export const MyProfileListRow = ({
   leading,
   label,
+  action,
 }: {
   leading: React.ReactNode;
   label: string;
+  action?: React.ReactNode;
 }): React.JSX.Element => (
   <div className="my-profile__list-row">
     <Cluster gap="2" align="center">
       {leading}
       <span className="my-profile__list-row-label">{label}</span>
     </Cluster>
-    <ChevronRight size={18} aria-hidden="true" />
+    {action ?? <ChevronRight size={18} aria-hidden="true" />}
   </div>
 );
