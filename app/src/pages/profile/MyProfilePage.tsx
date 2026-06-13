@@ -178,6 +178,7 @@ export const MyProfilePage = (): React.JSX.Element => {
           <Grid columns={2} gap="3">
             <MyProfileListCard
               title={t('profile.my.friends')}
+              totalCount={profile.friendsCount}
               countLabel={`${profile.friendsCount} ${t('profile.my.friends_count')}`}
               items={friendRows}
               emptyText={t('profile.my.empty_friends')}
@@ -185,6 +186,7 @@ export const MyProfilePage = (): React.JSX.Element => {
             />
             <MyProfileListCard
               title={t('profile.my.groups')}
+              totalCount={profile.groupsCount}
               countLabel={`${profile.groupsCount} ${t('profile.my.groups_count')}`}
               items={groupRows}
               emptyText={t('profile.my.empty_groups')}

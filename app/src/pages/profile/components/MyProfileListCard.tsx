@@ -5,6 +5,7 @@ import { Cluster, Stack } from '../../../shared/layout/index.tsx';
 
 type MyProfileListCardProps = {
   title: string;
+  totalCount?: number;
   countLabel: string;
   items: React.ReactNode[];
   emptyText: string;
@@ -14,31 +15,38 @@ type MyProfileListCardProps = {
 
 export const MyProfileListCard = ({
   title,
+  totalCount,
   countLabel,
   items,
   emptyText,
   ctaLabel,
-  onCtaClick,
-}: MyProfileListCardProps): React.JSX.Element => (
-  <Card
-    as="section"
-    header={(
-      <div className="my-profile__list-header">
-        <h2 className="my-profile__list-title">{title}</h2>
-        <span className="my-profile__list-count">{countLabel}</span>
-      </div>
-    )}
-  >
-    <Stack gap="2" align="stretch">
-      {items.length > 0 ? items : <p className="my-profile__empty-text">{emptyText}</p>}
-      {ctaLabel ? (
-        <Button type="button" variant="secondary" size="lg" onClick={onCtaClick}>
-          {ctaLabel}
-        </Button>
-      ) : null}
-    </Stack>
-  </Card>
-);
+}: MyProfileListCardProps): React.JSX.Element => {
+  const shouldShowCta = Boolean(
+    ctaLabel
+    && (totalCount === undefined || totalCount > items.length),
+  );
+
+  return (
+    <Card
+      as="section"
+      header={(
+        <div className="my-profile__list-header">
+          <h2 className="my-profile__list-title">{title}</h2>
+          <span className="my-profile__list-count">{countLabel}</span>
+        </div>
+      )}
+    >
+      <Stack gap="2" align="stretch">
+        {items.length > 0 ? items : <p className="my-profile__empty-text">{emptyText}</p>}
+        {shouldShowCta ? (
+          <Button type="button" variant="secondary" size="lg">
+            {ctaLabel}
+          </Button>
+        ) : null}
+      </Stack>
+    </Card>
+  );
+};
 
 export const MyProfileListRow = ({
   leading,
