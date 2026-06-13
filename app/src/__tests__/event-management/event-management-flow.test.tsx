@@ -332,6 +332,14 @@ describe('Event management flow', () => {
       expect(window.location.pathname).toBe('/app/my-events');
     });
 
+    const createCall = (global.fetch as jest.Mock).mock.calls.find((call) => {
+      const url = typeof call[0] === 'string' ? call[0] : call[0].toString();
+      return url.endsWith('/api/events') && call[1]?.method === 'POST';
+    });
+    expect(createCall).toBeDefined();
+    const requestBody = JSON.parse(String(createCall?.[1]?.body)) as { capacity: number | null };
+    expect(requestBody.capacity).toBeNull();
+
     expect(await screen.findByRole('heading', { name: t('eventManagement.my_events.title') })).toBeInTheDocument();
     expect(await screen.findByText(createdEventResponse.title)).toBeInTheDocument();
 

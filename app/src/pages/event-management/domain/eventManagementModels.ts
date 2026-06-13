@@ -48,6 +48,7 @@ export type CreateEventPayload = {
     currency: 'PLN';
     isFree: boolean;
   };
+  capacity: number | null;
 };
 
 export type GeocodeResult = {

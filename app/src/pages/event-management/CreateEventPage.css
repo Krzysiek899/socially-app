@@ -32,6 +32,17 @@
   position: relative;
 }
 
+.create-event-page__capacity-field {
+  display: grid;
+  gap: var(--space-1);
+}
+
+.create-event-page__toggle-row {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
 .create-event-page__address-popup {
   position: absolute;
   top: calc(100% + var(--space-1));

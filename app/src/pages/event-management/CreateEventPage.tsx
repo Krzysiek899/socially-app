@@ -28,10 +28,12 @@ type FormState = {
   addressQuery: string;
   priceMode: PriceMode;
   priceAmount: string;
+  unlimitedCapacity: boolean;
+  capacityValue: string;
 };
 
 type FormErrors = Partial<Record<
-  'title' | 'description' | 'dateTime' | 'category' | 'address' | 'priceAmount' | 'location',
+  'title' | 'description' | 'dateTime' | 'category' | 'address' | 'priceAmount' | 'capacity' | 'location',
   string
 >>;
 
@@ -53,6 +55,8 @@ const initialFormState: FormState = {
   addressQuery: '',
   priceMode: 'free',
   priceAmount: '0',
+  unlimitedCapacity: true,
+  capacityValue: '',
 };
 
 const isCategoryCode = (value: string): value is DiscoverCategoryCode =>
@@ -110,6 +114,13 @@ const validateForm = (
     }
   }
 
+  if (!form.unlimitedCapacity) {
+    const capacity = Number(form.capacityValue);
+    if (!Number.isInteger(capacity) || capacity < 1) {
+      errors.capacity = 'eventManagement.manage.validation.capacity';
+    }
+  }
+
   return errors;
 };
 
@@ -124,6 +135,7 @@ const toPayload = (
   }
 
   const amount = form.priceMode === 'free' ? 0 : Number(form.priceAmount);
+  const capacity = form.unlimitedCapacity ? null : Number(form.capacityValue);
 
   return {
     title: form.title.trim(),
@@ -142,6 +154,7 @@ const toPayload = (
       currency: 'PLN',
       isFree: form.priceMode === 'free',
     },
+    capacity,
   };
 };
 
@@ -379,6 +392,36 @@ export const CreateEventPage = () => {
                   variant={showValidation && errors.priceAmount ? 'error' : 'default'}
                   errorText={showValidation && errors.priceAmount ? t(errors.priceAmount) : undefined}
                 />
+                <div className="create-event-page__capacity-field">
+                  <label className="create-event-page__toggle-row" htmlFor="event-unlimited-capacity">
+                    <input
+                      id="event-unlimited-capacity"
+                      type="checkbox"
+                      checked={form.unlimitedCapacity}
+                      onChange={(event) => {
+                        const checked = event.target.checked;
+                        setForm((current) => ({
+                          ...current,
+                          unlimitedCapacity: checked,
+                          capacityValue: checked ? '' : current.capacityValue,
+                        }));
+                      }}
+                    />
+                    <span>{t('eventManagement.manage.capacity.unlimited_toggle')}</span>
+                  </label>
+                  <TextField
+                    id="event-capacity"
+                    label={t('eventManagement.manage.capacity.label')}
+                    type="number"
+                    min={1}
+                    step={1}
+                    value={form.capacityValue}
+                    onChange={handleInputChange('capacityValue')}
+                    disabled={form.unlimitedCapacity}
+                    variant={showValidation && errors.capacity ? 'error' : 'default'}
+                    errorText={showValidation && errors.capacity ? t(errors.capacity) : undefined}
+                  />
+                </div>
                 <div className="create-event-page__address-anchor">
                   <TextField
                     id="event-address"

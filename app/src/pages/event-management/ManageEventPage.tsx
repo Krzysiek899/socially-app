@@ -328,9 +328,7 @@ export const ManageEventPage = () => {
                           <p>
                             {selectedItem.management.capacity === null
                               ? t('eventManagement.manage.capacity.unlimited')
-                              : t('eventManagement.manage.capacity.value', {
-                                value: String(selectedItem.management.capacity),
-                              })}
+                              : `${selectedItem.management.capacity} osób`}
                           </p>
                         </div>
                       </div>

@@ -25,6 +25,7 @@ export const createEventPayloadSchema = z.object({
     currency: z.literal('PLN'),
     isFree: z.boolean(),
   }),
+  capacity: z.number().int().min(1).nullable(),
 }).superRefine((value, ctx) => {
   if (value.price.isFree && value.price.amount !== 0) {
     ctx.addIssue({

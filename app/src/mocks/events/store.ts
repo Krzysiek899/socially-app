@@ -236,9 +236,9 @@ const authoredEventsByUser = new Map<string, AuthoredEvent[]>([
 const getAllAuthoredEvents = () =>
   Array.from(authoredEventsByUser.values()).flat() as AuthoredEvent[];
 
-const buildDefaultManagementState = () => ({
+const buildDefaultManagementState = (capacity: number | null) => ({
   isActive: true,
-  capacity: null as number | null,
+  capacity,
   joinRules: {
     visibility: 'PUBLIC' as const,
     approvalRequired: true,
@@ -294,7 +294,7 @@ export const createAuthoredEventForUser = (
 
   const managedEvent = authoredEventSchema.parse({
     ...createdEvent,
-    management: buildDefaultManagementState(),
+    management: buildDefaultManagementState(payload.capacity),
   });
 
   const currentEvents = authoredEventsByUser.get(userId) ?? [];
