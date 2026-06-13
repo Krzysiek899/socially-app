@@ -7,9 +7,19 @@ import type { PublicProfile } from '../domain/profileModels.ts';
 
 type PublicProfileHeroProps = {
   profile: PublicProfile;
+  onSendRequest?: () => void;
+  onAcceptRequest?: () => void;
+  onRejectRequest?: () => void;
+  onUnfriend?: () => void;
 };
 
-export const PublicProfileHero = ({ profile }: PublicProfileHeroProps): React.JSX.Element => (
+export const PublicProfileHero = ({
+  profile,
+  onSendRequest,
+  onAcceptRequest,
+  onRejectRequest,
+  onUnfriend,
+}: PublicProfileHeroProps): React.JSX.Element => (
   <Card as="section" variant="raised" aria-label={t('profile.hero.aria_label')}>
     <div className="public-profile__hero">
       <div className="public-profile__hero-banner" />
@@ -33,10 +43,32 @@ export const PublicProfileHero = ({ profile }: PublicProfileHeroProps): React.JS
           </Stack>
         </div>
         <div className="public-profile__hero-actions">
-          <Button type="button" size="lg">
-            <UserPlus size={16} aria-hidden="true" />
-            {t('profile.actions.add_friend')}
-          </Button>
+          {profile.friendAction === 'can_send_request' ? (
+            <Button type="button" size="lg" onClick={onSendRequest}>
+              <UserPlus size={16} aria-hidden="true" />
+              {t('profile.actions.add_friend')}
+            </Button>
+          ) : null}
+          {profile.friendAction === 'request_sent' ? (
+            <Button type="button" size="lg" disabled>
+              {t('profile.actions.friend_request_sent')}
+            </Button>
+          ) : null}
+          {profile.friendAction === 'respond_to_request' ? (
+            <Cluster gap="2">
+              <Button type="button" size="lg" onClick={onAcceptRequest}>
+                {t('profile.actions.accept_request')}
+              </Button>
+              <Button type="button" size="lg" variant="secondary" onClick={onRejectRequest}>
+                {t('profile.actions.reject_request')}
+              </Button>
+            </Cluster>
+          ) : null}
+          {profile.friendAction === 'friends' ? (
+            <Button type="button" size="lg" variant="secondary" onClick={onUnfriend}>
+              {t('profile.actions.unfriend')}
+            </Button>
+          ) : null}
         </div>
       </div>
     </div>
