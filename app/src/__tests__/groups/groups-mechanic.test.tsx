@@ -218,7 +218,7 @@ describe('Groups mechanic UI integration', () => {
     expect(screen.getByText('Dawid Cieślak')).toBeInTheDocument();
     expect(screen.queryByText('Paweł Nowak')).not.toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole('button', { name: 'Zobacz wszystkich' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Zobacz wszystkie' }));
 
     expect(await screen.findByText('Paweł Nowak')).toBeInTheDocument();
     expect(screen.getByText('Julia Krawiec')).toBeInTheDocument();

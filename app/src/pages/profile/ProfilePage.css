@@ -326,6 +326,43 @@
   color: var(--color-text-default);
 }
 
+.group-details__title {
+  margin: 0;
+  color: var(--color-text-heading);
+  font-size: var(--typography-heading-size);
+  font-weight: var(--typography-heading-weight);
+  line-height: var(--typography-heading-line-height);
+}
+
+.group-details__content-grid {
+  align-items: stretch;
+}
+
+.group-details__section-title {
+  margin: 0;
+  color: var(--color-text-heading);
+  font-size: var(--typography-subheading-size);
+}
+
+.group-details__description {
+  margin: 0;
+  color: var(--color-text-default);
+}
+
+.group-details__members-count {
+  color: var(--color-text-subtle);
+  font-size: var(--typography-label-size);
+}
+
+.group-details__member-row {
+  min-height: 2rem;
+}
+
+.group-details__actions {
+  display: flex;
+  justify-content: flex-start;
+}
+
 @media (max-width: 900px) {
   .profile-page__section-item-top,
   .my-profile__list-header {
@@ -335,7 +372,8 @@
 
   .public-profile__hero-content,
   .public-profile__hero-main,
-  .public-profile__content {
+  .public-profile__content,
+  .group-details__content-grid {
     grid-template-columns: 1fr;
   }
 

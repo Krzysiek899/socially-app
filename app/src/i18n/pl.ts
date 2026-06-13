@@ -223,6 +223,8 @@ export const plTranslations: Record<string, string> = {
   'profile.errors.friend_reject_failed': 'Nie udało się odrzucić zaproszenia.',
   'profile.errors.friend_unfriend_failed': 'Nie udało się usunąć znajomego.',
   'groups.details.title': 'Szczegóły grupy',
+  'groups.details.description': 'Opis',
+  'groups.details.members': 'Członkowie',
   'groups.actions.join': 'Dołącz',
   'groups.actions.leave': 'Opuść',
   'groups.errors.fetch_failed': 'Nie udało się pobrać szczegółów grupy.',
