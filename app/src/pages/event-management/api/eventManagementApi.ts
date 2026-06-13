@@ -10,12 +10,17 @@ import {
   handleJoinRequestPayloadSchema,
   reverseGeocodePayloadSchema,
   reverseGeocodeResponseSchema,
+  joinEventResponseSchema,
+  leaveEventResponseSchema,
+  participatingEventsResponseSchema,
   updateJoinRulesPayloadSchema,
   updateAuthoredEventPayloadSchema,
 } from '../dto/eventManagementSchemas.ts';
 import type {
   HandleJoinRequestPayload,
   JoinRequestAction,
+  ParticipatingEvent,
+  ParticipationState,
   UpdateJoinRulesPayload,
   UpdateAuthoredEventPayload,
 } from '../domain/eventManagementModels.ts';
@@ -218,5 +223,60 @@ export const handleJoinRequestActionRequest = async (
       responseValidation: 'eventManagement.errors.response_invalid',
       network: 'eventManagement.errors.network',
       http: (status: number) => resolveHttpErrorKey(status, 'eventManagement.errors.request_action_failed'),
+    },
+  });
+
+export const fetchParticipatingEventsRequest = async (
+  token: string,
+  signal: AbortSignal,
+): Promise<ParticipatingEvent[]> =>
+  requestContract<never, ParticipatingEvent[]>({
+    url: '/api/events/participating',
+    token,
+    signal,
+    responseSchema: participatingEventsResponseSchema,
+    errorKeys: {
+      requestValidation: 'eventManagement.errors.request_invalid',
+      responseValidation: 'eventManagement.errors.response_invalid',
+      network: 'eventManagement.errors.network',
+      http: (status: number) => resolveHttpErrorKey(status, 'eventManagement.errors.fetch_failed'),
+    },
+  });
+
+export const joinEventRequest = async (
+  eventId: string,
+  token: string,
+  signal: AbortSignal,
+): Promise<{ state: ParticipationState }> =>
+  requestContract<never, { state: ParticipationState }>({
+    url: `/api/events/${eventId}/join`,
+    method: 'POST',
+    token,
+    signal,
+    responseSchema: joinEventResponseSchema,
+    errorKeys: {
+      requestValidation: 'eventManagement.errors.request_invalid',
+      responseValidation: 'eventManagement.errors.response_invalid',
+      network: 'eventManagement.errors.network',
+      http: (status: number) => resolveHttpErrorKey(status, 'eventManagement.errors.join_failed'),
+    },
+  });
+
+export const leaveEventRequest = async (
+  eventId: string,
+  token: string,
+  signal: AbortSignal,
+): Promise<{ ok: true }> =>
+  requestContract<never, { ok: true }>({
+    url: `/api/events/${eventId}/participation`,
+    method: 'DELETE',
+    token,
+    signal,
+    responseSchema: leaveEventResponseSchema,
+    errorKeys: {
+      requestValidation: 'eventManagement.errors.request_invalid',
+      responseValidation: 'eventManagement.errors.response_invalid',
+      network: 'eventManagement.errors.network',
+      http: (status: number) => resolveHttpErrorKey(status, 'eventManagement.errors.leave_failed'),
     },
   });

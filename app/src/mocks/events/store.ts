@@ -1,8 +1,11 @@
 import { discoverEventSchema, discoverEventsResponseSchema } from '../../pages/discover/dto/discoverSchemas.ts';
+import type { DiscoverEvent } from '../../pages/discover/domain/discoverModels.ts';
 import type {
   AuthoredEvent,
   CreateEventPayload,
   JoinRequestAction,
+  ParticipatingEvent,
+  ParticipationState,
   UpdateJoinRulesPayload,
   UpdateAuthoredEventPayload,
 } from '../../pages/event-management/domain/eventManagementModels.ts';
@@ -10,6 +13,7 @@ import { authoredEventSchema } from '../../pages/event-management/dto/eventManag
 
 type Coordinates = { lat: number; lng: number };
 type AddressInput = CreateEventPayload['address'];
+type ParticipationRecord = { userId: string; state: ParticipationState };
 
 const knownCoordinatesByCity: Record<string, Coordinates> = {
   warszawa: { lat: 52.2297, lng: 21.0122 },
@@ -233,6 +237,22 @@ const authoredEventsByUser = new Map<string, AuthoredEvent[]>([
   ],
 ]);
 
+const knownUserById: Record<string, { displayName: string; avatarUrl?: string }> = {
+  'user-1': {
+    displayName: 'Jan Kowalski',
+    avatarUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=120&q=80',
+  },
+};
+
+const participationByEventId = new Map<string, ParticipationRecord[]>([
+  [
+    'event-warsaw-tech-meetup',
+    [
+      { userId: 'user-1', state: 'pending' },
+    ],
+  ],
+]);
+
 const getAllAuthoredEvents = () =>
   Array.from(authoredEventsByUser.values()).flat() as AuthoredEvent[];
 
@@ -247,8 +267,59 @@ const buildDefaultManagementState = (capacity: number | null) => ({
   joinRequests: [] as AuthoredEvent['management']['joinRequests'],
 });
 
+const upsertParticipation = (eventId: string, userId: string, state: ParticipationState) => {
+  const existing = participationByEventId.get(eventId) ?? [];
+  const withoutUser = existing.filter((item) => item.userId !== userId);
+  participationByEventId.set(eventId, [...withoutUser, { userId, state }]);
+};
+
+const removeParticipation = (eventId: string, userId: string) => {
+  const existing = participationByEventId.get(eventId) ?? [];
+  const next = existing.filter((item) => item.userId !== userId);
+  if (next.length === 0) {
+    participationByEventId.delete(eventId);
+    return;
+  }
+
+  participationByEventId.set(eventId, next);
+};
+
+const getParticipationState = (eventId: string, userId: string): ParticipationState | null =>
+  participationByEventId.get(eventId)?.find((item) => item.userId === userId)?.state ?? null;
+
+export const getParticipationStateForUser = (eventId: string, userId: string): ParticipationState | null =>
+  getParticipationState(eventId, userId);
+
+const withJoinedParticipationApplied = (event: AuthoredEvent | DiscoverEvent): AuthoredEvent | DiscoverEvent => {
+  const joined = (participationByEventId.get(event.id) ?? []).filter((item) => item.state === 'joined');
+  if (joined.length === 0) {
+    return event;
+  }
+
+  const existingIds = new Set(event.attendees.map((attendee) => attendee.id));
+  const joinedAttendees = joined
+    .filter((item) => !existingIds.has(item.userId))
+    .map((item) => ({
+      id: item.userId,
+      displayName: knownUserById[item.userId]?.displayName ?? 'Socially User',
+      avatarUrl: knownUserById[item.userId]?.avatarUrl,
+    }));
+
+  if (joinedAttendees.length === 0) {
+    return event;
+  }
+
+  return {
+    ...event,
+    attendees: [...event.attendees, ...joinedAttendees],
+    attendeesCount: event.attendeesCount + joinedAttendees.length,
+  };
+};
+
 export const getAllDiscoverEvents = () =>
-  discoverEventsResponseSchema.parse([...discoverSeedEvents, ...getAllAuthoredEvents()]);
+  discoverEventsResponseSchema.parse(
+    [...discoverSeedEvents, ...getAllAuthoredEvents()].map((event) => withJoinedParticipationApplied(event)),
+  );
 
 export const getDiscoverEventById = (eventId: string) =>
   getAllDiscoverEvents().find((event) => event.id === eventId);
@@ -300,6 +371,100 @@ export const createAuthoredEventForUser = (
   const currentEvents = authoredEventsByUser.get(userId) ?? [];
   authoredEventsByUser.set(userId, [managedEvent, ...currentEvents]);
   return managedEvent;
+};
+
+export const getParticipatingEventsForUser = (userId: string): ParticipatingEvent[] =>
+  getAllDiscoverEvents()
+    .map((event) => {
+      const state = getParticipationState(event.id, userId);
+      if (!state) {
+        return null;
+      }
+
+      return {
+        ...event,
+        participation: { state },
+      } satisfies ParticipatingEvent;
+    })
+    .filter((event): event is ParticipatingEvent => event !== null);
+
+export const joinEventForUser = (userId: string, eventId: string) => {
+  const event = getDiscoverEventById(eventId);
+  if (!event) {
+    return { type: 'not_found' as const };
+  }
+
+  if (event.organizer.id === userId) {
+    return { type: 'forbidden' as const };
+  }
+
+  const currentState = getParticipationState(eventId, userId);
+  if (currentState === 'joined' || currentState === 'pending') {
+    return { type: 'conflict' as const };
+  }
+
+  const authoredOwnerEntry = Array.from(authoredEventsByUser.entries()).find(([, events]) =>
+    events.some((item) => item.id === eventId));
+  const authoredEvent = authoredOwnerEntry
+    ? authoredOwnerEntry[1].find((item) => item.id === eventId) ?? null
+    : null;
+  const requiresApproval = authoredEvent?.management.joinRules.approvalRequired ?? false;
+
+  if (requiresApproval && authoredOwnerEntry && authoredEvent) {
+    const requestId = `request-${eventId}-${userId}`;
+    const requestExists = authoredEvent.management.joinRequests.some((item) => item.userId === userId);
+    if (!requestExists) {
+      const request = {
+        id: requestId,
+        userId,
+        displayName: knownUserById[userId]?.displayName ?? 'Socially User',
+        avatarUrl: knownUserById[userId]?.avatarUrl,
+        requestedAt: new Date().toISOString(),
+      };
+      const updatedEvent = authoredEventSchema.parse({
+        ...authoredEvent,
+        management: {
+          ...authoredEvent.management,
+          joinRequests: [...authoredEvent.management.joinRequests, request],
+        },
+      });
+      const next = authoredOwnerEntry[1].map((item) => (item.id === eventId ? updatedEvent : item));
+      authoredEventsByUser.set(authoredOwnerEntry[0], next);
+    }
+    upsertParticipation(eventId, userId, 'pending');
+    return { type: 'ok' as const, state: 'pending' as const };
+  }
+
+  upsertParticipation(eventId, userId, 'joined');
+  return { type: 'ok' as const, state: 'joined' as const };
+};
+
+export const leaveEventForUser = (userId: string, eventId: string) => {
+  const event = getDiscoverEventById(eventId);
+  if (!event) {
+    return { type: 'not_found' as const };
+  }
+
+  removeParticipation(eventId, userId);
+
+  const authoredOwnerEntry = Array.from(authoredEventsByUser.entries()).find(([, events]) =>
+    events.some((item) => item.id === eventId));
+  const authoredEvent = authoredOwnerEntry
+    ? authoredOwnerEntry[1].find((item) => item.id === eventId) ?? null
+    : null;
+  if (authoredOwnerEntry && authoredEvent) {
+    const updatedEvent = authoredEventSchema.parse({
+      ...authoredEvent,
+      management: {
+        ...authoredEvent.management,
+        joinRequests: authoredEvent.management.joinRequests.filter((item) => item.userId !== userId),
+      },
+    });
+    const next = authoredOwnerEntry[1].map((item) => (item.id === eventId ? updatedEvent : item));
+    authoredEventsByUser.set(authoredOwnerEntry[0], next);
+  }
+
+  return { type: 'ok' as const };
 };
 
 export const updateAuthoredEventForUser = (
@@ -390,6 +555,12 @@ export const handleJoinRequestForUser = (
       avatarUrl: request.avatarUrl,
     }]
     : existingEvent.management.participants;
+
+  if (action === 'approve') {
+    upsertParticipation(eventId, request.userId, 'joined');
+  } else {
+    removeParticipation(eventId, request.userId);
+  }
 
   const updatedEvent = authoredEventSchema.parse({
     ...existingEvent,

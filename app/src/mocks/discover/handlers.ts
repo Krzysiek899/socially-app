@@ -2,7 +2,7 @@ import { http, HttpResponse } from 'msw';
 import { z } from 'zod';
 import { DISCOVER_CATEGORY_CODES } from '../../pages/discover/domain/discoverModels.ts';
 import { discoverEventsResponseSchema } from '../../pages/discover/dto/discoverSchemas.ts';
-import { getAllDiscoverEvents, getDiscoverEventById } from '../events/store.ts';
+import { getAllDiscoverEvents, getDiscoverEventById, getParticipationStateForUser } from '../events/store.ts';
 
 const discoverFiltersSchema = z.object({
   q: z.string().optional(),
@@ -43,6 +43,7 @@ export const discoverHandlers = [
     if (!authHeader?.startsWith('Bearer token-')) {
       return HttpResponse.json({ message: 'unauthorized' }, { status: 401 });
     }
+    const userId = authHeader.slice('Bearer token-'.length);
 
     const url = new URL(request.url);
     const filters = parseDiscoverFilters(url);
@@ -82,19 +83,36 @@ export const discoverHandlers = [
       .filter((event) => matchesDateTo(event.dateTime, filters.dateTo))
       .sort((left, right) => left.dateTime.localeCompare(right.dateTime));
 
-    return HttpResponse.json(discoverEventsResponseSchema.parse(filteredEvents), { status: 200 });
+    return HttpResponse.json(discoverEventsResponseSchema.parse(
+      filteredEvents.map((event) => {
+        const participationState = getParticipationStateForUser(event.id, userId);
+        if (!participationState) {
+          return event;
+        }
+
+        return {
+          ...event,
+          participation: { state: participationState },
+        };
+      }),
+    ), { status: 200 });
   }),
   http.get('/api/discover/events/:eventId', async ({ request, params }) => {
     const authHeader = request.headers.get('authorization');
     if (!authHeader?.startsWith('Bearer token-')) {
       return HttpResponse.json({ message: 'unauthorized' }, { status: 401 });
     }
+    const userId = authHeader.slice('Bearer token-'.length);
 
     const event = typeof params.eventId === 'string' ? getDiscoverEventById(params.eventId) : undefined;
     if (!event) {
       return HttpResponse.json({ message: 'not_found' }, { status: 404 });
     }
 
-    return HttpResponse.json(event, { status: 200 });
+    const participationState = getParticipationStateForUser(event.id, userId);
+
+    return HttpResponse.json(participationState
+      ? { ...event, participation: { state: participationState } }
+      : event, { status: 200 });
   }),
 ];

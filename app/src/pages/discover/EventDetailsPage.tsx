@@ -1,12 +1,14 @@
 import React from 'react';
 import { CalendarDays, CircleUserRound, Heart, MapPinned, Share2, Users, Wallet } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { AppNavbar, Avatar, Badge, Button } from '../../shared/components/index.ts';
-import { useAppSelector } from '../../redux/hooks.ts';
+import { AppNavbar, Avatar, Badge, Button, useNotifications } from '../../shared/components/index.ts';
+import { useAppDispatch, useAppSelector } from '../../redux/hooks.ts';
 import { fetchDiscoverEventByIdRequest } from './api/discoverApi.ts';
 import type { DiscoverEvent } from './domain/discoverModels.ts';
 import { Cluster, Grid, Page, Section, Split, Stack } from '../../shared/layout/index.tsx';
 import { t } from '../../i18n/index.ts';
+import { joinEventParticipation } from '../../redux/eventManagement/eventManagementSlice.ts';
+import { fetchDiscoverEvents } from '../../redux/discover/discoverSlice.ts';
 import './EventDetailsPage.css';
 
 type LoadStatus = 'loading' | 'succeeded' | 'failed';
@@ -54,14 +56,42 @@ const MetaCard = ({ icon, label, value }: MetaCardProps) => (
 
 export const EventDetailsPage = () => {
   const navigate = useNavigate();
+  const dispatch = useAppDispatch();
+  const { notify } = useNotifications();
   const { eventId } = useParams<{ eventId: string }>();
   const token = useAppSelector((state) => state.auth.session?.token);
   const currentUserId = useAppSelector((state) => state.auth.session?.userId);
   const [status, setStatus] = React.useState<LoadStatus>('loading');
   const [errorKey, setErrorKey] = React.useState<string | null>(null);
+  const [isJoining, setIsJoining] = React.useState(false);
   const [event, setEvent] = React.useState<DiscoverEvent | null>(null);
   const displayAttendees = React.useMemo(() => (event ? getDisplayAttendees(event) : []), [event]);
   const hiddenAttendeesCount = event ? Math.max(event.attendeesCount - displayAttendees.length, 0) : 0;
+
+  const loadEvent = React.useCallback(async (signal: AbortSignal) => {
+    if (!eventId || !token) {
+      setStatus('failed');
+      setErrorKey('discover.errors.unauthorized');
+      return;
+    }
+
+    setStatus('loading');
+    setErrorKey(null);
+
+    try {
+      const response = await fetchDiscoverEventByIdRequest(eventId, token, signal);
+      setEvent(response);
+      setStatus('succeeded');
+    } catch (error) {
+      setStatus('failed');
+      if (error instanceof Error) {
+        setErrorKey(error.message);
+        return;
+      }
+
+      setErrorKey('discover.errors.fetch_failed');
+    }
+  }, [eventId, token]);
 
   React.useEffect(() => {
     if (!eventId || !token) {
@@ -71,30 +101,37 @@ export const EventDetailsPage = () => {
     }
 
     const controller = new AbortController();
-
-    const load = async () => {
-      setStatus('loading');
-      setErrorKey(null);
-
-      try {
-        const response = await fetchDiscoverEventByIdRequest(eventId, token, controller.signal);
-        setEvent(response);
-        setStatus('succeeded');
-      } catch (error) {
-        setStatus('failed');
-        if (error instanceof Error) {
-          setErrorKey(error.message);
-          return;
-        }
-
-        setErrorKey('discover.errors.fetch_failed');
-      }
-    };
-
-    void load();
+    void loadEvent(controller.signal);
 
     return () => controller.abort();
-  }, [eventId, token]);
+  }, [eventId, loadEvent, token]);
+
+  const isOrganizer = event ? currentUserId === event.organizer.id : false;
+  const participationState = event?.participation?.state ?? null;
+  const isParticipant = event ? event.attendees.some((attendee) => attendee.id === currentUserId) : false;
+  const canJoin = Boolean(event && !isOrganizer && !isParticipant && participationState === null);
+
+  const handleJoin = React.useCallback(async () => {
+    if (!event || !eventId) {
+      return;
+    }
+
+    setIsJoining(true);
+
+    try {
+      await dispatch(joinEventParticipation(event.id)).unwrap();
+      await dispatch(fetchDiscoverEvents());
+      const controller = new AbortController();
+      await loadEvent(controller.signal);
+    } catch (joinError) {
+      notify({
+        variant: 'error',
+        message: t(typeof joinError === 'string' ? joinError : 'eventManagement.errors.join_failed'),
+      });
+    } finally {
+      setIsJoining(false);
+    }
+  }, [dispatch, event, eventId, loadEvent, notify]);
 
   return (
     <main className="event-details">
@@ -216,12 +253,22 @@ export const EventDetailsPage = () => {
               </aside>
             </Split>
 
-            <footer className="event-details__footer">
-              <Button type="button" size="lg">
-                <Users size={16} />
-                {t('discover.details.join')}
-              </Button>
-            </footer>
+            {(canJoin || participationState === 'pending') && (
+              <footer className="event-details__footer">
+                {canJoin && (
+                  <Button type="button" size="lg" onClick={() => { void handleJoin(); }} disabled={isJoining}>
+                    <Users size={16} />
+                    {t('discover.details.join')}
+                  </Button>
+                )}
+                {participationState === 'pending' && (
+                  <Button type="button" size="lg" disabled>
+                    <Users size={16} />
+                    {t('discover.details.pending')}
+                  </Button>
+                )}
+              </footer>
+            )}
           </Stack>
         )}
 

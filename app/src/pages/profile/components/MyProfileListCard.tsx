@@ -20,6 +20,7 @@ export const MyProfileListCard = ({
   items,
   emptyText,
   ctaLabel,
+  onCtaClick,
 }: MyProfileListCardProps): React.JSX.Element => {
   const shouldShowCta = Boolean(
     ctaLabel
@@ -39,7 +40,7 @@ export const MyProfileListCard = ({
       <Stack gap="2" align="stretch">
         {items.length > 0 ? items : <p className="my-profile__empty-text">{emptyText}</p>}
         {shouldShowCta ? (
-          <Button type="button" variant="secondary" size="lg">
+          <Button type="button" variant="secondary" size="lg" onClick={onCtaClick}>
             {ctaLabel}
           </Button>
         ) : null}

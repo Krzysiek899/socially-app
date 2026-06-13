@@ -94,3 +94,11 @@ export type JoinRequestAction = 'approve' | 'reject';
 export type HandleJoinRequestPayload = {
   action: JoinRequestAction;
 };
+
+export type ParticipationState = 'joined' | 'pending';
+
+export type ParticipatingEvent = DiscoverEvent & {
+  participation: {
+    state: ParticipationState;
+  };
+};

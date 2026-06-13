@@ -12,7 +12,10 @@ import {
   createAuthoredEventForUser,
   getAuthoredEventByIdForUser,
   getAuthoredEventsForUser,
+  getParticipatingEventsForUser,
   handleJoinRequestForUser,
+  joinEventForUser,
+  leaveEventForUser,
   updateJoinRulesForUser,
   updateAuthoredEventForUser,
 } from '../events/store.ts';
@@ -142,6 +145,14 @@ export const eventManagementHandlers = [
     }
 
     return HttpResponse.json(getAuthoredEventsForUser(userId), { status: 200 });
+  }),
+  http.get('/api/events/participating', async ({ request }) => {
+    const userId = getAuthorizedUserId(request.headers.get('authorization'));
+    if (!userId) {
+      return HttpResponse.json({ message: 'unauthorized' }, { status: 401 });
+    }
+
+    return HttpResponse.json(getParticipatingEventsForUser(userId), { status: 200 });
   }),
   http.get('/api/events/authored/:eventId', async ({ request, params }) => {
     const userId = getAuthorizedUserId(request.headers.get('authorization'));
@@ -300,5 +311,47 @@ export const eventManagementHandlers = [
     }
 
     return HttpResponse.json(result.event, { status: 200 });
+  }),
+  http.post('/api/events/:eventId/join', async ({ request, params }) => {
+    const userId = getAuthorizedUserId(request.headers.get('authorization'));
+    if (!userId) {
+      return HttpResponse.json({ message: 'unauthorized' }, { status: 401 });
+    }
+
+    if (typeof params.eventId !== 'string') {
+      return HttpResponse.json({ message: 'not_found' }, { status: 404 });
+    }
+
+    const result = joinEventForUser(userId, params.eventId);
+    if (result.type === 'not_found') {
+      return HttpResponse.json({ message: 'not_found' }, { status: 404 });
+    }
+
+    if (result.type === 'forbidden') {
+      return HttpResponse.json({ message: 'forbidden' }, { status: 403 });
+    }
+
+    if (result.type === 'conflict') {
+      return HttpResponse.json({ message: 'capacity_invalid' }, { status: 409 });
+    }
+
+    return HttpResponse.json({ state: result.state }, { status: 200 });
+  }),
+  http.delete('/api/events/:eventId/participation', async ({ request, params }) => {
+    const userId = getAuthorizedUserId(request.headers.get('authorization'));
+    if (!userId) {
+      return HttpResponse.json({ message: 'unauthorized' }, { status: 401 });
+    }
+
+    if (typeof params.eventId !== 'string') {
+      return HttpResponse.json({ message: 'not_found' }, { status: 404 });
+    }
+
+    const result = leaveEventForUser(userId, params.eventId);
+    if (result.type === 'not_found') {
+      return HttpResponse.json({ message: 'not_found' }, { status: 404 });
+    }
+
+    return HttpResponse.json({ ok: true }, { status: 200 });
   }),
 ];
