@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
+import { Bell, User, Clock, Ticket, Compass } from 'lucide-react';
 import { fetchNotifications, markNotificationAsRead } from '../../redux/notification-center/notificationCenterSlice.ts';
 import { AppDispatch, RootState } from '../../redux/store.ts';
 import { AppNavbar } from "../../shared/components/AppNavbar/AppNavbar.tsx";
@@ -29,7 +30,6 @@ export const NotificationCenterPage = () => {
       dispatch(markNotificationAsRead(id));
     }
     
-    // Route to relevant destinations based on notification type
     switch (type) {
       case 'USER_JOINED':
       case 'FRIEND_JOINED':
@@ -54,8 +54,12 @@ export const NotificationCenterPage = () => {
         <AppNavbar.NavLink href="/my-events">Moje wydarzenia</AppNavbar.NavLink>
         <AppNavbar.Actions>
           <button className="btn-primary" onClick={() => navigate('/app/events/create')}>Stwórz wydarzenie</button>
-          <button className="icon-btn" aria-label="Notifications" onClick={() => navigate('/app/notifications')}>🔔</button>
-          <button className="icon-btn" aria-label="Profile" onClick={() => navigate('/app/profile')}>👤</button>
+          <button className="icon-btn" aria-label="Notifications" onClick={() => navigate('/app/notifications')}>
+            <Bell size={20} />
+          </button>
+          <button className="icon-btn" aria-label="Profile" onClick={() => navigate('/app/profile')}>
+            <User size={20} />
+          </button>
         </AppNavbar.Actions>
       </AppNavbar>
 
@@ -129,7 +133,7 @@ const NotificationCard = ({ notification, onClick }: NotificationCardProps) => {
           <img src={notification.avatarUrl} alt="avatar" className="notification-card__avatar" />
         ) : (
           <div className="notification-card__icon-placeholder">
-             {notification.type === 'NEW_EVENT' ? '🧭' : '🎫'}
+             {notification.type === 'NEW_EVENT' ? <Compass size={24} /> : <Ticket size={24} />}
           </div>
         )}
       </div>
@@ -140,8 +144,12 @@ const NotificationCard = ({ notification, onClick }: NotificationCardProps) => {
         
         {notification.eventMeta && (
           <div className="notification-card__meta">
-            <span>🕒 {notification.eventMeta.time}</span>
-            <span>🎟️ {notification.eventMeta.price}</span>
+            <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+              <Clock size={14} /> {notification.eventMeta.time}
+            </span>
+            <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+              <Ticket size={14} /> {notification.eventMeta.price}
+            </span>
           </div>
         )}
       </div>

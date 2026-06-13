@@ -10,7 +10,7 @@ const initialNotifications = [
     timeAgo: '2 min temu',
     isRead: false,
     group: 'TODAY',
-    referenceId: 'user-adam-123', // 👈 ADD THIS (routes to Adam's profile)
+    referenceId: 'user-adam-123', 
     avatarUrl: 'https://i.pravatar.cc/150?u=adam',
   },
   {
@@ -21,7 +21,7 @@ const initialNotifications = [
     timeAgo: '1 godz temu',
     isRead: false,
     group: 'TODAY',
-    referenceId: 'event-photo-456', // 👈 ADD THIS (routes to event details)
+    referenceId: 'event-photo-456', 
     eventMeta: {
       time: '18:00 Today',
       price: 'Free'
@@ -35,7 +35,7 @@ const initialNotifications = [
     timeAgo: '3 godz temu',
     isRead: true,
     group: 'TODAY',
-    referenceId: 'user-marta-789', // 👈 ADD THIS 
+    referenceId: 'user-marta-789', 
     avatarUrl: 'https://i.pravatar.cc/150?u=marta',
   },
   {
@@ -46,7 +46,7 @@ const initialNotifications = [
     timeAgo: 'Wczoraj',
     isRead: true,
     group: 'YESTERDAY',
-    referenceId: 'event-tennis-012', // 👈 ADD THIS 
+    referenceId: 'event-tennis-012', 
   }
 ];
 

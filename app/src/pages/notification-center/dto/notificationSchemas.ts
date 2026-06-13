@@ -8,7 +8,7 @@ export const notificationSchema = z.object({
   timeAgo: z.string(),
   isRead: z.boolean(),
   group: z.enum(['TODAY', 'YESTERDAY', 'OLDER']),
-  referenceId: z.string(), // 👈 ADD THIS LINE
+  referenceId: z.string(), 
   avatarUrl: z.string().optional(),
   eventMeta: z.object({
     time: z.string(),
