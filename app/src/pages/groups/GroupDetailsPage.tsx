@@ -1,5 +1,5 @@
 import React from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { t } from '../../i18n/index.ts';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks.ts';
 import { fetchGroupDetails, joinGroup, leaveGroup } from '../../redux/groups/groupsSlice.ts';
@@ -9,9 +9,11 @@ import { GroupDetailsCard } from './components/GroupDetailsCard.tsx';
 
 export const GroupDetailsPage = (): React.JSX.Element => {
   const { groupId } = useParams<{ groupId: string }>();
+  const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const { notify } = useNotifications();
   const { details, status, errorKey } = useAppSelector((state) => state.groups);
+  const currentUserId = useAppSelector((state) => state.auth.session?.userId ?? null);
   const [isMutating, setIsMutating] = React.useState(false);
 
   const loadGroup = React.useCallback(() => {
@@ -53,6 +55,15 @@ export const GroupDetailsPage = (): React.JSX.Element => {
     }
   }, [details, dispatch, groupId, notify]);
 
+  const handleMemberProfileClick = React.useCallback((memberId: string) => {
+    if (currentUserId && memberId === currentUserId) {
+      navigate('/app/profile');
+      return;
+    }
+
+    navigate(`/app/users/${memberId}`);
+  }, [currentUserId, navigate]);
+
   return (
     <ProfileSurface
       heading={t('groups.details.title')}
@@ -67,6 +78,7 @@ export const GroupDetailsPage = (): React.JSX.Element => {
           actionLabel={details.isMember ? t('groups.actions.leave') : t('groups.actions.join')}
           actionDisabled={isMutating}
           onAction={handleMembershipAction}
+          onMemberProfileClick={handleMemberProfileClick}
         />
       ) : null}
     </ProfileSurface>

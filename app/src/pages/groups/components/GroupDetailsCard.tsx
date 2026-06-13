@@ -9,6 +9,7 @@ type GroupDetailsCardProps = {
   actionLabel: string;
   actionDisabled: boolean;
   onAction: () => void;
+  onMemberProfileClick: (memberId: string) => void;
 };
 
 export const GroupDetailsCard = ({
@@ -16,6 +17,7 @@ export const GroupDetailsCard = ({
   actionLabel,
   actionDisabled,
   onAction,
+  onMemberProfileClick,
 }: GroupDetailsCardProps): React.JSX.Element => {
   const [showAllMembers, setShowAllMembers] = React.useState(false);
 
@@ -48,9 +50,25 @@ export const GroupDetailsCard = ({
 
               <Stack gap="2">
                 {visibleMembers.map((member) => (
-                  <Cluster key={member.id} gap="2" align="center" className="group-details__member-row">
-                    <Avatar name={member.displayName} src={member.avatarUrl} size="sm" />
-                    <span>{member.displayName}</span>
+                  <Cluster
+                    key={member.id}
+                    gap="2"
+                    align="center"
+                    justify="space-between"
+                    className="group-details__member-row"
+                  >
+                    <Cluster gap="2" align="center">
+                      <Avatar name={member.displayName} src={member.avatarUrl} size="sm" />
+                      <span className="group-details__member-name">{member.displayName}</span>
+                    </Cluster>
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      size="sm"
+                      onClick={() => onMemberProfileClick(member.id)}
+                    >
+                      {t('profile.actions.view_public')}
+                    </Button>
                   </Cluster>
                 ))}
               </Stack>

@@ -217,10 +217,18 @@ describe('Groups mechanic UI integration', () => {
     expect(screen.getByText('Anna Wójcik')).toBeInTheDocument();
     expect(screen.getByText('Dawid Cieślak')).toBeInTheDocument();
     expect(screen.queryByText('Paweł Nowak')).not.toBeInTheDocument();
+    expect(screen.getAllByRole('button', { name: 'Zobacz profil' })).toHaveLength(3);
 
     fireEvent.click(screen.getByRole('button', { name: 'Zobacz wszystkie' }));
 
     expect(await screen.findByText('Paweł Nowak')).toBeInTheDocument();
     expect(screen.getByText('Julia Krawiec')).toBeInTheDocument();
+    expect(screen.getAllByRole('button', { name: 'Zobacz profil' })).toHaveLength(5);
+
+    fireEvent.click(screen.getAllByRole('button', { name: 'Zobacz profil' })[0]);
+
+    await waitFor(() => {
+      expect(window.location.pathname).toBe('/app/users/m-1');
+    });
   });
 });

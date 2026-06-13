@@ -358,6 +358,10 @@
   min-height: 2rem;
 }
 
+.group-details__member-name {
+  color: var(--color-text-default);
+}
+
 .group-details__actions {
   display: flex;
   justify-content: flex-start;
