@@ -157,4 +157,70 @@ describe('Groups mechanic UI integration', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Opuść' }));
     expect(await screen.findByRole('button', { name: 'Dołącz' })).toBeInTheDocument();
   });
+
+  it('shows first 3 members and reveals full list after clicking show-all', async () => {
+    window.history.replaceState({}, '', '/app/groups/group-2');
+
+    global.fetch = jest.fn(async (input: RequestInfo | URL) => {
+      const url = typeof input === 'string' ? input : input.toString();
+
+      if (url.includes('/api/groups/group-2')) {
+        return {
+          ok: true,
+          status: 200,
+          json: async () => ({
+            id: 'group-2',
+            name: 'Klub Czytelniczy',
+            description: 'Opis grupy',
+            membersCount: 5,
+            membersPreview: [
+              { id: 'm-1', displayName: 'Anna Wójcik' },
+              { id: 'm-2', displayName: 'Jan Kowalski' },
+              { id: 'm-3', displayName: 'Dawid Cieślak' },
+              { id: 'm-4', displayName: 'Paweł Nowak' },
+              { id: 'm-5', displayName: 'Julia Krawiec' },
+            ],
+            isMember: false,
+          }),
+        } as Response;
+      }
+
+      if (url.includes('/api/profile/me')) {
+        return {
+          ok: true,
+          status: 200,
+          json: async () => ({
+            id: 'user-1',
+            displayName: 'Jan Kowalski',
+            badge: 'Świetny organizator',
+            avatarUrl: 'https://images.example.com/jan.png',
+            bio: 'Bio',
+            friendsCount: 0,
+            friends: [],
+            incomingRequests: [],
+            groupsCount: 0,
+            groups: [],
+          }),
+        } as Response;
+      }
+
+      return {
+        ok: false,
+        status: 404,
+        json: async () => ({ message: 'not_found' }),
+      } as Response;
+    }) as typeof fetch;
+
+    render(<App />);
+
+    expect(await screen.findByRole('heading', { name: 'Klub Czytelniczy' })).toBeInTheDocument();
+    expect(screen.getByText('Anna Wójcik')).toBeInTheDocument();
+    expect(screen.getByText('Dawid Cieślak')).toBeInTheDocument();
+    expect(screen.queryByText('Paweł Nowak')).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Zobacz wszystkich' }));
+
+    expect(await screen.findByText('Paweł Nowak')).toBeInTheDocument();
+    expect(screen.getByText('Julia Krawiec')).toBeInTheDocument();
+  });
 });
