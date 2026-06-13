@@ -1,5 +1,12 @@
 import { discoverEventSchema, discoverEventsResponseSchema } from '../../pages/discover/dto/discoverSchemas.ts';
-import type { CreateEventPayload } from '../../pages/event-management/domain/eventManagementModels.ts';
+import type {
+  AuthoredEvent,
+  CreateEventPayload,
+  JoinRequestAction,
+  UpdateJoinRulesPayload,
+  UpdateAuthoredEventPayload,
+} from '../../pages/event-management/domain/eventManagementModels.ts';
+import { authoredEventSchema } from '../../pages/event-management/dto/eventManagementSchemas.ts';
 
 type Coordinates = { lat: number; lng: number };
 type AddressInput = CreateEventPayload['address'];
@@ -158,10 +165,10 @@ const discoverSeedEvents = discoverEventsResponseSchema.parse([
   },
 ]);
 
-const authoredEventsByUser = new Map([
+const authoredEventsByUser = new Map<string, AuthoredEvent[]>([
   [
     'user-1',
-    discoverEventsResponseSchema.parse([
+    [
       {
         id: 'event-user-1-community-breakfast',
         title: 'Śniadanie społecznościowe',
@@ -194,13 +201,51 @@ const authoredEventsByUser = new Map([
           { id: 'attendee-2', displayName: 'Adam P.' },
           { id: 'attendee-3', displayName: 'Karolina Z.' },
         ],
+        management: {
+          isActive: true,
+          capacity: 8,
+          joinRules: {
+            visibility: 'PUBLIC',
+            approvalRequired: true,
+          },
+          participants: [
+            { id: 'attendee-1', displayName: 'Ola M.' },
+            { id: 'attendee-2', displayName: 'Adam P.' },
+            { id: 'attendee-3', displayName: 'Karolina Z.' },
+          ],
+          joinRequests: [
+            {
+              id: 'request-1',
+              userId: 'request-user-1',
+              displayName: 'Marek Wiśniewski',
+              requestedAt: '2026-06-13T12:00:00.000Z',
+            },
+            {
+              id: 'request-2',
+              userId: 'request-user-2',
+              displayName: 'Alicja Mazur',
+              requestedAt: '2026-06-13T12:30:00.000Z',
+            },
+          ],
+        },
       },
-    ]),
+    ].map((event) => authoredEventSchema.parse(event)),
   ],
 ]);
 
 const getAllAuthoredEvents = () =>
-  Array.from(authoredEventsByUser.values()).flat();
+  Array.from(authoredEventsByUser.values()).flat() as AuthoredEvent[];
+
+const buildDefaultManagementState = (capacity: number | null) => ({
+  isActive: true,
+  capacity,
+  joinRules: {
+    visibility: 'PUBLIC' as const,
+    approvalRequired: true,
+  },
+  participants: [] as AuthoredEvent['management']['participants'],
+  joinRequests: [] as AuthoredEvent['management']['joinRequests'],
+});
 
 export const getAllDiscoverEvents = () =>
   discoverEventsResponseSchema.parse([...discoverSeedEvents, ...getAllAuthoredEvents()]);
@@ -209,7 +254,10 @@ export const getDiscoverEventById = (eventId: string) =>
   getAllDiscoverEvents().find((event) => event.id === eventId);
 
 export const getAuthoredEventsForUser = (userId: string) =>
-  discoverEventsResponseSchema.parse(authoredEventsByUser.get(userId) ?? []);
+  (authoredEventsByUser.get(userId) ?? []).map((event) => authoredEventSchema.parse(event));
+
+export const getAuthoredEventByIdForUser = (userId: string, eventId: string) =>
+  getAuthoredEventsForUser(userId).find((event) => event.id === eventId);
 
 export const createAuthoredEventForUser = (
   userId: string,
@@ -244,7 +292,118 @@ export const createAuthoredEventForUser = (
     attendees: [],
   });
 
+  const managedEvent = authoredEventSchema.parse({
+    ...createdEvent,
+    management: buildDefaultManagementState(payload.capacity),
+  });
+
   const currentEvents = authoredEventsByUser.get(userId) ?? [];
-  authoredEventsByUser.set(userId, [createdEvent, ...currentEvents]);
-  return createdEvent;
+  authoredEventsByUser.set(userId, [managedEvent, ...currentEvents]);
+  return managedEvent;
+};
+
+export const updateAuthoredEventForUser = (
+  userId: string,
+  eventId: string,
+  payload: UpdateAuthoredEventPayload,
+) => {
+  const currentEvents = authoredEventsByUser.get(userId) ?? [];
+  const eventIndex = currentEvents.findIndex((event) => event.id === eventId);
+  if (eventIndex < 0) {
+    return { type: 'not_found' as const };
+  }
+
+  const existingEvent = currentEvents[eventIndex];
+  const currentParticipantsCount = existingEvent.management.participants.length;
+  if (payload.capacity !== null && payload.capacity < currentParticipantsCount) {
+    return { type: 'capacity_invalid' as const };
+  }
+
+  const updatedEvent = authoredEventSchema.parse({
+    ...existingEvent,
+    title: payload.title,
+    description: payload.description,
+    dateTime: payload.dateTime,
+    address: payload.address,
+    price: payload.price,
+    management: {
+      ...existingEvent.management,
+      capacity: payload.capacity,
+    },
+  });
+
+  const nextEvents = [...currentEvents];
+  nextEvents[eventIndex] = updatedEvent;
+  authoredEventsByUser.set(userId, nextEvents);
+  return { type: 'ok' as const, event: updatedEvent };
+};
+
+export const updateJoinRulesForUser = (
+  userId: string,
+  eventId: string,
+  payload: UpdateJoinRulesPayload,
+) => {
+  const currentEvents = authoredEventsByUser.get(userId) ?? [];
+  const eventIndex = currentEvents.findIndex((event) => event.id === eventId);
+  if (eventIndex < 0) {
+    return { type: 'not_found' as const };
+  }
+
+  const existingEvent = currentEvents[eventIndex];
+  const updatedEvent = authoredEventSchema.parse({
+    ...existingEvent,
+    management: {
+      ...existingEvent.management,
+      joinRules: payload,
+    },
+  });
+
+  const nextEvents = [...currentEvents];
+  nextEvents[eventIndex] = updatedEvent;
+  authoredEventsByUser.set(userId, nextEvents);
+  return { type: 'ok' as const, event: updatedEvent };
+};
+
+export const handleJoinRequestForUser = (
+  userId: string,
+  eventId: string,
+  requestId: string,
+  action: JoinRequestAction,
+) => {
+  const currentEvents = authoredEventsByUser.get(userId) ?? [];
+  const eventIndex = currentEvents.findIndex((event) => event.id === eventId);
+  if (eventIndex < 0) {
+    return { type: 'not_found' as const };
+  }
+
+  const existingEvent = currentEvents[eventIndex];
+  const request = existingEvent.management.joinRequests.find((item) => item.id === requestId);
+  if (!request) {
+    return { type: 'request_not_found' as const };
+  }
+
+  const nextJoinRequests = existingEvent.management.joinRequests.filter((item) => item.id !== requestId);
+  const nextParticipants = action === 'approve'
+    ? [...existingEvent.management.participants, {
+      id: request.userId,
+      displayName: request.displayName,
+      avatarUrl: request.avatarUrl,
+    }]
+    : existingEvent.management.participants;
+
+  const updatedEvent = authoredEventSchema.parse({
+    ...existingEvent,
+    attendeesCount: nextParticipants.length,
+    attendees: nextParticipants,
+    management: {
+      ...existingEvent.management,
+      participants: nextParticipants,
+      joinRequests: nextJoinRequests,
+    },
+  });
+
+  const nextEvents = [...currentEvents];
+  nextEvents[eventIndex] = updatedEvent;
+  authoredEventsByUser.set(userId, nextEvents);
+  return { type: 'ok' as const, event: updatedEvent };
 };

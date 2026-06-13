@@ -2,12 +2,19 @@ import { http, HttpResponse } from 'msw';
 import {
   createEventPayloadSchema,
   geocodeSearchPayloadSchema,
+  handleJoinRequestPayloadSchema,
   reverseGeocodePayloadSchema,
+  updateJoinRulesPayloadSchema,
+  updateAuthoredEventPayloadSchema,
 } from '../../pages/event-management/dto/eventManagementSchemas.ts';
 import type { GeocodeResult } from '../../pages/event-management/domain/eventManagementModels.ts';
 import {
   createAuthoredEventForUser,
+  getAuthoredEventByIdForUser,
   getAuthoredEventsForUser,
+  handleJoinRequestForUser,
+  updateJoinRulesForUser,
+  updateAuthoredEventForUser,
 } from '../events/store.ts';
 
 const organizerByUserId: Record<string, { displayName: string; avatarUrl?: string }> = {
@@ -136,6 +143,23 @@ export const eventManagementHandlers = [
 
     return HttpResponse.json(getAuthoredEventsForUser(userId), { status: 200 });
   }),
+  http.get('/api/events/authored/:eventId', async ({ request, params }) => {
+    const userId = getAuthorizedUserId(request.headers.get('authorization'));
+    if (!userId) {
+      return HttpResponse.json({ message: 'unauthorized' }, { status: 401 });
+    }
+
+    if (typeof params.eventId !== 'string') {
+      return HttpResponse.json({ message: 'not_found' }, { status: 404 });
+    }
+
+    const event = getAuthoredEventByIdForUser(userId, params.eventId);
+    if (!event) {
+      return HttpResponse.json({ message: 'not_found' }, { status: 404 });
+    }
+
+    return HttpResponse.json(event, { status: 200 });
+  }),
   http.post('/api/events/geocode', async ({ request }) => {
     const userId = getAuthorizedUserId(request.headers.get('authorization'));
     if (!userId) {
@@ -207,5 +231,74 @@ export const eventManagementHandlers = [
     }
 
     return HttpResponse.json(createdEvent, { status: 201 });
+  }),
+  http.patch('/api/events/authored/:eventId', async ({ request, params }) => {
+    const userId = getAuthorizedUserId(request.headers.get('authorization'));
+    if (!userId) {
+      return HttpResponse.json({ message: 'unauthorized' }, { status: 401 });
+    }
+
+    if (typeof params.eventId !== 'string') {
+      return HttpResponse.json({ message: 'not_found' }, { status: 404 });
+    }
+
+    const payloadResult = updateAuthoredEventPayloadSchema.safeParse(await request.json());
+    if (!payloadResult.success) {
+      return HttpResponse.json({ message: 'request_invalid' }, { status: 400 });
+    }
+
+    const result = updateAuthoredEventForUser(userId, params.eventId, payloadResult.data);
+    if (result.type === 'not_found') {
+      return HttpResponse.json({ message: 'not_found' }, { status: 404 });
+    }
+    if (result.type === 'capacity_invalid') {
+      return HttpResponse.json({ message: 'capacity_invalid' }, { status: 409 });
+    }
+
+    return HttpResponse.json(result.event, { status: 200 });
+  }),
+  http.patch('/api/events/authored/:eventId/join-rules', async ({ request, params }) => {
+    const userId = getAuthorizedUserId(request.headers.get('authorization'));
+    if (!userId) {
+      return HttpResponse.json({ message: 'unauthorized' }, { status: 401 });
+    }
+
+    if (typeof params.eventId !== 'string') {
+      return HttpResponse.json({ message: 'not_found' }, { status: 404 });
+    }
+
+    const payloadResult = updateJoinRulesPayloadSchema.safeParse(await request.json());
+    if (!payloadResult.success) {
+      return HttpResponse.json({ message: 'request_invalid' }, { status: 400 });
+    }
+
+    const result = updateJoinRulesForUser(userId, params.eventId, payloadResult.data);
+    if (result.type === 'not_found') {
+      return HttpResponse.json({ message: 'not_found' }, { status: 404 });
+    }
+
+    return HttpResponse.json(result.event, { status: 200 });
+  }),
+  http.post('/api/events/authored/:eventId/requests/:requestId', async ({ request, params }) => {
+    const userId = getAuthorizedUserId(request.headers.get('authorization'));
+    if (!userId) {
+      return HttpResponse.json({ message: 'unauthorized' }, { status: 401 });
+    }
+
+    if (typeof params.eventId !== 'string' || typeof params.requestId !== 'string') {
+      return HttpResponse.json({ message: 'not_found' }, { status: 404 });
+    }
+
+    const payloadResult = handleJoinRequestPayloadSchema.safeParse(await request.json());
+    if (!payloadResult.success) {
+      return HttpResponse.json({ message: 'request_invalid' }, { status: 400 });
+    }
+
+    const result = handleJoinRequestForUser(userId, params.eventId, params.requestId, payloadResult.data.action);
+    if (result.type === 'not_found' || result.type === 'request_not_found') {
+      return HttpResponse.json({ message: 'not_found' }, { status: 404 });
+    }
+
+    return HttpResponse.json(result.event, { status: 200 });
   }),
 ];

@@ -1,6 +1,9 @@
 import { z } from 'zod';
 import { discoverEventSchema } from '../../discover/dto/discoverSchemas.ts';
 import { DISCOVER_CATEGORY_CODES } from '../../discover/domain/discoverModels.ts';
+import {
+  JOIN_VISIBILITY_OPTIONS,
+} from '../domain/eventManagementModels.ts';
 
 export const createEventPayloadSchema = z.object({
   title: z.string().trim().min(3).max(100),
@@ -22,6 +25,7 @@ export const createEventPayloadSchema = z.object({
     currency: z.literal('PLN'),
     isFree: z.boolean(),
   }),
+  capacity: z.number().int().min(1).nullable(),
 }).superRefine((value, ctx) => {
   if (value.price.isFree && value.price.amount !== 0) {
     ctx.addIssue({
@@ -40,8 +44,36 @@ export const createEventPayloadSchema = z.object({
   }
 });
 
-export const createEventResponseSchema = discoverEventSchema;
-export const authoredEventsResponseSchema = z.array(discoverEventSchema);
+const joinRequestSchema = z.object({
+  id: z.string().min(1),
+  userId: z.string().min(1),
+  displayName: z.string().min(1),
+  avatarUrl: z.string().url().optional(),
+  requestedAt: z.string().datetime(),
+});
+
+const authoredEventManagementSchema = z.object({
+  isActive: z.boolean(),
+  capacity: z.number().int().min(1).nullable(),
+  joinRules: z.object({
+    visibility: z.enum(JOIN_VISIBILITY_OPTIONS),
+    approvalRequired: z.boolean(),
+  }),
+  participants: z.array(z.object({
+    id: z.string().min(1),
+    displayName: z.string().min(1),
+    avatarUrl: z.string().url().optional(),
+  })),
+  joinRequests: z.array(joinRequestSchema),
+});
+
+export const authoredEventSchema = discoverEventSchema.extend({
+  management: authoredEventManagementSchema,
+});
+
+export const createEventResponseSchema = authoredEventSchema;
+export const authoredEventsResponseSchema = z.array(authoredEventSchema);
+export const authoredEventResponseSchema = authoredEventSchema;
 
 export const geocodeSearchPayloadSchema = z.object({
   query: z.string().trim().min(3),
@@ -84,4 +116,47 @@ export const reverseGeocodeResponseSchema = z.object({
       postalCode: z.string().optional(),
     }),
   }),
+});
+
+export const updateAuthoredEventPayloadSchema = z.object({
+  title: z.string().trim().min(3).max(100),
+  description: z.string().trim().min(10).max(1000),
+  dateTime: z.string().datetime(),
+  address: z.object({
+    city: z.string().trim().min(1),
+    street: z.string().trim().min(1),
+    buildingNumber: z.string().trim().min(1),
+    postalCode: z.string().trim().min(1).optional(),
+  }),
+  price: z.object({
+    amount: z.number().min(0),
+    currency: z.literal('PLN'),
+    isFree: z.boolean(),
+  }),
+  capacity: z.number().int().min(1).nullable(),
+}).superRefine((value, ctx) => {
+  if (value.price.isFree && value.price.amount !== 0) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ['price', 'amount'],
+      message: 'price_amount_must_be_zero_for_free',
+    });
+  }
+
+  if (!value.price.isFree && value.price.amount <= 0) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ['price', 'amount'],
+      message: 'price_amount_must_be_positive_for_paid',
+    });
+  }
+});
+
+export const updateJoinRulesPayloadSchema = z.object({
+  visibility: z.enum(JOIN_VISIBILITY_OPTIONS),
+  approvalRequired: z.boolean(),
+});
+
+export const handleJoinRequestPayloadSchema = z.object({
+  action: z.enum(['approve', 'reject']),
 });

@@ -54,6 +54,16 @@ const createdEventResponse = {
   },
   attendeesCount: 0,
   attendees: [],
+  management: {
+    isActive: true,
+    capacity: null,
+    joinRules: {
+      visibility: 'PUBLIC',
+      approvalRequired: true,
+    },
+    participants: [],
+    joinRequests: [],
+  },
 };
 
 const discoverSeedEvent = {
@@ -321,6 +331,14 @@ describe('Event management flow', () => {
     await waitFor(() => {
       expect(window.location.pathname).toBe('/app/my-events');
     });
+
+    const createCall = (global.fetch as jest.Mock).mock.calls.find((call) => {
+      const url = typeof call[0] === 'string' ? call[0] : call[0].toString();
+      return url.endsWith('/api/events') && call[1]?.method === 'POST';
+    });
+    expect(createCall).toBeDefined();
+    const requestBody = JSON.parse(String(createCall?.[1]?.body)) as { capacity: number | null };
+    expect(requestBody.capacity).toBeNull();
 
     expect(await screen.findByRole('heading', { name: t('eventManagement.my_events.title') })).toBeInTheDocument();
     expect(await screen.findByText(createdEventResponse.title)).toBeInTheDocument();

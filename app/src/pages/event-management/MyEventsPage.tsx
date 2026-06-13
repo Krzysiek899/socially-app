@@ -79,7 +79,12 @@ export const MyEventsPage = () => {
                       <Stack gap="2">
                         <Cluster justify="space-between" align="center">
                           <h2 className="my-events-page__card-title">{event.title}</h2>
-                          <Badge size="sm" variant="info">{t(`discover.category.${event.category}`)}</Badge>
+                          <Cluster gap="1" align="center">
+                            <Badge size="sm" variant="info">{t(`discover.category.${event.category}`)}</Badge>
+                            <Badge size="sm" variant={event.management.isActive ? 'success' : 'neutral'}>
+                              {event.management.isActive ? t('eventManagement.manage.status.active') : t('eventManagement.manage.status.inactive')}
+                            </Badge>
+                          </Cluster>
                         </Cluster>
                         <p className="my-events-page__description">{event.description}</p>
                       </Stack>
@@ -100,6 +105,14 @@ export const MyEventsPage = () => {
                         <span>{formatPrice(event)}</span>
                       </Cluster>
                       <Cluster justify="flex-end">
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="primary"
+                          onClick={() => navigate(`/app/my-events/${event.id}/manage`)}
+                        >
+                          {t('eventManagement.my_events.manage')}
+                        </Button>
                         <Button type="button" size="sm" variant="secondary" onClick={() => navigate(`/app/events/${event.id}`)}>
                           {t('eventManagement.my_events.details')}
                         </Button>
