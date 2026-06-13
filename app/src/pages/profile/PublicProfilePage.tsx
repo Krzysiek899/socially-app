@@ -2,6 +2,7 @@ import React from 'react';
 import { useParams } from 'react-router-dom';
 import { Stack } from '../../shared/layout/index.tsx';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks.ts';
+import { useNotifications } from '../../shared/components/index.ts';
 import {
   acceptFriendRequest,
   fetchPublicProfile,
@@ -19,6 +20,7 @@ import { ProfileSurface } from './components/ProfileSurface.tsx';
 export const PublicProfilePage = (): React.JSX.Element => {
   const { userId } = useParams<{ userId: string }>();
   const dispatch = useAppDispatch();
+  const { notify } = useNotifications();
   const { profile, status, errorKey } = useAppSelector((state) => state.profile.publicProfile);
 
   const loadProfile = React.useCallback(() => {
@@ -37,29 +39,73 @@ export const PublicProfilePage = (): React.JSX.Element => {
     if (!profile) {
       return;
     }
-    void dispatch(sendFriendRequest(profile.id));
-  }, [dispatch, profile]);
+    void dispatch(sendFriendRequest(profile.id))
+      .unwrap()
+      .catch((errorKeyFromApi: unknown) => {
+        notify({
+          variant: 'error',
+          message: t(
+            typeof errorKeyFromApi === 'string'
+              ? errorKeyFromApi
+              : 'profile.errors.friend_request_failed',
+          ),
+        });
+      });
+  }, [dispatch, notify, profile]);
 
   const handleAcceptRequest = React.useCallback(() => {
     if (!profile) {
       return;
     }
-    void dispatch(acceptFriendRequest(profile.id));
-  }, [dispatch, profile]);
+    void dispatch(acceptFriendRequest(profile.id))
+      .unwrap()
+      .catch((errorKeyFromApi: unknown) => {
+        notify({
+          variant: 'error',
+          message: t(
+            typeof errorKeyFromApi === 'string'
+              ? errorKeyFromApi
+              : 'profile.errors.friend_accept_failed',
+          ),
+        });
+      });
+  }, [dispatch, notify, profile]);
 
   const handleRejectRequest = React.useCallback(() => {
     if (!profile) {
       return;
     }
-    void dispatch(rejectFriendRequest(profile.id));
-  }, [dispatch, profile]);
+    void dispatch(rejectFriendRequest(profile.id))
+      .unwrap()
+      .catch((errorKeyFromApi: unknown) => {
+        notify({
+          variant: 'error',
+          message: t(
+            typeof errorKeyFromApi === 'string'
+              ? errorKeyFromApi
+              : 'profile.errors.friend_reject_failed',
+          ),
+        });
+      });
+  }, [dispatch, notify, profile]);
 
   const handleUnfriend = React.useCallback(() => {
     if (!profile) {
       return;
     }
-    void dispatch(unfriendUser(profile.id));
-  }, [dispatch, profile]);
+    void dispatch(unfriendUser(profile.id))
+      .unwrap()
+      .catch((errorKeyFromApi: unknown) => {
+        notify({
+          variant: 'error',
+          message: t(
+            typeof errorKeyFromApi === 'string'
+              ? errorKeyFromApi
+              : 'profile.errors.friend_unfriend_failed',
+          ),
+        });
+      });
+  }, [dispatch, notify, profile]);
 
   return (
     <ProfileSurface

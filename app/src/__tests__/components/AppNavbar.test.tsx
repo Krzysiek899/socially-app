@@ -49,6 +49,7 @@ const myProfileResponse = {
   friends: [
     { id: 'friend-1', displayName: 'Anna Nowak', avatarUrl: 'https://images.example.com/anna.png' },
   ],
+  incomingRequests: [],
   groupsCount: 8,
   groups: [
     { id: 'group-1', name: 'Biegacze Powiśle', iconKey: 'sport' },

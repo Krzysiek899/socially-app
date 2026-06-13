@@ -166,7 +166,7 @@
 
 .my-profile__list-row {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   gap: var(--space-3);
   min-height: 3.5rem;
@@ -174,6 +174,16 @@
 
 .my-profile__list-row-label {
   color: var(--color-text-default);
+}
+
+.my-profile__list-row > [data-layout="cluster"]:first-child {
+  flex: 1;
+}
+
+.my-profile__row-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
 }
 
 .my-profile__empty-text {

@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { Provider } from 'react-redux';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
+import { NotificationProvider } from './shared/components/index.ts';
 import { store } from './redux/store.ts';
 import { Playground } from './playground/Playground.tsx';
 import { AuthGuard } from './pages/auth/AuthGuard.tsx';
@@ -56,9 +57,11 @@ function App() {
 
   return (
     <Provider store={store}>
-      <BrowserRouter>
-        <AppRoutes />
-      </BrowserRouter>
+      <NotificationProvider>
+        <BrowserRouter>
+          <AppRoutes />
+        </BrowserRouter>
+      </NotificationProvider>
     </Provider>
   );
 }
