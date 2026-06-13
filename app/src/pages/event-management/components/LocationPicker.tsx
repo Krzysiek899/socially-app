@@ -1,8 +1,8 @@
 import * as React from 'react';
 import { MapContainer, Marker, TileLayer, useMapEvents } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
-import { Button, TextField } from '../../../shared/components/index.ts';
-import { Cluster, Stack } from '../../../shared/layout/index.tsx';
+import { Button } from '../../../shared/components/index.ts';
+import { Stack } from '../../../shared/layout/index.tsx';
 import { t } from '../../../i18n/index.ts';
 import { configureLeafletIcons } from '../../discover/leafletSetup.ts';
 import type { GeocodeResult } from '../domain/eventManagementModels.ts';
@@ -31,42 +31,25 @@ const MapClickHandler = ({ onPickLocation }: MapClickHandlerProps) => {
 };
 
 export type LocationPickerProps = {
-  searchValue: string;
-  onSearchValueChange: (value: string) => void;
   searchResults: GeocodeResult[];
   searchStatus: 'idle' | 'loading' | 'failed';
   searchErrorKey: string | null;
   selectedLocation: { lat: number; lng: number } | null;
-  onSearch: () => void;
   onSelectResult: (resultId: string) => void;
   onPickLocation: (location: { lat: number; lng: number }) => void;
 };
 
 export const LocationPicker = ({
-  searchValue,
-  onSearchValueChange,
   searchResults,
   searchStatus,
   searchErrorKey,
   selectedLocation,
-  onSearch,
   onSelectResult,
   onPickLocation,
 }: LocationPickerProps) => (
   <section className="location-picker" aria-label={t('eventManagement.form.location_picker')}>
     <Stack gap="2">
-      <Cluster align="end" gap="2">
-        <TextField
-          id="event-location-search"
-          label={t('eventManagement.form.location_search')}
-          value={searchValue}
-          onChange={(event) => onSearchValueChange(event.target.value)}
-        />
-        <Button type="button" variant="secondary" onClick={onSearch} disabled={searchStatus === 'loading'}>
-          {t('eventManagement.form.location_search_action')}
-        </Button>
-      </Cluster>
-
+      {searchStatus === 'loading' && <p className="location-picker__hint">{t('eventManagement.form.location_search_loading')}</p>}
       {searchStatus === 'failed' && searchErrorKey && (
         <p className="location-picker__error" role="alert">
           {t(searchErrorKey)}
@@ -74,9 +57,9 @@ export const LocationPicker = ({
       )}
 
       {searchResults.length > 0 && (
-        <div className="location-picker__results">
+        <div className="location-picker__results" role="listbox" aria-label={t('eventManagement.form.location_search_results')}>
           {searchResults.map((result) => (
-            <Button key={result.id} type="button" size="sm" variant="ghost" onClick={() => onSelectResult(result.id)}>
+            <Button key={result.id} type="button" size="sm" variant="secondary" onClick={() => onSelectResult(result.id)}>
               {result.label}
             </Button>
           ))}

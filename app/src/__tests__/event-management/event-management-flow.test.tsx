@@ -4,30 +4,15 @@ import { t } from '../../i18n/index.ts';
 
 jest.mock('../../pages/event-management/components/LocationPicker.tsx', () => ({
   LocationPicker: ({
-    searchValue,
-    onSearchValueChange,
     searchResults,
-    onSearch,
     onSelectResult,
     onPickLocation,
   }: {
-    searchValue: string;
-    onSearchValueChange: (value: string) => void;
     searchResults: Array<{ id: string; label: string }>;
-    onSearch: () => void;
     onSelectResult: (id: string) => void;
     onPickLocation: (coords: { lat: number; lng: number }) => void;
   }) => (
     <div>
-      <label htmlFor="mock-location-search">mock-location-search</label>
-      <input
-        id="mock-location-search"
-        value={searchValue}
-        onChange={(event) => onSearchValueChange(event.target.value)}
-      />
-      <button type="button" onClick={onSearch}>
-        mock-search
-      </button>
       {searchResults.map((result) => (
         <button key={result.id} type="button" onClick={() => onSelectResult(result.id)}>
           {result.label}
@@ -132,7 +117,7 @@ describe('Event management flow', () => {
     expect(global.fetch).not.toHaveBeenCalled();
   });
 
-  it('shows location required error when address was not picked on map', async () => {
+  it('closes popup after selecting an address search result', async () => {
     global.fetch = jest.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
       const url = typeof input === 'string' ? input : input.toString();
 
@@ -179,14 +164,59 @@ describe('Event management flow', () => {
     fireEvent.change(screen.getByLabelText(t('eventManagement.form.category')), {
       target: { value: 'TECH' },
     });
-    fireEvent.change(screen.getByLabelText('mock-location-search'), {
+    fireEvent.focus(screen.getByLabelText(t('eventManagement.form.address')));
+    fireEvent.change(screen.getByLabelText(t('eventManagement.form.address')), {
       target: { value: 'Prosta 10 Warszawa' },
     });
-    fireEvent.click(screen.getByRole('button', { name: 'mock-search' }));
-    expect(await screen.findByRole('button', { name: 'Prosta 10, Warszawa' })).toBeInTheDocument();
-    fireEvent.click(screen.getByRole('button', { name: t('eventManagement.create.submit') }));
+    const firstResult = await screen.findByRole('button', { name: 'Prosta 10, Warszawa' });
+    fireEvent.click(firstResult);
+    await waitFor(() => {
+      expect(screen.queryByRole('button', { name: 'Prosta 10, Warszawa' })).not.toBeInTheDocument();
+    });
+    await waitFor(() => {
+      expect((screen.getByLabelText(t('eventManagement.form.address')) as HTMLInputElement).value).toBe('Prosta 10, Warszawa');
+    });
+  });
 
-    expect(await screen.findByText(t('eventManagement.validation.location_required'))).toBeInTheDocument();
+  it('fills address field after picking point on map', async () => {
+    global.fetch = jest.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+      const url = typeof input === 'string' ? input : input.toString();
+
+      if (url.endsWith('/api/events/reverse-geocode') && init?.method === 'POST') {
+        return {
+          ok: true,
+          status: 200,
+          json: async () => ({
+            result: {
+              id: 'geo-map-1',
+              label: 'Marszałkowska 1, Warszawa',
+              location: { lat: 52.25, lng: 21.0 },
+              address: {
+                city: 'Warszawa',
+                street: 'Marszałkowska',
+                buildingNumber: '1',
+                postalCode: '00-001',
+              },
+            },
+          }),
+        } as Response;
+      }
+
+      return {
+        ok: false,
+        status: 404,
+        json: async () => ({ message: 'not_found' }),
+      } as Response;
+    }) as typeof fetch;
+
+    render(<App />);
+
+    fireEvent.focus(await screen.findByLabelText(t('eventManagement.form.address')));
+    fireEvent.click(screen.getByRole('button', { name: 'mock-pick-map' }));
+
+    await waitFor(() => {
+      expect((screen.getByLabelText(t('eventManagement.form.address')) as HTMLInputElement).value).toBe('Marszałkowska 1, Warszawa');
+    });
   });
 
   it('creates an event and keeps it consistent across my-events, discover and details', async () => {
@@ -274,10 +304,10 @@ describe('Event management flow', () => {
     fireEvent.change(screen.getByLabelText(t('eventManagement.form.category')), {
       target: { value: 'TECH' },
     });
-    fireEvent.change(screen.getByLabelText('mock-location-search'), {
+    fireEvent.focus(screen.getByLabelText(t('eventManagement.form.address')));
+    fireEvent.change(screen.getByLabelText(t('eventManagement.form.address')), {
       target: { value: 'Prosta 10 Warszawa' },
     });
-    fireEvent.click(screen.getByRole('button', { name: 'mock-search' }));
     fireEvent.click(await screen.findByRole('button', { name: 'Prosta 10, Warszawa' }));
     fireEvent.change(screen.getByLabelText(t('eventManagement.form.price_mode')), {
       target: { value: 'paid' },

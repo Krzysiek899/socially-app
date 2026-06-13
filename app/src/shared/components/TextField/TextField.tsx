@@ -25,6 +25,7 @@ export interface TextFieldProps {
   helperText?:          string;
   errorText?:           string;
   onChange?:            React.ChangeEventHandler<HTMLInputElement>;
+  onFocus?:             React.FocusEventHandler<HTMLInputElement>;
   leadingIcon?:         React.ReactNode;
   'aria-describedby'?:  string;
 }
@@ -53,6 +54,7 @@ export function TextField({
   helperText,
   errorText,
   onChange,
+  onFocus,
   leadingIcon,
   'aria-describedby': ariaDescribedBy,
 }: TextFieldProps): React.JSX.Element {
@@ -91,6 +93,7 @@ export function TextField({
           max={max}
           step={step}
           onChange={onChange}
+          onFocus={onFocus}
           aria-invalid={isError || undefined}
           aria-describedby={describedBy}
         />

@@ -63,3 +63,25 @@ export const geocodeSearchResponseSchema = z.object({
     }),
   })),
 });
+
+export const reverseGeocodePayloadSchema = z.object({
+  lat: z.number().min(-90).max(90),
+  lng: z.number().min(-180).max(180),
+});
+
+export const reverseGeocodeResponseSchema = z.object({
+  result: z.object({
+    id: z.string().min(1),
+    label: z.string().min(1),
+    location: z.object({
+      lat: z.number().min(-90).max(90),
+      lng: z.number().min(-180).max(180),
+    }),
+    address: z.object({
+      city: z.string().min(1),
+      street: z.string().min(1),
+      buildingNumber: z.string().min(1),
+      postalCode: z.string().optional(),
+    }),
+  }),
+});

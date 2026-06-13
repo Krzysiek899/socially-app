@@ -13,7 +13,7 @@ import { DISCOVER_CATEGORY_CODES, type DiscoverCategoryCode } from '../discover/
 import type { CreateEventPayload, GeocodeResult } from './domain/eventManagementModels.ts';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks.ts';
 import { createAuthoredEvent } from '../../redux/eventManagement/eventManagementSlice.ts';
-import { searchEventAddressRequest } from './api/eventManagementApi.ts';
+import { reverseEventAddressRequest, searchEventAddressRequest } from './api/eventManagementApi.ts';
 import './CreateEventPage.css';
 
 const LocationPicker = React.lazy(async () => import('./components/LocationPicker.tsx').then((module) => ({ default: module.LocationPicker })));
@@ -25,16 +25,13 @@ type FormState = {
   description: string;
   dateTime: string;
   category: string;
-  city: string;
-  street: string;
-  buildingNumber: string;
-  postalCode: string;
+  addressQuery: string;
   priceMode: PriceMode;
   priceAmount: string;
 };
 
 type FormErrors = Partial<Record<
-  'title' | 'description' | 'dateTime' | 'category' | 'city' | 'street' | 'buildingNumber' | 'priceAmount' | 'location',
+  'title' | 'description' | 'dateTime' | 'category' | 'address' | 'priceAmount' | 'location',
   string
 >>;
 
@@ -53,10 +50,7 @@ const initialFormState: FormState = {
   description: '',
   dateTime: '',
   category: '',
-  city: '',
-  street: '',
-  buildingNumber: '',
-  postalCode: '',
+  addressQuery: '',
   priceMode: 'free',
   priceAmount: '0',
 };
@@ -80,6 +74,7 @@ const toIsoDateTime = (value: string): string | null => {
 
 const validateForm = (
   form: FormState,
+  selectedAddressResult: GeocodeResult | null,
   selectedLocation: { lat: number; lng: number } | null,
 ): FormErrors => {
   const errors: FormErrors = {};
@@ -100,16 +95,8 @@ const validateForm = (
     errors.category = 'eventManagement.validation.category';
   }
 
-  if (form.city.trim().length === 0) {
-    errors.city = 'eventManagement.validation.city';
-  }
-
-  if (form.street.trim().length === 0) {
-    errors.street = 'eventManagement.validation.street';
-  }
-
-  if (form.buildingNumber.trim().length === 0) {
-    errors.buildingNumber = 'eventManagement.validation.building_number';
+  if (form.addressQuery.trim().length < 3 || !selectedAddressResult) {
+    errors.address = 'eventManagement.validation.address_required';
   }
 
   if (!selectedLocation) {
@@ -128,10 +115,11 @@ const validateForm = (
 
 const toPayload = (
   form: FormState,
+  selectedAddressResult: GeocodeResult | null,
   selectedLocation: { lat: number; lng: number } | null,
 ): CreateEventPayload => {
   const dateTime = toIsoDateTime(form.dateTime);
-  if (!dateTime || !isCategoryCode(form.category) || !selectedLocation) {
+  if (!dateTime || !isCategoryCode(form.category) || !selectedLocation || !selectedAddressResult) {
     throw new Error('eventManagement.errors.request_invalid');
   }
 
@@ -143,10 +131,10 @@ const toPayload = (
     dateTime,
     category: form.category,
     address: {
-      city: form.city.trim(),
-      street: form.street.trim(),
-      buildingNumber: form.buildingNumber.trim(),
-      postalCode: form.postalCode.trim() || undefined,
+      city: selectedAddressResult.address.city,
+      street: selectedAddressResult.address.street,
+      buildingNumber: selectedAddressResult.address.buildingNumber,
+      postalCode: selectedAddressResult.address.postalCode,
     },
     location: selectedLocation,
     price: {
@@ -164,17 +152,30 @@ export const CreateEventPage = () => {
   const token = useAppSelector((state) => state.auth.session?.token);
   const [form, setForm] = React.useState<FormState>(initialFormState);
   const [submitted, setSubmitted] = React.useState(false);
-  const [locationSearchQuery, setLocationSearchQuery] = React.useState('');
+  const [isLocationPickerOpen, setIsLocationPickerOpen] = React.useState(false);
   const [locationSearchStatus, setLocationSearchStatus] = React.useState<'idle' | 'loading' | 'failed'>('idle');
   const [locationSearchErrorKey, setLocationSearchErrorKey] = React.useState<string | null>(null);
   const [locationSearchResults, setLocationSearchResults] = React.useState<GeocodeResult[]>([]);
+  const [selectedAddressResult, setSelectedAddressResult] = React.useState<GeocodeResult | null>(null);
   const [selectedLocation, setSelectedLocation] = React.useState<{ lat: number; lng: number } | null>(null);
+  const reverseLookupRequestIdRef = React.useRef(0);
 
-  const errors = React.useMemo(() => validateForm(form, selectedLocation), [form, selectedLocation]);
+  const errors = React.useMemo(
+    () => validateForm(form, selectedAddressResult, selectedLocation),
+    [form, selectedAddressResult, selectedLocation],
+  );
   const showValidation = submitted;
 
-  const handleInputChange = (key: keyof FormState) => (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = (key: keyof Omit<FormState, 'addressQuery'>) => (event: React.ChangeEvent<HTMLInputElement>) => {
     setForm((current) => ({ ...current, [key]: event.target.value }));
+  };
+
+  const handleAddressQueryChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const nextValue = event.target.value;
+    setForm((current) => ({ ...current, addressQuery: nextValue }));
+    setIsLocationPickerOpen(true);
+    setSelectedAddressResult(null);
+    setSelectedLocation(null);
   };
 
   const handleCategoryChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
@@ -190,7 +191,19 @@ export const CreateEventPage = () => {
     }));
   };
 
-  const handleSearchLocation = async () => {
+  React.useEffect(() => {
+    if (!isLocationPickerOpen) {
+      return;
+    }
+
+    const query = form.addressQuery.trim();
+    if (query.length < 3) {
+      setLocationSearchResults([]);
+      setLocationSearchErrorKey(null);
+      setLocationSearchStatus('idle');
+      return;
+    }
+
     if (!token) {
       setLocationSearchStatus('failed');
       setLocationSearchErrorKey('eventManagement.errors.unauthorized');
@@ -198,44 +211,94 @@ export const CreateEventPage = () => {
     }
 
     const controller = new AbortController();
-    setLocationSearchStatus('loading');
-    setLocationSearchErrorKey(null);
-    try {
-      const results = await searchEventAddressRequest(locationSearchQuery, token, controller.signal);
-      setLocationSearchResults(results);
-      setLocationSearchStatus('idle');
-      if (results.length === 0) {
-        setLocationSearchErrorKey('eventManagement.errors.location_not_found');
-      }
-    } catch (error) {
-      setLocationSearchResults([]);
-      setLocationSearchStatus('failed');
-      if (error instanceof Error) {
-        setLocationSearchErrorKey(error.message);
-      } else {
-        setLocationSearchErrorKey('eventManagement.errors.fetch_failed');
-      }
-    }
-  };
+    const timer = window.setTimeout(() => {
+      setLocationSearchStatus('loading');
+      setLocationSearchErrorKey(null);
+      void searchEventAddressRequest(query, token, controller.signal)
+        .then((results) => {
+          setLocationSearchResults(results);
+          setLocationSearchStatus('idle');
+          if (results.length === 0) {
+            setLocationSearchErrorKey('eventManagement.errors.location_not_found');
+          }
+        })
+        .catch((error) => {
+          if (controller.signal.aborted) {
+            return;
+          }
+          setLocationSearchResults([]);
+          setLocationSearchStatus('failed');
+          if (error instanceof Error) {
+            setLocationSearchErrorKey(error.message);
+          } else {
+            setLocationSearchErrorKey('eventManagement.errors.fetch_failed');
+          }
+        });
+    }, 300);
+
+    return () => {
+      window.clearTimeout(timer);
+      controller.abort();
+    };
+  }, [form.addressQuery, isLocationPickerOpen, token]);
 
   const handleSelectSearchResult = (resultId: string) => {
-    const selectedResult = locationSearchResults.find((result) => result.id === resultId);
-    if (!selectedResult) {
+    const result = locationSearchResults.find((item) => item.id === resultId);
+    if (!result) {
       return;
     }
 
-    setForm((current) => ({
-      ...current,
-      city: selectedResult.address.city,
-      street: selectedResult.address.street,
-      buildingNumber: selectedResult.address.buildingNumber,
-      postalCode: selectedResult.address.postalCode ?? '',
-    }));
-    setSelectedLocation(selectedResult.location);
+    setSelectedAddressResult(result);
+    setSelectedLocation(result.location);
+    setForm((current) => ({ ...current, addressQuery: result.label }));
+    setLocationSearchResults([]);
+    setLocationSearchStatus('idle');
+    setLocationSearchErrorKey(null);
+    setIsLocationPickerOpen(false);
   };
 
   const handlePickLocation = (location: { lat: number; lng: number }) => {
     setSelectedLocation(location);
+
+    if (!token) {
+      setLocationSearchStatus('failed');
+      setLocationSearchErrorKey('eventManagement.errors.unauthorized');
+      return;
+    }
+
+    const requestId = reverseLookupRequestIdRef.current + 1;
+    reverseLookupRequestIdRef.current = requestId;
+
+    const controller = new AbortController();
+    setLocationSearchStatus('loading');
+    setLocationSearchErrorKey(null);
+
+    void reverseEventAddressRequest(location, token, controller.signal)
+      .then((result) => {
+        if (reverseLookupRequestIdRef.current !== requestId) {
+          return;
+        }
+
+        setSelectedAddressResult(result);
+        setSelectedLocation(result.location);
+        setForm((current) => ({ ...current, addressQuery: result.label }));
+        setLocationSearchResults([]);
+        setLocationSearchStatus('idle');
+        setLocationSearchErrorKey(null);
+        setIsLocationPickerOpen(false);
+      })
+      .catch((error) => {
+        if (controller.signal.aborted || reverseLookupRequestIdRef.current !== requestId) {
+          return;
+        }
+
+        setLocationSearchStatus('failed');
+        if (error instanceof Error) {
+          setLocationSearchErrorKey(error.message);
+        } else {
+          setLocationSearchErrorKey('eventManagement.errors.fetch_failed');
+        }
+      });
   };
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -246,7 +309,7 @@ export const CreateEventPage = () => {
       return;
     }
 
-    const payload = toPayload(form, selectedLocation);
+    const payload = toPayload(form, selectedAddressResult, selectedLocation);
     const result = await dispatch(createAuthoredEvent(payload));
     if (createAuthoredEvent.fulfilled.match(result)) {
       navigate('/app/my-events');
@@ -316,39 +379,33 @@ export const CreateEventPage = () => {
                   variant={showValidation && errors.priceAmount ? 'error' : 'default'}
                   errorText={showValidation && errors.priceAmount ? t(errors.priceAmount) : undefined}
                 />
-                <TextField
-                  id="event-city"
-                  label={t('eventManagement.form.city')}
-                  value={form.city}
-                  onChange={handleInputChange('city')}
-                  required
-                  variant={showValidation && errors.city ? 'error' : 'default'}
-                  errorText={showValidation && errors.city ? t(errors.city) : undefined}
-                />
-                <TextField
-                  id="event-street"
-                  label={t('eventManagement.form.street')}
-                  value={form.street}
-                  onChange={handleInputChange('street')}
-                  required
-                  variant={showValidation && errors.street ? 'error' : 'default'}
-                  errorText={showValidation && errors.street ? t(errors.street) : undefined}
-                />
-                <TextField
-                  id="event-building-number"
-                  label={t('eventManagement.form.building_number')}
-                  value={form.buildingNumber}
-                  onChange={handleInputChange('buildingNumber')}
-                  required
-                  variant={showValidation && errors.buildingNumber ? 'error' : 'default'}
-                  errorText={showValidation && errors.buildingNumber ? t(errors.buildingNumber) : undefined}
-                />
-                <TextField
-                  id="event-postal-code"
-                  label={t('eventManagement.form.postal_code')}
-                  value={form.postalCode}
-                  onChange={handleInputChange('postalCode')}
-                />
+                <div className="create-event-page__address-anchor">
+                  <TextField
+                    id="event-address"
+                    label={t('eventManagement.form.address')}
+                    value={form.addressQuery}
+                    onChange={handleAddressQueryChange}
+                    onFocus={() => setIsLocationPickerOpen(true)}
+                    required
+                    variant={showValidation && errors.address ? 'error' : 'default'}
+                    errorText={showValidation && errors.address ? t(errors.address) : undefined}
+                    placeholder={t('eventManagement.form.address_placeholder')}
+                  />
+                  {isLocationPickerOpen && (
+                    <div className="create-event-page__address-popup">
+                      <React.Suspense fallback={<p>{t('eventManagement.form.location_picker_loading')}</p>}>
+                        <LocationPicker
+                          searchResults={locationSearchResults}
+                          searchStatus={locationSearchStatus}
+                          searchErrorKey={locationSearchErrorKey}
+                          selectedLocation={selectedLocation}
+                          onSelectResult={handleSelectSearchResult}
+                          onPickLocation={handlePickLocation}
+                        />
+                      </React.Suspense>
+                    </div>
+                  )}
+                </div>
               </Grid>
 
               <TextField
@@ -360,20 +417,6 @@ export const CreateEventPage = () => {
                 variant={showValidation && errors.description ? 'error' : 'default'}
                 errorText={showValidation && errors.description ? t(errors.description) : undefined}
               />
-
-              <React.Suspense fallback={<p>{t('eventManagement.form.location_picker_loading')}</p>}>
-                <LocationPicker
-                  searchValue={locationSearchQuery}
-                  onSearchValueChange={setLocationSearchQuery}
-                  searchResults={locationSearchResults}
-                  searchStatus={locationSearchStatus}
-                  searchErrorKey={locationSearchErrorKey}
-                  selectedLocation={selectedLocation}
-                  onSearch={handleSearchLocation}
-                  onSelectResult={handleSelectSearchResult}
-                  onPickLocation={handlePickLocation}
-                />
-              </React.Suspense>
 
               {(showValidation && errors.location) && (
                 <p className="create-event-page__error" role="alert">

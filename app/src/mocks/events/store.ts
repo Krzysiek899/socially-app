@@ -211,41 +211,6 @@ export const getDiscoverEventById = (eventId: string) =>
 export const getAuthoredEventsForUser = (userId: string) =>
   discoverEventsResponseSchema.parse(authoredEventsByUser.get(userId) ?? []);
 
-export const searchAddressCandidates = (query: string) => {
-  const normalizedQuery = normalizeValue(query);
-  if (normalizedQuery.length < 3) {
-    return [];
-  }
-
-  const allEvents = getAllDiscoverEvents();
-  const unique = new Map<string, {
-    id: string;
-    label: string;
-    location: { lat: number; lng: number };
-    address: { city: string; street: string; buildingNumber: string; postalCode?: string };
-  }>();
-
-  for (const event of allEvents) {
-    const label = `${event.address.street} ${event.address.buildingNumber}, ${event.address.city}`;
-    const haystack = normalizeValue(`${label} ${event.address.postalCode ?? ''}`);
-    if (!haystack.includes(normalizedQuery)) {
-      continue;
-    }
-
-    const key = `${event.address.city}|${event.address.street}|${event.address.buildingNumber}|${event.address.postalCode ?? ''}`;
-    if (!unique.has(key)) {
-      unique.set(key, {
-        id: `geo-${slugify(key)}`,
-        label,
-        location: event.location,
-        address: event.address,
-      });
-    }
-  }
-
-  return Array.from(unique.values()).slice(0, 5);
-};
-
 export const createAuthoredEventForUser = (
   userId: string,
   payload: CreateEventPayload,

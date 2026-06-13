@@ -6,6 +6,8 @@ import {
   createEventResponseSchema,
   geocodeSearchPayloadSchema,
   geocodeSearchResponseSchema,
+  reverseGeocodePayloadSchema,
+  reverseGeocodeResponseSchema,
 } from '../dto/eventManagementSchemas.ts';
 
 const resolveHttpErrorKey = (status: number, fallback: string): string => {
@@ -84,3 +86,30 @@ export const searchEventAddressRequest = async (
       },
     },
   }).then((response) => response.results);
+
+export const reverseEventAddressRequest = async (
+  location: { lat: number; lng: number },
+  token: string,
+  signal: AbortSignal,
+): Promise<GeocodeResult> =>
+  requestContract<{ lat: number; lng: number }, { result: GeocodeResult }>({
+    url: '/api/events/reverse-geocode',
+    method: 'POST',
+    payload: location,
+    payloadSchema: reverseGeocodePayloadSchema,
+    token,
+    signal,
+    responseSchema: reverseGeocodeResponseSchema,
+    errorKeys: {
+      requestValidation: 'eventManagement.errors.request_invalid',
+      responseValidation: 'eventManagement.errors.response_invalid',
+      network: 'eventManagement.errors.network',
+      http: (status: number) => {
+        if (status === 404) {
+          return 'eventManagement.errors.location_not_found';
+        }
+
+        return resolveHttpErrorKey(status, 'eventManagement.errors.fetch_failed');
+      },
+    },
+  }).then((response) => response.result);
