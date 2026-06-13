@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { Cluster } from '../../layout/index.tsx';
 import './TopNav.css';
 
@@ -12,13 +13,13 @@ export interface NavLinkProps {
 
 function NavLink({ href, active = false, children }: NavLinkProps): React.JSX.Element {
   return (
-    <a
-      href={href}
+    <Link
+      to={href}
       className={`top-nav__link${active ? ' top-nav__link--active' : ''}`}
       aria-current={active ? 'page' : undefined}
     >
       {children}
-    </a>
+    </Link>
   );
 }
 

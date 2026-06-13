@@ -102,7 +102,7 @@ describe('Event participation flow', () => {
     }) as typeof fetch;
 
     window.history.replaceState({}, '', '/app/events/event-1');
-    const firstRender = render(<App />);
+    render(<App />);
 
     fireEvent.click(await screen.findByRole('button', { name: t('discover.details.join') }));
 
@@ -110,9 +110,7 @@ describe('Event participation flow', () => {
       expect(screen.queryByRole('button', { name: t('discover.details.join') })).not.toBeInTheDocument();
     });
 
-    firstRender.unmount();
-    window.history.replaceState({}, '', '/app/my-events');
-    render(<App />);
+    fireEvent.click(await screen.findByRole('link', { name: t('discover.nav.my_events') }));
 
     expect(await screen.findByRole('heading', { name: t('eventManagement.my_events.participating.title') })).toBeInTheDocument();
     expect(await screen.findByText(t('eventManagement.my_events.participation.joined'))).toBeInTheDocument();
@@ -150,14 +148,12 @@ describe('Event participation flow', () => {
     }) as typeof fetch;
 
     window.history.replaceState({}, '', '/app/events/event-2');
-    const firstRender = render(<App />);
+    render(<App />);
 
     expect(await screen.findByText(t('discover.details.pending'))).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: t('discover.details.join') })).not.toBeInTheDocument();
 
-    firstRender.unmount();
-    window.history.replaceState({}, '', '/app/my-events');
-    render(<App />);
+    fireEvent.click(await screen.findByRole('link', { name: t('discover.nav.my_events') }));
     expect(await screen.findByText(t('eventManagement.my_events.participation.pending'))).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button', { name: t('eventManagement.my_events.leave') }));
