@@ -10,11 +10,11 @@ import { logout } from '../../../redux/auth/authSlice.ts';
 import { useAppDispatch } from '../../../redux/hooks.ts';
 import './AppNavbar.css';
 
-type AppNavKey = 'discover' | 'my-events' | 'profile';
-
 export interface AppNavbarProps {
   active?: AppNavKey;
 }
+
+type AppNavKey = 'discover' | 'my-events' | 'profile' | 'create-event';
 
 export function AppNavbar({ active = 'discover' }: AppNavbarProps): React.JSX.Element {
   const dispatch = useAppDispatch();
@@ -59,9 +59,11 @@ export function AppNavbar({ active = 'discover' }: AppNavbarProps): React.JSX.El
     <TopNav>
       <TopNav.Brand>Socially</TopNav.Brand>
       <TopNav.NavLink href="/app" active={active === 'discover'}>{t('discover.nav.discover')}</TopNav.NavLink>
-      <TopNav.NavLink href="#my-events" active={active === 'my-events'}>{t('discover.nav.my_events')}</TopNav.NavLink>
+      <TopNav.NavLink href="/app/my-events" active={active === 'my-events'}>{t('discover.nav.my_events')}</TopNav.NavLink>
       <TopNav.Actions>
-        <Button type="button" size="sm">{t('discover.nav.create_event')}</Button>
+        <Button type="button" size="sm" variant={active === 'create-event' ? 'primary' : 'secondary'} onClick={() => navigate('/app/events/create')}>
+          {t('discover.nav.create_event')}
+        </Button>
         <Button
           type="button"
           size="sm"

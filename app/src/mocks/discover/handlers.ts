@@ -2,6 +2,7 @@ import { http, HttpResponse } from 'msw';
 import { z } from 'zod';
 import { DISCOVER_CATEGORY_CODES } from '../../pages/discover/domain/discoverModels.ts';
 import { discoverEventsResponseSchema } from '../../pages/discover/dto/discoverSchemas.ts';
+import { getAllDiscoverEvents, getDiscoverEventById } from '../events/store.ts';
 
 const discoverFiltersSchema = z.object({
   q: z.string().optional(),
@@ -10,122 +11,6 @@ const discoverFiltersSchema = z.object({
   dateFrom: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
   dateTo: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
 });
-
-const discoverEvents = discoverEventsResponseSchema.parse([
-  {
-    id: 'event-krakow-jazz-night',
-    title: 'Jazz Night nad Wisłą',
-    dateTime: '2026-06-20T17:30:00Z',
-    description: 'Wieczorny koncert jazzowy i jam session na bulwarach.',
-    category: 'MUSIC',
-    address: {
-      city: 'Kraków',
-      street: 'Bulwar Czerwieński',
-      buildingNumber: '1',
-      postalCode: '31-069',
-    },
-    location: {
-      lat: 50.0515,
-      lng: 19.9366,
-    },
-    price: {
-      amount: 0,
-      currency: 'PLN',
-      isFree: true,
-    },
-    organizer: {
-      id: 'org-anna',
-      displayName: 'Anna Wójcik',
-      avatarUrl: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=120&q=80',
-    },
-    attendeesCount: 12,
-    attendees: [
-      { id: 'u1', displayName: 'Paweł K.', avatarUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=120&q=80' },
-      { id: 'u2', displayName: 'Natalia S.', avatarUrl: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=120&q=80' },
-      { id: 'u3', displayName: 'Michał R.' },
-      { id: 'u4', displayName: 'Kasia W.' },
-      { id: 'u5', displayName: 'Ola M.' },
-      { id: 'u6', displayName: 'Tomek P.' },
-      { id: 'u7', displayName: 'Marek Z.' },
-      { id: 'u8', displayName: 'Iga B.' },
-      { id: 'u9', displayName: 'Adrian N.' },
-      { id: 'u10', displayName: 'Zofia T.' },
-      { id: 'u11', displayName: 'Kuba G.' },
-      { id: 'u12', displayName: 'Ewa C.' },
-    ],
-    photoUrl: 'https://images.unsplash.com/photo-1415201364774-f6f0bb35f28f?auto=format&fit=crop&w=640&q=80',
-  },
-  {
-    id: 'event-warsaw-tech-meetup',
-    title: 'Frontend Meetup Warszawa',
-    dateTime: '2026-06-15T16:00:00Z',
-    description: 'Spotkanie społeczności frontendowej z lightning talkami.',
-    category: 'TECH',
-    address: {
-      city: 'Warszawa',
-      street: 'Prosta',
-      buildingNumber: '51',
-      postalCode: '00-838',
-    },
-    location: {
-      lat: 52.2326,
-      lng: 20.9842,
-    },
-    price: {
-      amount: 35,
-      currency: 'PLN',
-      isFree: false,
-    },
-    organizer: {
-      id: 'org-dawid',
-      displayName: 'Dawid Cieślak',
-      avatarUrl: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=120&q=80',
-    },
-    attendeesCount: 6,
-    attendees: [
-      { id: 'u13', displayName: 'Magda O.' },
-      { id: 'u14', displayName: 'Bartek P.' },
-      { id: 'u15', displayName: 'Sandra R.' },
-      { id: 'u16', displayName: 'Mikołaj F.' },
-      { id: 'u17', displayName: 'Laura K.' },
-      { id: 'u18', displayName: 'Dominik H.' },
-    ],
-    photoUrl: 'https://images.unsplash.com/photo-1515187029135-18ee286d815b?auto=format&fit=crop&w=640&q=80',
-  },
-  {
-    id: 'event-gdansk-kayak',
-    title: 'Poranny spływ kajakowy',
-    dateTime: '2026-06-18T07:00:00Z',
-    description: 'Rekreacyjny spływ kajakowy z instruktorem dla początkujących.',
-    category: 'OUTDOOR',
-    address: {
-      city: 'Gdańsk',
-      street: 'Sienna Grobla',
-      buildingNumber: '7',
-      postalCode: '80-760',
-    },
-    location: {
-      lat: 54.3515,
-      lng: 18.6719,
-    },
-    price: {
-      amount: 70,
-      currency: 'PLN',
-      isFree: false,
-    },
-    organizer: {
-      id: 'org-julia',
-      displayName: 'Julia Lis',
-    },
-    attendeesCount: 4,
-    attendees: [
-      { id: 'u19', displayName: 'Karol M.' },
-      { id: 'u20', displayName: 'Wiktoria N.' },
-      { id: 'u21', displayName: 'Robert D.' },
-      { id: 'u22', displayName: 'Agnieszka G.' },
-    ],
-  },
-]);
 
 const parseDiscoverFilters = (url: URL) =>
   discoverFiltersSchema.parse({
@@ -163,6 +48,7 @@ export const discoverHandlers = [
     const filters = parseDiscoverFilters(url);
     const normalizedSearch = filters.q?.trim().toLowerCase() ?? '';
 
+    const discoverEvents = getAllDiscoverEvents();
     const filteredEvents = discoverEvents
       .filter((event) => {
         if (normalizedSearch.length === 0) {
@@ -204,7 +90,7 @@ export const discoverHandlers = [
       return HttpResponse.json({ message: 'unauthorized' }, { status: 401 });
     }
 
-    const event = discoverEvents.find((item) => item.id === params.eventId);
+    const event = typeof params.eventId === 'string' ? getDiscoverEventById(params.eventId) : undefined;
     if (!event) {
       return HttpResponse.json({ message: 'not_found' }, { status: 404 });
     }

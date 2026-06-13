@@ -1,0 +1,117 @@
+import * as React from 'react';
+import { CalendarDays, MapPinned, Users } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { AppNavbar, Badge, Button, Card } from '../../shared/components/index.ts';
+import { Cluster, Grid, Page, Section, Stack } from '../../shared/layout/index.tsx';
+import { useAppDispatch, useAppSelector } from '../../redux/hooks.ts';
+import { fetchAuthoredEvents } from '../../redux/eventManagement/eventManagementSlice.ts';
+import type { AuthoredEvent } from './domain/eventManagementModels.ts';
+import { t } from '../../i18n/index.ts';
+import './MyEventsPage.css';
+
+const formatDateTime = (isoDateTime: string): string =>
+  new Intl.DateTimeFormat('pl-PL', {
+    dateStyle: 'medium',
+    timeStyle: 'short',
+  }).format(new Date(isoDateTime));
+
+const formatAddress = (event: AuthoredEvent): string => {
+  const postalCode = event.address.postalCode ? `${event.address.postalCode} ` : '';
+  return `${event.address.street} ${event.address.buildingNumber}, ${postalCode}${event.address.city}`;
+};
+
+const formatPrice = (event: AuthoredEvent): string => {
+  if (event.price.isFree) {
+    return t('discover.card.price.free');
+  }
+
+  return new Intl.NumberFormat('pl-PL', {
+    style: 'currency',
+    currency: event.price.currency,
+    maximumFractionDigits: 0,
+  }).format(event.price.amount);
+};
+
+export const MyEventsPage = () => {
+  const navigate = useNavigate();
+  const dispatch = useAppDispatch();
+  const { authoredItems, authoredStatus, authoredErrorKey } = useAppSelector((state) => state.eventManagement);
+
+  React.useEffect(() => {
+    void dispatch(fetchAuthoredEvents());
+  }, [dispatch]);
+
+  return (
+    <main className="my-events-page">
+      <AppNavbar active="my-events" />
+
+      <Page maxWidth="xl">
+        <Section spacing="sm">
+          <Stack gap="3">
+            <header className="my-events-page__header">
+              <h1>{t('eventManagement.my_events.title')}</h1>
+              <p>{t('eventManagement.my_events.subtitle')}</p>
+              <Cluster gap="2">
+                <Button type="button" onClick={() => navigate('/app/events/create')}>
+                  {t('eventManagement.my_events.create_cta')}
+                </Button>
+              </Cluster>
+            </header>
+
+            {authoredStatus === 'loading' && <p className="my-events-page__state">{t('eventManagement.state.loading')}</p>}
+            {authoredStatus === 'failed' && (
+              <p className="my-events-page__state my-events-page__state--error" role="alert">
+                {t(authoredErrorKey ?? 'eventManagement.errors.fetch_failed')}
+              </p>
+            )}
+            {authoredStatus === 'succeeded' && authoredItems.length === 0 && (
+              <p className="my-events-page__state">{t('eventManagement.state.empty')}</p>
+            )}
+
+            {authoredItems.length > 0 && (
+              <Grid columns={2} gap="3">
+                {authoredItems.map((event) => (
+                  <Card
+                    key={event.id}
+                    as="article"
+                    variant="default"
+                    header={(
+                      <Stack gap="2">
+                        <Cluster justify="space-between" align="center">
+                          <h2 className="my-events-page__card-title">{event.title}</h2>
+                          <Badge size="sm" variant="info">{t(`discover.category.${event.category}`)}</Badge>
+                        </Cluster>
+                        <p className="my-events-page__description">{event.description}</p>
+                      </Stack>
+                    )}
+                  >
+                    <Stack gap="2">
+                      <Cluster gap="2" align="center">
+                        <CalendarDays size={14} />
+                        <span>{formatDateTime(event.dateTime)}</span>
+                      </Cluster>
+                      <Cluster gap="2" align="center">
+                        <MapPinned size={14} />
+                        <span>{formatAddress(event)}</span>
+                      </Cluster>
+                      <Cluster gap="2" align="center">
+                        <Users size={14} />
+                        <span>{event.attendeesCount}</span>
+                        <span>{formatPrice(event)}</span>
+                      </Cluster>
+                      <Cluster justify="flex-end">
+                        <Button type="button" size="sm" variant="secondary" onClick={() => navigate(`/app/events/${event.id}`)}>
+                          {t('eventManagement.my_events.details')}
+                        </Button>
+                      </Cluster>
+                    </Stack>
+                  </Card>
+                ))}
+              </Grid>
+            )}
+          </Stack>
+        </Section>
+      </Page>
+    </main>
+  );
+};
