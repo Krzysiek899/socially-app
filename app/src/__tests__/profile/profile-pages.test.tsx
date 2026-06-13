@@ -141,6 +141,32 @@ describe('Profile pages', () => {
     expect(screen.getByText('Brak grup do wyświetlenia.')).toBeInTheDocument();
   });
 
+  it('expands all my groups after clicking show-all CTA', async () => {
+    window.history.replaceState({}, '', '/app/profile');
+    global.fetch = jest.fn(async () => ({
+      ok: true,
+      status: 200,
+      json: async () => ({
+        ...myProfileResponse,
+        groupsCount: 5,
+        groups: [
+          { id: 'group-1', name: 'Biegacze Powiśle', iconKey: 'sport' },
+          { id: 'group-2', name: 'Klub Czytelniczy', iconKey: 'book' },
+          { id: 'group-3', name: 'Tech Meetup WAW', iconKey: 'tech' },
+          { id: 'group-4', name: 'Board Games', iconKey: 'book' },
+          { id: 'group-5', name: 'Startup Talks', iconKey: 'tech' },
+        ],
+      }),
+    })) as typeof fetch;
+
+    render(<App />);
+
+    fireEvent.click(await screen.findByRole('button', { name: 'Zobacz wszystkie' }));
+
+    expect(await screen.findByRole('button', { name: 'Board Games' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Startup Talks' })).toBeInTheDocument();
+  });
+
   it('renders a public profile route with dedicated figma sections', async () => {
     window.history.replaceState({}, '', '/app/users/org-anna');
     global.fetch = jest.fn(async () => ({

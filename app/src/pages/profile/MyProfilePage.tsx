@@ -20,6 +20,7 @@ export const MyProfilePage = (): React.JSX.Element => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const { notify } = useNotifications();
+  const [showAllGroups, setShowAllGroups] = React.useState(false);
   const { profile, status, errorKey } = useAppSelector((state) => state.profile.myProfile);
 
   const loadProfile = React.useCallback(() => {
@@ -29,6 +30,10 @@ export const MyProfilePage = (): React.JSX.Element => {
   React.useEffect(() => {
     loadProfile();
   }, [loadProfile]);
+
+  React.useEffect(() => {
+    setShowAllGroups(false);
+  }, [profile?.id]);
 
   const handleLogout = React.useCallback(() => {
     dispatch(logout());
@@ -131,8 +136,16 @@ export const MyProfilePage = (): React.JSX.Element => {
     [handleAcceptRequest, handleRejectRequest, profile],
   );
 
+  const visibleGroups = React.useMemo(() => {
+    if (!profile) {
+      return [];
+    }
+
+    return showAllGroups ? profile.groups : profile.groups.slice(0, 3);
+  }, [profile, showAllGroups]);
+
   const groupRows = React.useMemo(
-    () => profile?.groups.map((group) => {
+    () => visibleGroups.map((group) => {
       const icon = group.iconKey === 'sport'
         ? <UsersRound size={18} aria-hidden="true" />
         : group.iconKey === 'book'
@@ -144,10 +157,11 @@ export const MyProfilePage = (): React.JSX.Element => {
           key={group.id}
           leading={<span className={`my-profile__group-icon my-profile__group-icon--${group.iconKey}`}>{icon}</span>}
           label={group.name}
+          onClick={() => navigate(`/app/groups/${group.id}`)}
         />
       );
-    }) ?? [],
-    [profile],
+    }),
+    [navigate, visibleGroups],
   );
 
   return (
@@ -174,7 +188,8 @@ export const MyProfilePage = (): React.JSX.Element => {
               countLabel={`${profile.groupsCount} ${t('profile.my.groups_count')}`}
               items={groupRows}
               emptyText={t('profile.my.empty_groups')}
-              ctaLabel={t('profile.my.show_all_groups')}
+              ctaLabel={profile.groups.length > 3 && !showAllGroups ? t('profile.my.show_all_groups') : undefined}
+              onCtaClick={() => setShowAllGroups(true)}
             />
             <MyProfileListCard
               title={t('profile.my.incoming_requests')}
