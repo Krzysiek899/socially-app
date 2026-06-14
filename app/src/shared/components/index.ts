@@ -9,6 +9,9 @@ export type { ButtonProps, ButtonVariant, ButtonSize } from './Button/Button.tsx
 export { TextField, TEXT_FIELD_VARIANTS, TEXT_FIELD_SIZES } from './TextField/TextField.tsx';
 export type { TextFieldProps, TextFieldVariant, TextFieldSize } from './TextField/TextField.tsx';
 
+export { TextArea, TEXT_AREA_VARIANTS, TEXT_AREA_SIZES } from './TextArea/TextArea.tsx';
+export type { TextAreaProps, TextAreaVariant, TextAreaSize } from './TextArea/TextArea.tsx';
+
 export { Card, CARD_VARIANTS } from './Card/Card.tsx';
 export type { CardProps, CardVariant } from './Card/Card.tsx';
 
@@ -32,6 +35,9 @@ export type { DateTimeFieldProps } from './DateTimeField/DateTimeField.tsx';
 
 export { Dropdown, DROPDOWN_VARIANTS, DROPDOWN_SIZES } from './Dropdown/Dropdown.tsx';
 export type { DropdownProps, DropdownOption } from './Dropdown/Dropdown.tsx';
+
+export { SegmentedToggle } from './SegmentedToggle/SegmentedToggle.tsx';
+export type { SegmentedToggleOption, SegmentedToggleProps } from './SegmentedToggle/SegmentedToggle.tsx';
 
 export { Modal, MODAL_SIZES } from './Modal/Modal.tsx';
 export type { ModalProps, ModalSize } from './Modal/Modal.tsx';

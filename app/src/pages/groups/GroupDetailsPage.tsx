@@ -17,7 +17,7 @@ export const GroupDetailsPage = (): React.JSX.Element => {
   const { details, status, errorKey } = useAppSelector((state) => state.groups);
   const currentUserId = useAppSelector((state) => state.auth.session?.userId ?? null);
   const [isMutating, setIsMutating] = React.useState(false);
-  const goBack = useSmartBack('/app');
+  const goBack = useSmartBack('/discover');
 
   const loadGroup = React.useCallback(() => {
     if (!groupId) {
@@ -41,8 +41,16 @@ export const GroupDetailsPage = (): React.JSX.Element => {
     try {
       if (details.isMember) {
         await dispatch(leaveGroup(groupId)).unwrap();
+        notify({
+          variant: 'success',
+          message: t('groups.success.left'),
+        });
       } else {
         await dispatch(joinGroup(groupId)).unwrap();
+        notify({
+          variant: 'success',
+          message: t('groups.success.joined'),
+        });
       }
     } catch (errorKeyFromApi: unknown) {
       notify({
@@ -60,11 +68,11 @@ export const GroupDetailsPage = (): React.JSX.Element => {
 
   const handleMemberProfileClick = React.useCallback((memberId: string) => {
     if (currentUserId && memberId === currentUserId) {
-      navigate('/app/profile');
+      navigate('/profile');
       return;
     }
 
-    navigate(`/app/users/${memberId}`);
+    navigate(`/users/${memberId}`);
   }, [currentUserId, navigate]);
 
   return (

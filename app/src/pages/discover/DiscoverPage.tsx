@@ -195,7 +195,7 @@ export const DiscoverPage = () => {
                   <button
                     type="button"
                     className="discover-card__organizer-link"
-                    onClick={() => navigate(`/app/users/${event.organizer.id}`)}
+                    onClick={() => navigate(`/users/${event.organizer.id}`)}
                     aria-label={event.organizer.displayName}
                   >
                     <Avatar name={event.organizer.displayName} src={event.organizer.avatarUrl} size="sm" />
@@ -226,7 +226,7 @@ export const DiscoverPage = () => {
                   <Button
                     type="button"
                     size="sm"
-                    onClick={() => navigate(`/app/events/${event.id}`)}
+                    onClick={() => navigate(`/events/${event.id}`)}
                   >
                     {t('discover.card.join')}
                   </Button>

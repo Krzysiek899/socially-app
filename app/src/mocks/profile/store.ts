@@ -77,6 +77,30 @@ const userDirectory = new Map<string, UserDirectoryEntry>([
       avatarUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=120&q=80',
     },
   ],
+  [
+    'org-kasia',
+    {
+      id: 'org-kasia',
+      displayName: 'Kasia Mazur',
+      avatarUrl: 'https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?auto=format&fit=crop&w=160&q=80',
+    },
+  ],
+  [
+    'friend-julia',
+    {
+      id: 'friend-julia',
+      displayName: 'Julia Krawiec',
+      avatarUrl: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=160&q=80',
+    },
+  ],
+  [
+    'friend-emilia',
+    {
+      id: 'friend-emilia',
+      displayName: 'Emilia Zawadzka',
+      avatarUrl: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=160&q=80',
+    },
+  ],
 ]);
 
 const groupDirectory = new Map<string, GroupDirectoryEntry>([
@@ -179,6 +203,69 @@ const publicProfileBaseByUserId = new Map<string, PublicProfileBase>([
       ],
     },
   ],
+  [
+    'friend-pawel',
+    {
+      id: 'friend-pawel',
+      displayName: 'Paweł Nowak',
+      badge: 'Lider aktywności',
+      avatarUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=120&q=80',
+      bio: 'Organizuję sportowe spotkania po pracy i pomagam nowym osobom szybko wejść do grupy.',
+      rating: 4.9,
+      reviewsCount: 17,
+      reviews: [
+        {
+          id: 'review-1',
+          authorName: 'Ewelina M.',
+          rating: 5,
+          publishedAtLabel: 'Wczoraj',
+          content: 'Bardzo pozytywna energia i super kontakt przed wydarzeniem.',
+        },
+        {
+          id: 'review-2',
+          authorName: 'Tomek B.',
+          rating: 5,
+          publishedAtLabel: '3 dni temu',
+          content: 'Świetna organizacja drużyn i dbanie o każdego uczestnika.',
+        },
+        {
+          id: 'review-3',
+          authorName: 'Karol P.',
+          rating: 4,
+          publishedAtLabel: 'Tydzień temu',
+          content: 'Wydarzenie dobrze przygotowane, jasna komunikacja zasad.',
+        },
+      ],
+    },
+  ],
+  [
+    'org-kasia',
+    {
+      id: 'org-kasia',
+      displayName: 'Kasia Mazur',
+      badge: 'Ambasadorka społeczności',
+      avatarUrl: 'https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?auto=format&fit=crop&w=160&q=80',
+      bio: 'Prowadzę lokalne aktywności sportowe i wydarzenia integracyjne dla nowych osób.',
+      rating: 4.6,
+      reviewsCount: 12,
+      reviews: [
+        {
+          id: 'review-1',
+          authorName: 'Michał R.',
+          rating: 5,
+          publishedAtLabel: '2 dni temu',
+          content: 'Świetna atmosfera i bardzo konkretna organizacja.',
+        },
+        {
+          id: 'review-2',
+          authorName: 'Iga N.',
+          rating: 4,
+          publishedAtLabel: '6 dni temu',
+          content: 'Wydarzenia punktualne i przyjazne dla początkujących.',
+        },
+      ],
+    },
+  ],
 ]);
 
 const relationPairKey = (left: string, right: string): string => [left, right].sort().join('::');
@@ -186,22 +273,31 @@ const relationRequestKey = (fromUserId: string, toUserId: string): string => `${
 
 const initialFriendships = new Set<string>([
   relationPairKey('user-1', 'org-dawid'),
+  relationPairKey('user-1', 'org-kasia'),
+  relationPairKey('user-1', 'friend-emilia'),
   relationPairKey('org-dawid', 'org-anna'),
+  relationPairKey('org-dawid', 'friend-pawel'),
   relationPairKey('org-anna', 'friend-pawel'),
 ]);
 
 const initialPendingRequests = new Set<string>([
   relationRequestKey('org-anna', 'user-1'),
+  relationRequestKey('friend-julia', 'user-1'),
+  relationRequestKey('user-1', 'friend-pawel'),
 ]);
 
 const groupMembershipKey = (userId: string, groupId: string): string => `${userId}::${groupId}`;
 
 const initialGroupMemberships = new Set<string>([
   groupMembershipKey('user-1', 'group-1'),
+  groupMembershipKey('user-1', 'group-2'),
   groupMembershipKey('user-1', 'group-3'),
   groupMembershipKey('org-anna', 'group-1'),
   groupMembershipKey('org-anna', 'group-2'),
   groupMembershipKey('org-dawid', 'group-3'),
+  groupMembershipKey('org-kasia', 'group-1'),
+  groupMembershipKey('friend-pawel', 'group-3'),
+  groupMembershipKey('friend-emilia', 'group-2'),
 ]);
 
 let friendships = new Set(initialFriendships);
@@ -331,6 +427,12 @@ const getGroupIdsForUser = (userId: string): string[] =>
     .filter(([memberId]) => memberId === userId)
     .map(([, groupId]) => groupId);
 
+const getGroupMembersCount = (groupId: string): number =>
+  Array.from(groupMemberships)
+    .map((membershipKey) => membershipKey.split('::'))
+    .filter(([, memberGroupId]) => memberGroupId === groupId)
+    .length;
+
 const toPublicFriendAction = (state: ReturnType<typeof relationState>) => {
   if (state === 'outgoing_pending') {
     return 'request_sent' as const;
@@ -378,6 +480,7 @@ export const getMyProfileForUser = (userId: string, preferredDisplayName?: strin
       id: entry.id,
       name: entry.name,
       iconKey: entry.iconKey,
+      membersCount: getGroupMembersCount(entry.id),
     }));
 
   return myProfileSchema.parse({
@@ -422,6 +525,8 @@ export const getPublicProfileForUser = (
       id: entry.id,
       name: entry.name,
       meta: entry.meta,
+      iconKey: entry.iconKey,
+      membersCount: getGroupMembersCount(entry.id),
     }));
 
   return publicProfileSchema.parse({

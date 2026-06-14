@@ -33,11 +33,11 @@ export const NotificationCenterPage = () => {
     switch (type) {
       case 'USER_JOINED':
       case 'FRIEND_JOINED':
-        navigate(`/app/users/${referenceId}`);
+        navigate(`/users/${referenceId}`);
         break;
       case 'NEW_EVENT':
       case 'SYSTEM_APPROVAL':
-        navigate(`/app/events/${referenceId}`);
+        navigate(`/events/${referenceId}`);
         break;
       default:
         break;
@@ -46,7 +46,7 @@ export const NotificationCenterPage = () => {
 
   return (
     <main className="notifications-page">
-      <AppNavbar />
+      <AppNavbar active="notifications" />
 
       <Page maxWidth="xl">
         <Section spacing="md">

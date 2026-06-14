@@ -27,6 +27,7 @@ export const myProfileSchema = z.object({
       id: z.string().min(1),
       name: z.string().min(1),
       iconKey: z.enum(['sport', 'book', 'tech']),
+      membersCount: z.number().int().min(0).optional().default(0),
     }),
   ),
   isApproved: z.boolean().default(false),
@@ -59,6 +60,8 @@ export const publicProfileGroupSchema = z.object({
   id: z.string().min(1),
   name: z.string().min(1),
   meta: z.string().min(1),
+  iconKey: z.enum(['sport', 'book', 'tech']),
+  membersCount: z.number().int().min(0),
 });
 
 export const publicProfileSchema = z.object({

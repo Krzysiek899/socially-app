@@ -14,7 +14,7 @@ export interface AppNavbarProps {
   active?: AppNavKey;
 }
 
-type AppNavKey = 'discover' | 'my-events' | 'profile' | 'create-event';
+type AppNavKey = 'discover' | 'my-events' | 'profile' | 'create-event' | 'notifications';
 
 export function AppNavbar({ active = 'discover' }: AppNavbarProps): React.JSX.Element {
   const dispatch = useAppDispatch();
@@ -50,7 +50,7 @@ export function AppNavbar({ active = 'discover' }: AppNavbarProps): React.JSX.El
 
   const handleOpenProfile = () => {
     setIsProfileMenuOpen(false);
-    navigate('/app/profile');
+    navigate('/profile');
   };
 
   const handleLogout = () => {
@@ -62,22 +62,25 @@ export function AppNavbar({ active = 'discover' }: AppNavbarProps): React.JSX.El
   return (
     <TopNav>
       <TopNav.Brand>Socially</TopNav.Brand>
-      <TopNav.NavLink href="/app" active={active === 'discover'}>{t('discover.nav.discover')}</TopNav.NavLink>
-      <TopNav.NavLink href="/app/my-events" active={active === 'my-events'}>{t('discover.nav.my_events')}</TopNav.NavLink>
+      <TopNav.NavLink href="/discover" active={active === 'discover'}>{t('discover.nav.discover')}</TopNav.NavLink>
+      <TopNav.NavLink href="/my-events" active={active === 'my-events'}>{t('discover.nav.my_events')}</TopNav.NavLink>
       <TopNav.Actions>
-        <Button type="button" size="sm" variant={active === 'create-event' ? 'primary' : 'secondary'} onClick={() => navigate('/app/events/create')}>
-          {t('discover.nav.create_event')}
-        </Button>
+        {active !== 'create-event' ? (
+          <Button type="button" size="sm" variant="primary" onClick={() => navigate('/events/create')}>
+            {t('discover.nav.create_event')}
+          </Button>
+        ) : null}
         <Button
           type="button"
           size="sm"
           variant="ghost"
           aria-label={t('discover.nav.notifications')}
-          onClick={() => navigate('/app/notifications')}
+          onClick={() => navigate('/notifications')}
         >
           
           <Bell size={16} />
         </Button>
+        <ThemeToggle />
         <div className="app-navbar__profile-menu" ref={menuRef}>
           <button
             type="button"
@@ -114,7 +117,6 @@ export function AppNavbar({ active = 'discover' }: AppNavbarProps): React.JSX.El
             </div>
           ) : null}
         </div>
-        <ThemeToggle />
       </TopNav.Actions>
     </TopNav>
   );

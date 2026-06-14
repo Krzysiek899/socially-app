@@ -1,7 +1,7 @@
 import React from 'react';
 import { BadgeCheck, UserPlus } from 'lucide-react';
-import { Avatar, Badge, Button, Card } from '../../../shared/components/index.ts';
-import { Cluster, Stack } from '../../../shared/layout/index.tsx';
+import { Avatar, Badge, Button } from '../../../shared/components/index.ts';
+import { Cluster } from '../../../shared/layout/index.tsx';
 import { t } from '../../../i18n/index.ts';
 import type { PublicProfile } from '../domain/profileModels.ts';
 
@@ -20,27 +20,26 @@ export const PublicProfileHero = ({
   onRejectRequest,
   onUnfriend,
 }: PublicProfileHeroProps): React.JSX.Element => (
-  <Card as="section" variant="raised" aria-label={t('profile.hero.aria_label')}>
+  <section className="public-profile__hero-shell" aria-label={t('profile.hero.aria_label')}>
     <div className="public-profile__hero">
       <div className="public-profile__hero-banner" />
       <div className="public-profile__hero-content">
         <div className="public-profile__hero-main">
-          <Avatar name={profile.displayName} src={profile.avatarUrl} size="xl" />
-          <Stack gap="2" align="stretch">
-            <Stack gap="1" align="stretch">
+          <div className="public-profile__hero-avatar-wrap">
+            <Avatar name={profile.displayName} src={profile.avatarUrl} size="xl" />
+          </div>
+          <div className="public-profile__hero-text">
+            <Cluster gap="2" align="center">
               <h2 className="public-profile__hero-name">{profile.displayName}</h2>
-              <Badge variant="info" size="sm">
+              <Badge variant="warning" size="sm">
                 <Cluster gap="1" align="center">
-                  <BadgeCheck size={14} aria-hidden="true" />
+                  <BadgeCheck size={12} aria-hidden="true" />
                   <span>{profile.badge}</span>
                 </Cluster>
               </Badge>
-            </Stack>
+            </Cluster>
             <p className="public-profile__hero-bio">{profile.bio}</p>
-            <p className="public-profile__hero-rating">
-              <strong>{profile.rating.toFixed(1)}</strong> · {profile.reviewsCount} {t('profile.public.reviews_count')}
-            </p>
-          </Stack>
+          </div>
         </div>
         <div className="public-profile__hero-actions">
           {profile.friendAction === 'can_send_request' ? (
@@ -65,12 +64,12 @@ export const PublicProfileHero = ({
             </Cluster>
           ) : null}
           {profile.friendAction === 'friends' ? (
-            <Button type="button" size="lg" variant="secondary" onClick={onUnfriend}>
+            <Button type="button" size="lg" variant="danger" onClick={onUnfriend}>
               {t('profile.actions.unfriend')}
             </Button>
           ) : null}
         </div>
       </div>
     </div>
-  </Card>
+  </section>
 );

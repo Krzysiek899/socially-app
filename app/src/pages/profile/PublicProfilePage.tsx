@@ -24,7 +24,7 @@ export const PublicProfilePage = (): React.JSX.Element => {
   const dispatch = useAppDispatch();
   const { notify } = useNotifications();
   const { profile, status, errorKey } = useAppSelector((state) => state.profile.publicProfile);
-  const goBack = useSmartBack('/app/discover');
+  const goBack = useSmartBack('/discover');
 
   const loadProfile = React.useCallback(() => {
     if (!userId) {
@@ -138,7 +138,6 @@ export const PublicProfilePage = (): React.JSX.Element => {
           <div className="public-profile__primary-column">
             <PublicProfileReviewsCard
               rating={profile.rating}
-              reviewsCount={profile.reviewsCount}
               reviews={profile.reviews}
             />
           </div>

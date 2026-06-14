@@ -1,6 +1,7 @@
 import React from 'react';
 import { Avatar, Button, Card } from '../../../shared/components/index.ts';
-import { Cluster, Grid, Stack } from '../../../shared/layout/index.tsx';
+import { ChevronRight } from 'lucide-react';
+import { Cluster, Split, Stack } from '../../../shared/layout/index.tsx';
 import { t } from '../../../i18n/index.ts';
 import type { GroupDetails } from '../domain/groupModels.ts';
 
@@ -29,47 +30,44 @@ export const GroupDetailsCard = ({
   const shouldShowExpand = details.membersPreview.length > 3 && !showAllMembers;
 
   return (
-    <Card as="section" variant="raised">
-      <Stack gap="4">
-        <h2 className="group-details__title">{details.name}</h2>
+    <Stack gap="3">
+      <Card as="section" variant="raised">
+        <Stack gap="1">
+          <h2 className="group-details__title">{details.name}</h2>
+          <p className="group-details__members-count">{t('profile.public.group_members_count').replace('{count}', String(details.membersCount))}</p>
+        </Stack>
+      </Card>
 
-        <Grid columns={2} gap="3" className="group-details__content-grid">
-          <Card as="section" variant="subtle">
+      <div className="group-details__split">
+        <Split fraction="1/2" gap="3">
+          <Card as="section" variant="raised">
             <Stack gap="2">
               <h3 className="group-details__section-title">{t('groups.details.description')}</h3>
               <p className="group-details__description">{details.description}</p>
             </Stack>
           </Card>
 
-          <Card as="section" variant="subtle">
+          <Card as="section" variant="raised">
             <Stack gap="2">
-              <Cluster gap="2" align="center" justify="space-between">
+              <div className="group-details__list-header">
                 <h3 className="group-details__section-title">{t('groups.details.members')}</h3>
-                <span className="group-details__members-count">{details.membersCount}</span>
-              </Cluster>
+                <span className="group-details__list-count">{details.membersCount}</span>
+              </div>
 
               <Stack gap="2">
                 {visibleMembers.map((member) => (
-                  <Cluster
+                  <button
                     key={member.id}
-                    gap="2"
-                    align="center"
-                    justify="space-between"
-                    className="group-details__member-row"
+                    type="button"
+                    className="group-details__member-row group-details__member-row--button"
+                    onClick={() => onMemberProfileClick(member.id)}
                   >
                     <Cluster gap="2" align="center">
                       <Avatar name={member.displayName} src={member.avatarUrl} size="sm" />
                       <span className="group-details__member-name">{member.displayName}</span>
                     </Cluster>
-                    <Button
-                      type="button"
-                      variant="secondary"
-                      size="sm"
-                      onClick={() => onMemberProfileClick(member.id)}
-                    >
-                      {t('profile.actions.view_public')}
-                    </Button>
-                  </Cluster>
+                    <ChevronRight size={16} aria-hidden="true" />
+                  </button>
                 ))}
               </Stack>
 
@@ -85,14 +83,20 @@ export const GroupDetailsCard = ({
               ) : null}
             </Stack>
           </Card>
-        </Grid>
+        </Split>
+      </div>
 
-        <div className="group-details__actions">
-          <Button type="button" onClick={onAction} disabled={actionDisabled} size="md">
-            {actionLabel}
-          </Button>
-        </div>
-      </Stack>
-    </Card>
+      <div className="group-details__actions">
+        <Button
+          type="button"
+          onClick={onAction}
+          disabled={actionDisabled}
+          size="md"
+          variant={details.isMember ? 'danger' : 'primary'}
+        >
+          {actionLabel}
+        </Button>
+      </div>
+    </Stack>
   );
 };

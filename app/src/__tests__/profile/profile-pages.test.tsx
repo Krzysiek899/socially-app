@@ -87,11 +87,15 @@ const publicProfileResponse = {
       id: 'group-1',
       name: 'Jazz Kraków',
       meta: '5 wspólnych wydarzeń',
+      iconKey: 'sport',
+      membersCount: 124,
     },
     {
       id: 'group-2',
       name: 'Muzyka na żywo',
       meta: '2 wspólnych znajomych',
+      iconKey: 'book',
+      membersCount: 58,
     },
   ],
 };
@@ -309,8 +313,7 @@ describe('Profile pages', () => {
       expect(window.location.pathname).toBe('/app/events/event-krakow-jazz-night');
     });
 
-    const publicProfileButtons = await screen.findAllByRole('button', { name: t('profile.actions.view_public') });
-    fireEvent.click(publicProfileButtons[publicProfileButtons.length - 1]);
+    fireEvent.click(await screen.findByRole('button', { name: 'Paweł K.' }));
 
     await waitFor(() => {
       expect(window.location.pathname).toBe('/app/users/u1');

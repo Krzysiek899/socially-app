@@ -327,9 +327,7 @@ describe('Event management flow', () => {
       target: { value: 'Prosta 10 Warszawa' },
     });
     fireEvent.click(await screen.findByRole('button', { name: 'Prosta 10, Warszawa' }));
-    fireEvent.change(screen.getByLabelText(t('eventManagement.form.price_mode')), {
-      target: { value: 'paid' },
-    });
+    fireEvent.click(screen.getByRole('button', { name: t('eventManagement.form.price_mode.paid') }));
     fireEvent.change(screen.getByLabelText(t('eventManagement.form.price_amount')), {
       target: { value: String(createdEventResponse.price.amount) },
     });

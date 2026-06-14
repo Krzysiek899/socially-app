@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { CalendarDays, MapPinned, Users } from 'lucide-react';
+import { CalendarDays, MapPinned, Users, Wallet } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { AppNavbar, Badge, Button, Card } from '../../shared/components/index.ts';
 import { Cluster, Grid, Page, Section, Stack } from '../../shared/layout/index.tsx';
@@ -59,30 +59,28 @@ export const MyEventsPage = () => {
 
       <Page maxWidth="xl">
         <Section spacing="sm">
-          <Stack gap="3">
+          <Stack gap="5">
             <header className="my-events-page__header">
               <h1>{t('eventManagement.my_events.title')}</h1>
-              <p>{t('eventManagement.my_events.subtitle')}</p>
-              <Cluster gap="2">
-                <Button type="button" onClick={() => navigate('/app/events/create')}>
-                  {t('eventManagement.my_events.create_cta')}
-                </Button>
-              </Cluster>
             </header>
-
-            {authoredStatus === 'loading' && <p className="my-events-page__state">{t('eventManagement.state.loading')}</p>}
-            {authoredStatus === 'failed' && (
-              <p className="my-events-page__state my-events-page__state--error" role="alert">
-                {t(authoredErrorKey ?? 'eventManagement.errors.fetch_failed')}
-              </p>
-            )}
-            {authoredStatus === 'succeeded' && authoredItems.length === 0 && (
-              <p className="my-events-page__state">{t('eventManagement.state.empty')}</p>
-            )}
 
             <section aria-label={t('eventManagement.my_events.organized.title')}>
               <Stack gap="3">
                 <h2 className="my-events-page__section-title">{t('eventManagement.my_events.organized.title')}</h2>
+                <Cluster gap="2">
+                  <Button type="button" onClick={() => navigate('/events/create')}>
+                    {t('eventManagement.my_events.create_cta')}
+                  </Button>
+                </Cluster>
+                {authoredStatus === 'loading' && <p className="my-events-page__state">{t('eventManagement.state.loading')}</p>}
+                {authoredStatus === 'failed' && (
+                  <p className="my-events-page__state my-events-page__state--error" role="alert">
+                    {t(authoredErrorKey ?? 'eventManagement.errors.fetch_failed')}
+                  </p>
+                )}
+                {authoredStatus === 'succeeded' && authoredItems.length === 0 && (
+                  <p className="my-events-page__state">{t('eventManagement.state.empty')}</p>
+                )}
                 {authoredItems.length > 0 && (
                   <Grid columns={2} gap="3">
                     {authoredItems.map((event) => (
@@ -105,34 +103,41 @@ export const MyEventsPage = () => {
                           </Stack>
                         )}
                       >
-                        <Stack gap="2">
-                          <Cluster gap="2" align="center">
-                            <CalendarDays size={14} />
-                            <span>{formatDateTime(event.dateTime)}</span>
-                          </Cluster>
-                          <Cluster gap="2" align="center">
-                            <MapPinned size={14} />
-                            <span>{formatAddress(event)}</span>
-                          </Cluster>
-                          <Cluster gap="2" align="center">
-                            <Users size={14} />
-                            <span>{event.attendeesCount}</span>
-                            <span>{formatPrice(event)}</span>
-                          </Cluster>
-                          <Cluster justify="flex-end">
-                            <Button
-                              type="button"
-                              size="sm"
-                              variant="primary"
-                              onClick={() => navigate(`/app/my-events/${event.id}/manage`)}
-                            >
-                              {t('eventManagement.my_events.manage')}
-                            </Button>
-                            <Button type="button" size="sm" variant="secondary" onClick={() => navigate(`/app/events/${event.id}`)}>
-                              {t('eventManagement.my_events.details')}
-                            </Button>
-                          </Cluster>
-                        </Stack>
+                        <div className="my-events-page__card-content">
+                          <Stack gap="2">
+                            <Cluster gap="2" align="center">
+                              <CalendarDays size={14} />
+                              <span>{formatDateTime(event.dateTime)}</span>
+                            </Cluster>
+                            <Cluster gap="2" align="center">
+                              <MapPinned size={14} />
+                              <span>{formatAddress(event)}</span>
+                            </Cluster>
+                            <Cluster gap="2" align="center">
+                              <Users size={14} />
+                              <span>{event.attendeesCount}</span>
+                            </Cluster>
+                            <Cluster gap="2" align="center">
+                              <Wallet size={14} />
+                              <span>{formatPrice(event)}</span>
+                            </Cluster>
+                          </Stack>
+                          <div className="my-events-page__card-actions">
+                            <Cluster justify="flex-end">
+                              <Button
+                                type="button"
+                                size="sm"
+                                variant="primary"
+                                onClick={() => navigate(`/my-events/${event.id}/manage`)}
+                              >
+                                {t('eventManagement.my_events.manage')}
+                              </Button>
+                              <Button type="button" size="sm" variant="secondary" onClick={() => navigate(`/events/${event.id}`)}>
+                                {t('eventManagement.my_events.details')}
+                              </Button>
+                            </Cluster>
+                          </div>
+                        </div>
                       </Card>
                     ))}
                   </Grid>
@@ -178,36 +183,43 @@ export const MyEventsPage = () => {
                           </Stack>
                         )}
                       >
-                        <Stack gap="2">
-                          <Cluster gap="2" align="center">
-                            <CalendarDays size={14} />
-                            <span>{formatDateTime(event.dateTime)}</span>
-                          </Cluster>
-                          <Cluster gap="2" align="center">
-                            <MapPinned size={14} />
-                            <span>{formatAddress(event)}</span>
-                          </Cluster>
-                          <Cluster gap="2" align="center">
-                            <Users size={14} />
-                            <span>{event.attendeesCount}</span>
-                            <span>{formatPrice(event)}</span>
-                          </Cluster>
-                          <Cluster justify="flex-end">
-                            <Button type="button" size="sm" variant="secondary" onClick={() => navigate(`/app/events/${event.id}`)}>
-                              {t('eventManagement.my_events.details')}
-                            </Button>
-                            <Button
-                              type="button"
-                              size="sm"
-                              variant="ghost"
-                              onClick={() => {
-                                void dispatch(leaveEventParticipation(event.id));
-                              }}
-                            >
-                              {t('eventManagement.my_events.leave')}
-                            </Button>
-                          </Cluster>
-                        </Stack>
+                        <div className="my-events-page__card-content">
+                          <Stack gap="2">
+                            <Cluster gap="2" align="center">
+                              <CalendarDays size={14} />
+                              <span>{formatDateTime(event.dateTime)}</span>
+                            </Cluster>
+                            <Cluster gap="2" align="center">
+                              <MapPinned size={14} />
+                              <span>{formatAddress(event)}</span>
+                            </Cluster>
+                            <Cluster gap="2" align="center">
+                              <Users size={14} />
+                              <span>{event.attendeesCount}</span>
+                            </Cluster>
+                            <Cluster gap="2" align="center">
+                              <Wallet size={14} />
+                              <span>{formatPrice(event)}</span>
+                            </Cluster>
+                          </Stack>
+                          <div className="my-events-page__card-actions">
+                            <Cluster justify="flex-end">
+                              <Button type="button" size="sm" variant="secondary" onClick={() => navigate(`/events/${event.id}`)}>
+                                {t('eventManagement.my_events.details')}
+                              </Button>
+                              <Button
+                                type="button"
+                                size="sm"
+                                variant="danger"
+                                onClick={() => {
+                                  void dispatch(leaveEventParticipation(event.id));
+                                }}
+                              >
+                                {t('eventManagement.my_events.leave')}
+                              </Button>
+                            </Cluster>
+                          </div>
+                        </div>
                       </Card>
                     ))}
                   </Grid>

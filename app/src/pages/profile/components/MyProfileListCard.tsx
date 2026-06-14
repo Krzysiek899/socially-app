@@ -32,8 +32,10 @@ export const MyProfileListCard = ({
       as="section"
       header={(
         <div className="my-profile__list-header">
-          <h2 className="my-profile__list-title">{title}</h2>
-          <span className="my-profile__list-count">{countLabel}</span>
+          <div className="public-profile__card-title-row">
+            <h2 className="public-profile__card-title">{title}</h2>
+            <span className="public-profile__count-chip">{countLabel}</span>
+          </div>
         </div>
       )}
     >
@@ -71,10 +73,23 @@ export const MyProfileListRow = ({
   );
 
   if (onClick) {
+    const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        onClick();
+      }
+    };
+
     return (
-      <button type="button" className="my-profile__list-row my-profile__list-row--button" onClick={onClick}>
+      <div
+        role="button"
+        tabIndex={0}
+        className="my-profile__list-row my-profile__list-row--button"
+        onClick={onClick}
+        onKeyDown={handleKeyDown}
+      >
         {content}
-      </button>
+      </div>
     );
   }
 

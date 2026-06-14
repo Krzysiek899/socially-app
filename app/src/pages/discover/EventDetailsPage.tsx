@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowLeft, CalendarDays, CircleUserRound, Heart, MapPinned, Share2, Users, Wallet } from 'lucide-react';
+import { ArrowLeft, CalendarDays, CircleUserRound, MapPinned, Users, Wallet } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { AppNavbar, Avatar, Badge, Button, useNotifications } from '../../shared/components/index.ts';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks.ts';
@@ -7,7 +7,7 @@ import { fetchDiscoverEventByIdRequest } from './api/discoverApi.ts';
 import type { DiscoverEvent } from './domain/discoverModels.ts';
 import { Cluster, Grid, Page, Section, Split, Stack } from '../../shared/layout/index.tsx';
 import { t } from '../../i18n/index.ts';
-import { joinEventParticipation } from '../../redux/eventManagement/eventManagementSlice.ts';
+import { joinEventParticipation, leaveEventParticipation } from '../../redux/eventManagement/eventManagementSlice.ts';
 import { fetchDiscoverEvents } from '../../redux/discover/discoverSlice.ts';
 import { useSmartBack } from '../../shared/hooks/useSmartBack.ts';
 import './EventDetailsPage.css';
@@ -38,15 +38,19 @@ const formatPrice = (event: DiscoverEvent): string => {
 };
 
 const getDisplayAttendees = (event: DiscoverEvent) => event.attendees.slice(0, 6);
+const formatAttendeesLimit = (event: DiscoverEvent) => (
+  event.participantCapacity ? `${event.attendeesCount}/${event.participantCapacity}` : `${event.attendeesCount}`
+);
 
 type MetaCardProps = {
+  tone: 'time' | 'location' | 'price' | 'organizer';
   icon: React.ReactNode;
   label: string;
   value: React.ReactNode;
 };
 
-const MetaCard = ({ icon, label, value }: MetaCardProps) => (
-  <article className="event-details__meta-card">
+const MetaCard = ({ tone, icon, label, value }: MetaCardProps) => (
+  <article className={`event-details__meta-card event-details__meta-card--${tone}`}>
     <span className="event-details__meta-icon" aria-hidden="true">{icon}</span>
     <div>
       <p className="event-details__meta-label">{label}</p>
@@ -65,10 +69,11 @@ export const EventDetailsPage = () => {
   const [status, setStatus] = React.useState<LoadStatus>('loading');
   const [errorKey, setErrorKey] = React.useState<string | null>(null);
   const [isJoining, setIsJoining] = React.useState(false);
+  const [isLeaving, setIsLeaving] = React.useState(false);
   const [event, setEvent] = React.useState<DiscoverEvent | null>(null);
   const displayAttendees = React.useMemo(() => (event ? getDisplayAttendees(event) : []), [event]);
   const hiddenAttendeesCount = event ? Math.max(event.attendeesCount - displayAttendees.length, 0) : 0;
-  const goBack = useSmartBack('/app');
+  const goBack = useSmartBack('/discover');
 
   const loadEvent = React.useCallback(async (signal: AbortSignal) => {
     if (!eventId || !token) {
@@ -112,6 +117,7 @@ export const EventDetailsPage = () => {
   const participationState = event?.participation?.state ?? null;
   const isParticipant = event ? event.attendees.some((attendee) => attendee.id === currentUserId) : false;
   const canJoin = Boolean(event && !isOrganizer && !isParticipant && participationState === null);
+  const canLeave = Boolean(event && !isOrganizer && (isParticipant || participationState === 'joined'));
 
   const handleJoin = React.useCallback(async () => {
     if (!event || !eventId) {
@@ -121,10 +127,18 @@ export const EventDetailsPage = () => {
     setIsJoining(true);
 
     try {
-      await dispatch(joinEventParticipation(event.id)).unwrap();
+      const result = await dispatch(joinEventParticipation(event.id)).unwrap();
       await dispatch(fetchDiscoverEvents());
       const controller = new AbortController();
       await loadEvent(controller.signal);
+      notify({
+        variant: 'success',
+        message: t(
+          result.state === 'pending'
+            ? 'eventManagement.success.join_requested'
+            : 'eventManagement.success.joined',
+        ),
+      });
     } catch (joinError) {
       notify({
         variant: 'error',
@@ -134,6 +148,32 @@ export const EventDetailsPage = () => {
       setIsJoining(false);
     }
   }, [dispatch, event, eventId, loadEvent, notify]);
+
+  const handleLeave = React.useCallback(async () => {
+    if (!event) {
+      return;
+    }
+
+    setIsLeaving(true);
+
+    try {
+      await dispatch(leaveEventParticipation(event.id)).unwrap();
+      await dispatch(fetchDiscoverEvents());
+      const controller = new AbortController();
+      await loadEvent(controller.signal);
+      notify({
+        variant: 'success',
+        message: t('eventManagement.success.left'),
+      });
+    } catch (leaveError) {
+      notify({
+        variant: 'error',
+        message: t(typeof leaveError === 'string' ? leaveError : 'eventManagement.errors.leave_failed'),
+      });
+    } finally {
+      setIsLeaving(false);
+    }
+  }, [dispatch, event, loadEvent, notify]);
 
   return (
     <main className="event-details">
@@ -153,17 +193,11 @@ export const EventDetailsPage = () => {
                     type="button"
                     variant="secondary"
                     size="sm"
-                    onClick={() => navigate(`/app/my-events/${event.id}/manage`)}
+                    onClick={() => navigate(`/my-events/${event.id}/manage`)}
                   >
                     {t('eventManagement.my_events.manage')}
                   </Button>
                 )}
-                <Button type="button" variant="secondary" size="sm" aria-label="Udostępnij wydarzenie">
-                  <Share2 size={16} />
-                </Button>
-                <Button type="button" variant="secondary" size="sm" aria-label="Dodaj do ulubionych">
-                  <Heart size={16} />
-                </Button>
               </Cluster>
             </Cluster>
 
@@ -172,7 +206,9 @@ export const EventDetailsPage = () => {
         {status === 'succeeded' && event && (
           <Stack gap="4">
             <header className="event-details__header">
-              <Badge variant="info">{t(`discover.category.${event.category}`)}</Badge>
+              <div className="event-details__category-badge">
+                <Badge variant="info">{t(`discover.category.${event.category}`)}</Badge>
+              </div>
               <h1>{event.title}</h1>
             </header>
 
@@ -185,32 +221,35 @@ export const EventDetailsPage = () => {
 
             <Grid columns={4} gap="2">
               <MetaCard
+                tone="time"
                 icon={<CalendarDays size={16} />}
                 label="Kiedy"
                 value={formatDateTime(event.dateTime)}
               />
               <MetaCard
+                tone="location"
                 icon={<MapPinned size={16} />}
                 label="Gdzie"
                 value={formatAddress(event)}
               />
               <MetaCard
+                tone="price"
                 icon={<Wallet size={16} />}
                 label="Koszt"
                 value={formatPrice(event)}
               />
               <MetaCard
+                tone="organizer"
                 icon={<CircleUserRound size={16} />}
                 label={t('discover.details.organizer')}
                 value={(
-                  <Button
+                  <button
                     type="button"
-                    size="sm"
-                    variant="ghost"
-                    onClick={() => navigate(`/app/users/${event.organizer.id}`)}
+                    className="event-details__meta-link"
+                    onClick={() => navigate(`/users/${event.organizer.id}`)}
                   >
                     {event.organizer.displayName}
-                  </Button>
+                  </button>
                 )}
               />
             </Grid>
@@ -227,22 +266,20 @@ export const EventDetailsPage = () => {
                 <Stack gap="3">
                   <Cluster justify="space-between" align="center">
                     <h2>Lista uczestników</h2>
-                    <Badge size="sm" variant="info">{displayAttendees.length}/{event.attendeesCount}</Badge>
+                    <Badge size="sm" variant="info">{formatAttendeesLimit(event)}</Badge>
                   </Cluster>
 
                   <Stack gap="2">
                     {displayAttendees.map((attendee) => (
                       <Cluster key={attendee.id} gap="2" align="center">
                         <Avatar name={attendee.displayName} src={attendee.avatarUrl} size="sm" />
-                        <span className="event-details__attendee-name">{attendee.displayName}</span>
-                        <Button
+                        <button
                           type="button"
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => navigate(`/app/users/${attendee.id}`)}
+                          className="event-details__attendee-link"
+                          onClick={() => navigate(`/users/${attendee.id}`)}
                         >
-                          {t('profile.actions.view_public')}
-                        </Button>
+                          {attendee.displayName}
+                        </button>
                       </Cluster>
                     ))}
                     {hiddenAttendeesCount > 0 && (
@@ -256,12 +293,18 @@ export const EventDetailsPage = () => {
               </aside>
             </Split>
 
-            {(canJoin || participationState === 'pending') && (
+            {(canJoin || canLeave || participationState === 'pending') && (
               <footer className="event-details__footer">
                 {canJoin && (
                   <Button type="button" size="lg" onClick={() => { void handleJoin(); }} disabled={isJoining}>
                     <Users size={16} />
                     {t('discover.details.join')}
+                  </Button>
+                )}
+                {canLeave && (
+                  <Button type="button" size="lg" variant="danger" onClick={() => { void handleLeave(); }} disabled={isLeaving}>
+                    <Users size={16} />
+                    {t('eventManagement.my_events.leave')}
                   </Button>
                 )}
                 {participationState === 'pending' && (

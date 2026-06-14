@@ -16,6 +16,7 @@ export type MyProfileGroup = {
   id: string;
   name: string;
   iconKey: MyProfileGroupIconKey;
+  membersCount: number;
 };
 
 export type MyProfile = {
@@ -51,6 +52,8 @@ export type PublicProfileGroup = {
   id: string;
   name: string;
   meta: string;
+  iconKey: MyProfileGroupIconKey;
+  membersCount: number;
 };
 
 export type PublicProfileFriendAction =

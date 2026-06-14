@@ -79,7 +79,7 @@ export const RegistrationPage = () => {
     authStatus === 'loading' || [fullName, email, password, confirmPassword].some((value) => value.trim().length === 0);
 
   if (session) {
-    return <Navigate to="/app" replace />;
+    return <Navigate to="/discover" replace />;
   }
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {

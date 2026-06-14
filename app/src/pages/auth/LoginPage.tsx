@@ -24,7 +24,7 @@ export const LoginPage = () => {
   const returnTo = resolveReturnTo(params.get('returnTo'));
 
   if (session) {
-    return <Navigate to="/app" replace />;
+    return <Navigate to="/discover" replace />;
   }
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {

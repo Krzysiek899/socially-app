@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Button, Modal, TextField } from '../../../shared/components/index.ts';
+import { Button, Modal, TextArea, TextField } from '../../../shared/components/index.ts';
 import type { UpdateProfileRequestDTO } from '../dto/profileSchemas.ts';
 import { t } from '../../../i18n/index.ts'; 
 
@@ -37,7 +37,6 @@ export const EditProfileDialog = ({ isOpen, initialData, onClose, onSave }: Edit
     >
       <form onSubmit={handleSubmit} className="my-profile__dialog-form">
         <div className="my-profile__dialog-input-group">
-          {/* Replaced native input with your shared TextField */}
           <TextField 
             id="displayName" 
             label={t('auth.registration.full_name')}
@@ -48,14 +47,14 @@ export const EditProfileDialog = ({ isOpen, initialData, onClose, onSave }: Edit
         </div>
 
         <div className="my-profile__dialog-input-group">
-          {/* Kept native textarea since a shared one doesn't exist yet */}
-          <label htmlFor="bio">{t('profile.my.about')}</label>
-          <textarea 
+          <TextArea
             id="bio" 
-            className="my-profile__dialog-textarea"
+            label={t('profile.my.about')}
             value={bio} 
             onChange={(e) => setBio(e.target.value)}
+            rows={5}
             maxLength={300}
+            helperText={`${bio.length}/300`}
           />
         </div>
 
