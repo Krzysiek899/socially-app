@@ -2,7 +2,7 @@ import React, { useMemo, useRef } from 'react';
 import { CalendarDays, MapPinned, Search, SlidersHorizontal, Users } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks.ts';
-import { Accordion, AppNavbar, Avatar, Badge, Button, DateField, Dropdown, TextField } from '../../shared/components/index.ts';
+import { Accordion, AppNavbar, Avatar, Badge, Button, DateField, Dropdown, TextField, useNotifications } from '../../shared/components/index.ts';
 import { t } from '../../i18n/index.ts';
 import { Cluster, Grid, Page, Section, Split, Stack } from '../../shared/layout/index.tsx';
 import { DiscoverMap } from './DiscoverMap.tsx';
@@ -11,6 +11,10 @@ import {
   dateFromSet,
   dateToSet,
   fetchDiscoverEvents,
+  geolocationFailed,
+  geolocationRequestStarted,
+  geolocationResolved,
+  hereNowToggled,
   priceFilterSet,
   searchQuerySet,
   selectedEventSet,
@@ -58,6 +62,7 @@ const getDisplayedAttendees = (attendees: DiscoverEvent['attendees']) => attende
 export const DiscoverPage = () => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
+  const { notify } = useNotifications();
   const { items, status, errorKey, selectedEventId, filters } = useAppSelector((state) => state.discover);
   const prevSearchRef = useRef(filters.searchQuery);
   const itemRefs = useRef(new Map<string, HTMLLIElement>());
@@ -108,6 +113,30 @@ export const DiscoverPage = () => {
 
     itemRefs.current.delete(eventId);
   };
+
+  const requestUserLocation = React.useCallback(() => {
+    if (!navigator.geolocation) {
+      dispatch(geolocationFailed());
+      notify({ variant: 'error', message: t('discover.errors.fetch_failed') });
+      void dispatch(fetchDiscoverEvents());
+      return;
+    }
+
+    dispatch(geolocationRequestStarted());
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        dispatch(geolocationResolved({
+          lat: position.coords.latitude,
+          lng: position.coords.longitude,
+        }));
+        void dispatch(fetchDiscoverEvents());
+      },
+      () => {
+        dispatch(geolocationFailed());
+        void dispatch(fetchDiscoverEvents());
+      },
+    );
+  }, [dispatch, notify]);
 
   const accordionItems = useMemo(
     () =>
@@ -252,6 +281,23 @@ export const DiscoverPage = () => {
                       />
                     </Grid>
                   )}
+                  <label className="discover__here-now-toggle">
+                    <input
+                      type="checkbox"
+                      checked={filters.hereNowEnabled}
+                      onChange={(event) => {
+                        const enabled = event.target.checked;
+                        dispatch(hereNowToggled(enabled));
+                        if (enabled) {
+                          requestUserLocation();
+                          return;
+                        }
+
+                        void dispatch(fetchDiscoverEvents());
+                      }}
+                    />
+                    {t('discover.filters.here_now')}
+                  </label>
                   <div className="discover__categories-label">{t('discover.filters.category')}</div>
                   <div className="discover__category-chips" aria-label={t('discover.filters.category')}>
                     <Cluster gap="1">

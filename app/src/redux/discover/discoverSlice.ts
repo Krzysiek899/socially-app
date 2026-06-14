@@ -1,6 +1,7 @@
 import { createAsyncThunk, createSlice, type PayloadAction } from '@reduxjs/toolkit';
 import type { RootState } from '../store.ts';
 import { fetchDiscoverEventsRequest } from '../../pages/discover/api/discoverApi.ts';
+import { isWithinRadiusKm } from '../../pages/discover/domain/hereNow.ts';
 import type {
   DiscoverCategoryCode,
   DiscoverEvent,
@@ -9,6 +10,7 @@ import type {
 } from '../../pages/discover/domain/discoverModels.ts';
 
 type DiscoverStatus = 'idle' | 'loading' | 'succeeded' | 'failed';
+type GeolocationStatus = 'idle' | 'requesting' | 'granted' | 'error';
 
 type DiscoverState = {
   items: DiscoverEvent[];
@@ -17,6 +19,8 @@ type DiscoverState = {
   selectedEventId: string | null;
   filters: DiscoverFilters;
   currentRequestId: string | null;
+  geolocationStatus: GeolocationStatus;
+  userLocation: { lat: number; lng: number } | null;
 };
 
 const initialState: DiscoverState = {
@@ -34,6 +38,8 @@ const initialState: DiscoverState = {
     startsWithinMinutes: null,
   },
   currentRequestId: null,
+  geolocationStatus: 'idle',
+  userLocation: null,
 };
 
 const getErrorKey = (error: unknown, fallback: string): string => {
@@ -57,7 +63,14 @@ export const fetchDiscoverEvents = createAsyncThunk<
   }
 
   try {
-    return await fetchDiscoverEventsRequest(state.discover.filters, session.token, thunkApi.signal);
+    const apiItems = await fetchDiscoverEventsRequest(state.discover.filters, session.token, thunkApi.signal);
+
+    const userLocation = state.discover.userLocation;
+    if (state.discover.filters.hereNowEnabled && userLocation) {
+      return apiItems.filter((event) => isWithinRadiusKm(userLocation, event.location, 5));
+    }
+
+    return apiItems;
   } catch (error) {
     return thunkApi.rejectWithValue(getErrorKey(error, 'discover.errors.fetch_failed'));
   }
@@ -81,6 +94,27 @@ const discoverSlice = createSlice({
     },
     dateToSet: (state, action: PayloadAction<string>) => {
       state.filters.dateTo = action.payload;
+    },
+    hereNowToggled: (state, action: PayloadAction<boolean>) => {
+      state.filters.hereNowEnabled = action.payload;
+      state.filters.startsWithinMinutes = action.payload ? 120 : null;
+      if (!action.payload) {
+        state.geolocationStatus = 'idle';
+        state.userLocation = null;
+      }
+    },
+    geolocationRequestStarted: (state) => {
+      state.geolocationStatus = 'requesting';
+    },
+    geolocationResolved: (state, action: PayloadAction<{ lat: number; lng: number }>) => {
+      state.geolocationStatus = 'granted';
+      state.userLocation = action.payload;
+    },
+    geolocationFailed: (state) => {
+      state.geolocationStatus = 'error';
+      state.filters.hereNowEnabled = false;
+      state.filters.startsWithinMinutes = null;
+      state.userLocation = null;
     },
     selectedEventSet: (state, action: PayloadAction<string>) => {
       state.selectedEventId = action.payload;
@@ -137,6 +171,10 @@ export const {
   priceFilterSet,
   dateFromSet,
   dateToSet,
+  hereNowToggled,
+  geolocationRequestStarted,
+  geolocationResolved,
+  geolocationFailed,
   selectedEventSet,
 } = discoverSlice.actions;
 export const discoverReducer = discoverSlice.reducer;

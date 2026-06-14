@@ -207,4 +207,50 @@ describe('Discover page states', () => {
     expect(items).toHaveLength(1);
     expect(items[0]?.title).toContain('Frontend Meetup');
   });
+
+  it('keeps Here & Now active after successful geolocation and applies radius filter', async () => {
+    const getCurrentPosition = jest.fn((success: PositionCallback) => {
+      success({ coords: { latitude: 52.2297, longitude: 21.0122 } } as GeolocationPosition);
+    });
+    Object.defineProperty(global.navigator, 'geolocation', {
+      value: { getCurrentPosition },
+      configurable: true,
+    });
+
+    global.fetch = jest.fn(async () => ({
+      ok: true,
+      status: 200,
+      json: async () => [baseEvent],
+    })) as typeof fetch;
+
+    render(<App />);
+    fireEvent.click(await screen.findByRole('checkbox', { name: t('discover.filters.here_now') }));
+
+    await waitFor(() => {
+      expect(getCurrentPosition).toHaveBeenCalled();
+    });
+  });
+
+  it('disables Here & Now when geolocation is denied', async () => {
+    const getCurrentPosition = jest.fn((_: PositionCallback, error: PositionErrorCallback) => {
+      error({ code: 1, message: 'denied', PERMISSION_DENIED: 1 } as GeolocationPositionError);
+    });
+    Object.defineProperty(global.navigator, 'geolocation', {
+      value: { getCurrentPosition },
+      configurable: true,
+    });
+
+    global.fetch = jest.fn(async () => ({
+      ok: true,
+      status: 200,
+      json: async () => [baseEvent],
+    })) as typeof fetch;
+
+    render(<App />);
+    fireEvent.click(await screen.findByRole('checkbox', { name: t('discover.filters.here_now') }));
+
+    await waitFor(() => {
+      expect(screen.getByRole('checkbox', { name: t('discover.filters.here_now') })).not.toBeChecked();
+    });
+  });
 });
