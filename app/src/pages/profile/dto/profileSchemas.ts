@@ -7,18 +7,37 @@ export const myProfileSchema = z.object({
   avatarUrl: z.string().url().optional(),
   bio: z.string().min(1),
   friendsCount: z.number().int().min(0),
-  friends: z.array(z.object({
-    id: z.string().min(1),
-    displayName: z.string().min(1),
-    avatarUrl: z.string().url().optional(),
-  })),
+  friends: z.array(
+    z.object({
+      id: z.string().min(1),
+      displayName: z.string().min(1),
+      avatarUrl: z.string().url().optional(),
+    }),
+  ),
+  incomingRequests: z.array(
+    z.object({
+      id: z.string().min(1),
+      displayName: z.string().min(1),
+      avatarUrl: z.string().url().optional(),
+    }),
+  ),
   groupsCount: z.number().int().min(0),
-  groups: z.array(z.object({
-    id: z.string().min(1),
-    name: z.string().min(1),
-    iconKey: z.enum(['sport', 'book', 'tech']),
-  })),
-  isApproved: z.boolean().default(false), 
+  groups: z.array(
+    z.object({
+      id: z.string().min(1),
+      name: z.string().min(1),
+      iconKey: z.enum(['sport', 'book', 'tech']),
+    }),
+  ),
+  isApproved: z.boolean().default(false),
+});
+
+export const friendMutationPayloadSchema = z.object({
+  targetUserId: z.string().min(1),
+});
+
+export const friendMutationResponseSchema = z.object({
+  ok: z.literal(true),
 });
 
 export const publicProfileReviewSchema = z.object({
@@ -53,21 +72,20 @@ export const publicProfileSchema = z.object({
   reviews: z.array(publicProfileReviewSchema),
   mutualFriends: z.array(publicProfileMutualFriendSchema),
   groups: z.array(publicProfileGroupSchema),
-  friendAction: z.enum(['can_send_request']),
+  friendAction: z.enum(['can_send_request', 'request_sent', 'respond_to_request', 'friends']),
 });
 
 export const createReviewRequestSchema = z.object({
   rating: z.number().int().min(1).max(5),
-  content: z.string(), 
+  content: z.string(),
 });
 
-
 export const updateProfileSchema = z.object({
-  displayName: z.string().min(2, "Imię musi mieć co najmniej 2 znaki").optional(),
-  bio: z.string().max(300, "Opis jest za długi").optional(),
+  displayName: z.string().min(2, 'Imię musi mieć co najmniej 2 znaki').optional(),
+  bio: z.string().max(300, 'Opis jest za długi').optional(),
 });
 
 export type CreateReviewRequestDTO = z.infer<typeof createReviewRequestSchema>;
 export type PublicProfileReviewDTO = z.infer<typeof publicProfileReviewSchema>;
 export type PublicProfileDTO = z.infer<typeof publicProfileSchema>;
-export type UpdateProfileRequestDTO = z.infer<typeof updateProfileSchema>; 
+export type UpdateProfileRequestDTO = z.infer<typeof updateProfileSchema>;

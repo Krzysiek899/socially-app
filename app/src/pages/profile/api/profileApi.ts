@@ -1,20 +1,38 @@
-import { z } from 'zod'; 
+import { z } from 'zod';
 import { requestContract } from '../../../app/apiContractGateway.ts';
 
 import type { MyProfile, PublicProfile, PublicProfileReview } from '../domain/profileModels.ts';
 
-import { 
-  myProfileSchema, 
-  publicProfileSchema, 
-  publicProfileReviewSchema, 
+import {
+  friendMutationPayloadSchema,
+  friendMutationResponseSchema,
+  myProfileSchema,
+  publicProfileReviewSchema,
+  publicProfileSchema,
   type CreateReviewRequestDTO,
-  type UpdateProfileRequestDTO 
+  type UpdateProfileRequestDTO,
 } from '../dto/profileSchemas.ts';
 
 const profileHttpErrorKey = (status: number): string => {
   if (status === 401) return 'profile.errors.unauthorized';
   if (status === 404) return 'profile.errors.not_found';
   return 'profile.errors.fetch_failed';
+};
+
+const profileMutationHttpErrorKey = (status: number, fallback: string): string => {
+  if (status === 401) {
+    return 'profile.errors.unauthorized';
+  }
+
+  if (status === 404) {
+    return 'profile.errors.not_found';
+  }
+
+  if (status === 409) {
+    return 'profile.errors.friend_action_conflict';
+  }
+
+  return fallback;
 };
 
 export const fetchMyProfileRequest = async (
@@ -60,8 +78,8 @@ export const submitProfileReviewRequest = async (
 ): Promise<PublicProfileReview> =>
   requestContract<CreateReviewRequestDTO, PublicProfileReview>({
     url: `/api/profile/users/${userId}/reviews`,
-    method: 'POST', 
-    payload, 
+    method: 'POST',
+    payload,
     token,
     signal,
     responseSchema: publicProfileReviewSchema,
@@ -73,6 +91,90 @@ export const submitProfileReviewRequest = async (
     },
   });
 
+export const sendFriendRequestRequest = async (
+  targetUserId: string,
+  token: string,
+  signal: AbortSignal,
+): Promise<{ ok: true }> =>
+  requestContract<{ targetUserId: string }, { ok: true }>({
+    url: '/api/profile/friends/request',
+    method: 'POST',
+    payload: { targetUserId },
+    payloadSchema: friendMutationPayloadSchema,
+    token,
+    signal,
+    responseSchema: friendMutationResponseSchema,
+    errorKeys: {
+      requestValidation: 'profile.errors.request_invalid',
+      responseValidation: 'profile.errors.response_invalid',
+      network: 'profile.errors.network',
+      http: (status: number) => profileMutationHttpErrorKey(status, 'profile.errors.friend_request_failed'),
+    },
+  });
+
+export const acceptFriendRequestRequest = async (
+  targetUserId: string,
+  token: string,
+  signal: AbortSignal,
+): Promise<{ ok: true }> =>
+  requestContract<{ targetUserId: string }, { ok: true }>({
+    url: '/api/profile/friends/accept',
+    method: 'POST',
+    payload: { targetUserId },
+    payloadSchema: friendMutationPayloadSchema,
+    token,
+    signal,
+    responseSchema: friendMutationResponseSchema,
+    errorKeys: {
+      requestValidation: 'profile.errors.request_invalid',
+      responseValidation: 'profile.errors.response_invalid',
+      network: 'profile.errors.network',
+      http: (status: number) => profileMutationHttpErrorKey(status, 'profile.errors.friend_accept_failed'),
+    },
+  });
+
+export const rejectFriendRequestRequest = async (
+  targetUserId: string,
+  token: string,
+  signal: AbortSignal,
+): Promise<{ ok: true }> =>
+  requestContract<{ targetUserId: string }, { ok: true }>({
+    url: '/api/profile/friends/reject',
+    method: 'POST',
+    payload: { targetUserId },
+    payloadSchema: friendMutationPayloadSchema,
+    token,
+    signal,
+    responseSchema: friendMutationResponseSchema,
+    errorKeys: {
+      requestValidation: 'profile.errors.request_invalid',
+      responseValidation: 'profile.errors.response_invalid',
+      network: 'profile.errors.network',
+      http: (status: number) => profileMutationHttpErrorKey(status, 'profile.errors.friend_reject_failed'),
+    },
+  });
+
+export const unfriendUserRequest = async (
+  targetUserId: string,
+  token: string,
+  signal: AbortSignal,
+): Promise<{ ok: true }> =>
+  requestContract<{ targetUserId: string }, { ok: true }>({
+    url: '/api/profile/friends/unfriend',
+    method: 'POST',
+    payload: { targetUserId },
+    payloadSchema: friendMutationPayloadSchema,
+    token,
+    signal,
+    responseSchema: friendMutationResponseSchema,
+    errorKeys: {
+      requestValidation: 'profile.errors.request_invalid',
+      responseValidation: 'profile.errors.response_invalid',
+      network: 'profile.errors.network',
+      http: (status: number) => profileMutationHttpErrorKey(status, 'profile.errors.friend_unfriend_failed'),
+    },
+  });
+
 export const updateMyProfileRequest = async (
   payload: UpdateProfileRequestDTO,
   token: string,
@@ -80,8 +182,8 @@ export const updateMyProfileRequest = async (
 ): Promise<MyProfile> =>
   requestContract<UpdateProfileRequestDTO, MyProfile>({
     url: '/api/profile/me',
-    method: 'PATCH', 
-    payload, 
+    method: 'PATCH',
+    payload,
     token,
     signal,
     responseSchema: myProfileSchema,
@@ -93,19 +195,18 @@ export const updateMyProfileRequest = async (
     },
   });
 
-
 export const approveMyProfileRequest = async (
   token: string,
   signal: AbortSignal,
 ): Promise<{ success: boolean; isApproved: boolean }> =>
   requestContract<never, { success: boolean; isApproved: boolean }>({
     url: '/api/profile/me/approve',
-    method: 'PATCH', 
+    method: 'PATCH',
     token,
     signal,
     responseSchema: z.object({
       success: z.boolean(),
-      isApproved: z.boolean()
+      isApproved: z.boolean(),
     }),
     errorKeys: {
       requestValidation: 'profile.errors.request_invalid',

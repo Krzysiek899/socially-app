@@ -44,8 +44,12 @@ export type DiscoverEvent = {
   };
   attendees: DiscoverEventAttendee[];
   attendeesCount: number;
+  participantCapacity?: number | null;
   photoUrl?: string;
   category: DiscoverCategoryCode;
+  participation?: {
+    state: 'joined' | 'pending';
+  };
 };
 
 export type DiscoverFilters = {
@@ -54,4 +58,6 @@ export type DiscoverFilters = {
   price: DiscoverPriceFilter;
   dateFrom: string;
   dateTo: string;
+  hereNowEnabled: boolean;
+  startsWithinMinutes: number | null;
 };

@@ -277,6 +277,14 @@ describe('Event management flow', () => {
         } as Response;
       }
 
+      if (url.endsWith('/api/events/participating')) {
+        return {
+          ok: true,
+          status: 200,
+          json: async () => [],
+        } as Response;
+      }
+
       if (url.includes('/api/discover/events/') && !url.includes('?')) {
         return {
           ok: true,

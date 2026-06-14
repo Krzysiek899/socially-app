@@ -166,14 +166,33 @@
 
 .my-profile__list-row {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   gap: var(--space-3);
   min-height: 3.5rem;
 }
 
+.my-profile__list-row--button {
+  width: 100%;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+}
+
 .my-profile__list-row-label {
   color: var(--color-text-default);
+}
+
+.my-profile__list-row > [data-layout="cluster"]:first-child {
+  flex: 1;
+}
+
+.my-profile__row-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
 }
 
 .my-profile__empty-text {
@@ -284,6 +303,13 @@
   border-radius: var(--radius-sm);
 }
 
+.public-profile__group-row--button {
+  width: 100%;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+}
+
 .public-profile__review-header,
 .public-profile__friend-row {
   display: flex;
@@ -340,10 +366,6 @@
   color: var(--color-warning-strong, #f59e0b);
 }
 
-/* ════════════════════════════════════════════════════════════════════════
-   🌙 TWEAK DLA TRYBU CIEMNEGO (Zwiększenie widoczności gwiazdek w Modalu)
-   ════════════════════════════════════════════════════════════════════════ */
-
 /* Nadpisanie koloru nieaktywnej gwiazdki na jasny szary o niskiej przezroczystości */
 [data-theme="dark"] .public-profile__star-button {
   color: rgba(255, 255, 255, 0.25);
@@ -363,6 +385,47 @@
   color: var(--color-text-subtle);
 }
 
+.group-details__title {
+  margin: 0;
+  color: var(--color-text-heading);
+  font-size: var(--typography-heading-size);
+  font-weight: var(--typography-heading-weight);
+  line-height: var(--typography-heading-line-height);
+}
+
+.group-details__content-grid {
+  align-items: stretch;
+}
+
+.group-details__section-title {
+  margin: 0;
+  color: var(--color-text-heading);
+  font-size: var(--typography-subheading-size);
+}
+
+.group-details__description {
+  margin: 0;
+  color: var(--color-text-default);
+}
+
+.group-details__members-count {
+  color: var(--color-text-subtle);
+  font-size: var(--typography-label-size);
+}
+
+.group-details__member-row {
+  min-height: 2rem;
+}
+
+.group-details__member-name {
+  color: var(--color-text-default);
+}
+
+.group-details__actions {
+  display: flex;
+  justify-content: flex-start;
+}
+
 /* Responsywność */
 @media (max-width: 900px) {
   .profile-page__section-item-top,
@@ -373,44 +436,14 @@
 
   .public-profile__hero-content,
   .public-profile__hero-main,
-  .public-profile__content {
+  .public-profile__content,
+  .group-details__content-grid {
     grid-template-columns: 1fr;
   }
 
   .my-profile__hero {
     grid-template-columns: 1fr;
   }
-}
-
-/* ════════════════════════════════════════════════════════════════════════
-   MODAL: EDYTUJ PROFIL
-   ════════════════════════════════════════════════════════════════════════ */
-.my-profile__dialog-overlay {
-  position: fixed;
-  inset: 0;
-  background-color: rgba(0, 0, 0, 0.6);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-  padding: var(--space-4, 1rem);
-}
-
-.my-profile__dialog-surface {
-  background: var(--color-surface-default);
-  border: var(--border-width-default) solid var(--color-border-default);
-  border-radius: var(--radius-md);
-  padding: var(--space-6);
-  width: 100%;
-  max-width: 500px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
-}
-
-.my-profile__dialog-title {
-  margin: 0 0 var(--space-4) 0;
-  color: var(--color-primary); /* Make the title pop! */
-  font-size: var(--typography-heading-size);
-  font-weight: var(--typography-heading-weight);
 }
 
 .my-profile__dialog-form {
@@ -423,7 +456,6 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
-  align-items: center
 }
 
 .my-profile__dialog-input-group label {
@@ -432,24 +464,18 @@
   font-weight: bold;
 }
 
-.my-profile__dialog-input,
 .my-profile__dialog-textarea {
   width: 100%;
+  min-height: 120px;
+  resize: vertical;
   padding: var(--space-3);
   border-radius: var(--radius-sm);
   border: var(--border-width-default) solid var(--color-border-default);
   background: var(--color-surface-subtle);
   color: var(--color-text-default);
   font-family: inherit;
-  align-items: center
 }
 
-.my-profile__dialog-textarea {
-  min-height: 120px;
-  resize: vertical;
-}
-
-.my-profile__dialog-input:focus,
 .my-profile__dialog-textarea:focus {
   outline: 2px solid var(--color-primary);
   outline-offset: -1px;
