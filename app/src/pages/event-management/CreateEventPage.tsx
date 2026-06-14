@@ -8,6 +8,7 @@ import {
   SegmentedToggle,
   TextArea,
   TextField,
+  useNotifications,
 } from '../../shared/components/index.ts';
 import { Cluster, Grid, Page, Section, Stack } from '../../shared/layout/index.tsx';
 import { t } from '../../i18n/index.ts';
@@ -163,7 +164,8 @@ const toPayload = (
 export const CreateEventPage = () => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
-  const { createStatus, createErrorKey } = useAppSelector((state) => state.eventManagement);
+  const { notify } = useNotifications();
+  const { createStatus } = useAppSelector((state) => state.eventManagement);
   const token = useAppSelector((state) => state.auth.session?.token);
   const [form, setForm] = React.useState<FormState>(initialFormState);
   const [submitted, setSubmitted] = React.useState(false);
@@ -322,13 +324,23 @@ export const CreateEventPage = () => {
     setSubmitted(true);
 
     if (Object.keys(errors).length > 0) {
+      const firstErrorKey = Object.values(errors)[0];
+      if (firstErrorKey) {
+        notify({ variant: 'error', message: t(firstErrorKey) });
+      }
       return;
     }
 
     const payload = toPayload(form, selectedAddressResult, selectedLocation);
-    const result = await dispatch(createAuthoredEvent(payload));
-    if (createAuthoredEvent.fulfilled.match(result)) {
+    try {
+      await dispatch(createAuthoredEvent(payload)).unwrap();
+      notify({ variant: 'success', message: t('eventManagement.success.created') });
       navigate('/my-events');
+    } catch (createError) {
+      notify({
+        variant: 'error',
+        message: t(typeof createError === 'string' ? createError : 'eventManagement.errors.create_failed'),
+      });
     }
   };
 
@@ -486,17 +498,6 @@ export const CreateEventPage = () => {
                   errorText={showValidation && errors.description ? t(errors.description) : undefined}
                 />
               </div>
-
-              {(showValidation && errors.location) && (
-                <p className="create-event-page__error" role="alert">
-                  {t(errors.location)}
-                </p>
-              )}
-              {createErrorKey && (
-                <p className="create-event-page__error" role="alert">
-                  {t(createErrorKey)}
-                </p>
-              )}
 
               <Cluster justify="flex-end" gap="2">
                 <Button type="button" variant="secondary" onClick={() => navigate('/my-events')}>

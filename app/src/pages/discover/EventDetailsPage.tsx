@@ -7,7 +7,7 @@ import { fetchDiscoverEventByIdRequest } from './api/discoverApi.ts';
 import type { DiscoverEvent } from './domain/discoverModels.ts';
 import { Cluster, Grid, Page, Section, Split, Stack } from '../../shared/layout/index.tsx';
 import { t } from '../../i18n/index.ts';
-import { joinEventParticipation } from '../../redux/eventManagement/eventManagementSlice.ts';
+import { joinEventParticipation, leaveEventParticipation } from '../../redux/eventManagement/eventManagementSlice.ts';
 import { fetchDiscoverEvents } from '../../redux/discover/discoverSlice.ts';
 import { useSmartBack } from '../../shared/hooks/useSmartBack.ts';
 import './EventDetailsPage.css';
@@ -69,6 +69,7 @@ export const EventDetailsPage = () => {
   const [status, setStatus] = React.useState<LoadStatus>('loading');
   const [errorKey, setErrorKey] = React.useState<string | null>(null);
   const [isJoining, setIsJoining] = React.useState(false);
+  const [isLeaving, setIsLeaving] = React.useState(false);
   const [event, setEvent] = React.useState<DiscoverEvent | null>(null);
   const displayAttendees = React.useMemo(() => (event ? getDisplayAttendees(event) : []), [event]);
   const hiddenAttendeesCount = event ? Math.max(event.attendeesCount - displayAttendees.length, 0) : 0;
@@ -116,6 +117,7 @@ export const EventDetailsPage = () => {
   const participationState = event?.participation?.state ?? null;
   const isParticipant = event ? event.attendees.some((attendee) => attendee.id === currentUserId) : false;
   const canJoin = Boolean(event && !isOrganizer && !isParticipant && participationState === null);
+  const canLeave = Boolean(event && !isOrganizer && (isParticipant || participationState === 'joined'));
 
   const handleJoin = React.useCallback(async () => {
     if (!event || !eventId) {
@@ -125,10 +127,18 @@ export const EventDetailsPage = () => {
     setIsJoining(true);
 
     try {
-      await dispatch(joinEventParticipation(event.id)).unwrap();
+      const result = await dispatch(joinEventParticipation(event.id)).unwrap();
       await dispatch(fetchDiscoverEvents());
       const controller = new AbortController();
       await loadEvent(controller.signal);
+      notify({
+        variant: 'success',
+        message: t(
+          result.state === 'pending'
+            ? 'eventManagement.success.join_requested'
+            : 'eventManagement.success.joined',
+        ),
+      });
     } catch (joinError) {
       notify({
         variant: 'error',
@@ -138,6 +148,32 @@ export const EventDetailsPage = () => {
       setIsJoining(false);
     }
   }, [dispatch, event, eventId, loadEvent, notify]);
+
+  const handleLeave = React.useCallback(async () => {
+    if (!event) {
+      return;
+    }
+
+    setIsLeaving(true);
+
+    try {
+      await dispatch(leaveEventParticipation(event.id)).unwrap();
+      await dispatch(fetchDiscoverEvents());
+      const controller = new AbortController();
+      await loadEvent(controller.signal);
+      notify({
+        variant: 'success',
+        message: t('eventManagement.success.left'),
+      });
+    } catch (leaveError) {
+      notify({
+        variant: 'error',
+        message: t(typeof leaveError === 'string' ? leaveError : 'eventManagement.errors.leave_failed'),
+      });
+    } finally {
+      setIsLeaving(false);
+    }
+  }, [dispatch, event, loadEvent, notify]);
 
   return (
     <main className="event-details">
@@ -257,12 +293,18 @@ export const EventDetailsPage = () => {
               </aside>
             </Split>
 
-            {(canJoin || participationState === 'pending') && (
+            {(canJoin || canLeave || participationState === 'pending') && (
               <footer className="event-details__footer">
                 {canJoin && (
                   <Button type="button" size="lg" onClick={() => { void handleJoin(); }} disabled={isJoining}>
                     <Users size={16} />
                     {t('discover.details.join')}
+                  </Button>
+                )}
+                {canLeave && (
+                  <Button type="button" size="lg" variant="danger" onClick={() => { void handleLeave(); }} disabled={isLeaving}>
+                    <Users size={16} />
+                    {t('eventManagement.my_events.leave')}
                   </Button>
                 )}
                 {participationState === 'pending' && (

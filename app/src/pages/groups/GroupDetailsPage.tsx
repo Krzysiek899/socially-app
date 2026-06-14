@@ -41,8 +41,16 @@ export const GroupDetailsPage = (): React.JSX.Element => {
     try {
       if (details.isMember) {
         await dispatch(leaveGroup(groupId)).unwrap();
+        notify({
+          variant: 'success',
+          message: t('groups.success.left'),
+        });
       } else {
         await dispatch(joinGroup(groupId)).unwrap();
+        notify({
+          variant: 'success',
+          message: t('groups.success.joined'),
+        });
       }
     } catch (errorKeyFromApi: unknown) {
       notify({

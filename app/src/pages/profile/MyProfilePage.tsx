@@ -41,13 +41,36 @@ export const MyProfilePage = (): React.JSX.Element => {
   }, [dispatch, navigate]);
 
   const handleSaveProfile = React.useCallback((data: UpdateProfileRequestDTO) => {
-    void dispatch(updateMyProfile(data));
-    setIsEditDialogOpen(false);
-  }, [dispatch]);
+    void dispatch(updateMyProfile(data))
+      .unwrap()
+      .then(() => {
+        setIsEditDialogOpen(false);
+        notify({
+          variant: 'success',
+          message: t('profile.success.updated'),
+        });
+      })
+      .catch((errorKeyFromApi: unknown) => {
+        notify({
+          variant: 'error',
+          message: t(
+            typeof errorKeyFromApi === 'string'
+              ? errorKeyFromApi
+              : 'profile.errors.update_failed',
+          ),
+        });
+      });
+  }, [dispatch, notify]);
 
   const handleApproveProfile = React.useCallback(() => {
     void dispatch(approveMyProfile())
       .unwrap()
+      .then(() => {
+        notify({
+          variant: 'success',
+          message: t('profile.success.approved'),
+        });
+      })
       .catch((errorKeyFromApi: unknown) => {
         notify({
           variant: 'error',

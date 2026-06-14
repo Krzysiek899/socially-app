@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { CalendarDays, ChevronRight, Eye, MapPinned, Users, ArrowLeft, Wallet } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { AppNavbar, Avatar, Badge, Button, DateTimeField, Dropdown, Modal, SegmentedToggle, TextArea, TextField } from '../../shared/components/index.ts';
+import { AppNavbar, Avatar, Badge, Button, DateTimeField, Dropdown, Modal, SegmentedToggle, TextArea, TextField, useNotifications } from '../../shared/components/index.ts';
 import { Cluster, Page, Section, Split, Stack } from '../../shared/layout/index.tsx';
 import { t } from '../../i18n/index.ts';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks.ts';
@@ -111,16 +111,14 @@ export const ManageEventPage = () => {
   const { eventId } = useParams<{ eventId: string }>();
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
+  const { notify } = useNotifications();
   const {
     selectedItem,
     selectedStatus,
     selectedErrorKey,
     updateStatus,
-    updateErrorKey,
     rulesStatus,
-    rulesErrorKey,
     requestActionStatus,
-    requestActionErrorKey,
   } = useAppSelector((state) => state.eventManagement);
   const token = useAppSelector((state) => state.auth.session?.token);
 
@@ -137,7 +135,6 @@ export const ManageEventPage = () => {
     visibility: 'PUBLIC',
     approvalRequired: true,
   });
-  const [localErrorKey, setLocalErrorKey] = React.useState<string | null>(null);
   const reverseLookupRequestIdRef = React.useRef(0);
 
   const goBack = useSmartBack('/my-events');
@@ -315,27 +312,27 @@ export const ManageEventPage = () => {
     }
 
     if (editForm.title.trim().length < 3) {
-      setLocalErrorKey('eventManagement.validation.title');
+      notify({ variant: 'error', message: t('eventManagement.validation.title') });
       return;
     }
     if (editForm.description.trim().length < 10) {
-      setLocalErrorKey('eventManagement.validation.description');
+      notify({ variant: 'error', message: t('eventManagement.validation.description') });
       return;
     }
     if (editForm.addressQuery.trim().length < 3 || !editSelectedAddressResult || !editSelectedLocation) {
-      setLocalErrorKey('eventManagement.validation.address_required');
+      notify({ variant: 'error', message: t('eventManagement.validation.address_required') });
       return;
     }
 
     const dateTime = toIsoDateTime(editForm.dateTime);
     if (!dateTime) {
-      setLocalErrorKey('eventManagement.validation.date_time');
+      notify({ variant: 'error', message: t('eventManagement.validation.date_time') });
       return;
     }
 
     const priceAmount = editForm.priceMode === 'free' ? 0 : Number(editForm.priceAmount);
     if (editForm.priceMode === 'paid' && (!Number.isFinite(priceAmount) || priceAmount <= 0)) {
-      setLocalErrorKey('eventManagement.validation.price_amount');
+      notify({ variant: 'error', message: t('eventManagement.validation.price_amount') });
       return;
     }
 
@@ -343,38 +340,45 @@ export const ManageEventPage = () => {
     if (!editForm.unlimitedCapacity) {
       const parsedCapacity = Number(editForm.capacityValue);
       if (!Number.isInteger(parsedCapacity) || parsedCapacity < 1) {
-        setLocalErrorKey('eventManagement.manage.validation.capacity');
+        notify({ variant: 'error', message: t('eventManagement.manage.validation.capacity') });
         return;
       }
       if (selectedItem.management.capacity !== null && parsedCapacity < selectedItem.management.capacity) {
-        setLocalErrorKey('eventManagement.manage.validation.capacity_increase_only');
+        notify({ variant: 'error', message: t('eventManagement.manage.validation.capacity_increase_only') });
         return;
       }
       capacity = parsedCapacity;
     }
 
-    setLocalErrorKey(null);
-    await dispatch(updateAuthoredEvent({
-      eventId,
-      payload: {
-        title: editForm.title.trim(),
-        description: editForm.description.trim(),
-        dateTime,
-        address: {
-          city: editSelectedAddressResult.address.city,
-          street: editSelectedAddressResult.address.street,
-          buildingNumber: editSelectedAddressResult.address.buildingNumber,
-          postalCode: editSelectedAddressResult.address.postalCode,
+    try {
+      await dispatch(updateAuthoredEvent({
+        eventId,
+        payload: {
+          title: editForm.title.trim(),
+          description: editForm.description.trim(),
+          dateTime,
+          address: {
+            city: editSelectedAddressResult.address.city,
+            street: editSelectedAddressResult.address.street,
+            buildingNumber: editSelectedAddressResult.address.buildingNumber,
+            postalCode: editSelectedAddressResult.address.postalCode,
+          },
+          price: {
+            amount: priceAmount,
+            currency: 'PLN',
+            isFree: editForm.priceMode === 'free',
+          },
+          capacity,
         },
-        price: {
-          amount: priceAmount,
-          currency: 'PLN',
-          isFree: editForm.priceMode === 'free',
-        },
-        capacity,
-      },
-    }));
-    setIsEditModalOpen(false);
+      })).unwrap();
+      setIsEditModalOpen(false);
+      notify({ variant: 'success', message: t('eventManagement.success.updated') });
+    } catch (updateError) {
+      notify({
+        variant: 'error',
+        message: t(typeof updateError === 'string' ? updateError : 'eventManagement.errors.update_failed'),
+      });
+    }
   };
 
   const handleSaveRules = async () => {
@@ -382,11 +386,19 @@ export const ManageEventPage = () => {
       return;
     }
 
-    await dispatch(updateJoinRules({
-      eventId,
-      payload: rulesForm,
-    }));
-    setIsRulesModalOpen(false);
+    try {
+      await dispatch(updateJoinRules({
+        eventId,
+        payload: rulesForm,
+      })).unwrap();
+      setIsRulesModalOpen(false);
+      notify({ variant: 'success', message: t('eventManagement.success.rules_updated') });
+    } catch (rulesError) {
+      notify({
+        variant: 'error',
+        message: t(typeof rulesError === 'string' ? rulesError : 'eventManagement.errors.rules_update_failed'),
+      });
+    }
   };
 
   const handleRequestAction = async (requestId: string, action: 'approve' | 'reject') => {
@@ -394,11 +406,26 @@ export const ManageEventPage = () => {
       return;
     }
 
-    await dispatch(handleJoinRequestAction({
-      eventId,
-      requestId,
-      action,
-    }));
+    try {
+      await dispatch(handleJoinRequestAction({
+        eventId,
+        requestId,
+        action,
+      })).unwrap();
+      notify({
+        variant: 'success',
+        message: t(
+          action === 'approve'
+            ? 'eventManagement.success.request_approved'
+            : 'eventManagement.success.request_rejected',
+        ),
+      });
+    } catch (requestError) {
+      notify({
+        variant: 'error',
+        message: t(typeof requestError === 'string' ? requestError : 'eventManagement.errors.request_action_failed'),
+      });
+    }
   };
 
   return (
@@ -594,11 +621,6 @@ export const ManageEventPage = () => {
               </Split>
             )}
 
-            {(localErrorKey || updateErrorKey || rulesErrorKey || requestActionErrorKey) && (
-              <p className="manage-event-page__error" role="alert">
-                {t(localErrorKey ?? updateErrorKey ?? rulesErrorKey ?? requestActionErrorKey ?? 'eventManagement.errors.fetch_failed')}
-              </p>
-            )}
           </Stack>
         </Section>
       </Page>
