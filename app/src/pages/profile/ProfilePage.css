@@ -340,9 +340,7 @@
   color: var(--color-warning-strong, #f59e0b);
 }
 
-/* ════════════════════════════════════════════════════════════════════════
-   🌙 TWEAK DLA TRYBU CIEMNEGO (Zwiększenie widoczności gwiazdek w Modalu)
-   ════════════════════════════════════════════════════════════════════════ */
+
 
 /* Nadpisanie koloru nieaktywnej gwiazdki na jasny szary o niskiej przezroczystości */
 [data-theme="dark"] .public-profile__star-button {

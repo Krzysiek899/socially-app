@@ -56,7 +56,7 @@ export const fetchPublicProfileRequest = async (
     },
   });
 
-// 👇 NOWA FUNKCJA: Wysłanie opinii
+
 export const submitProfileReviewRequest = async (
   userId: string,
   payload: CreateReviewRequestDTO,
