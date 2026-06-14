@@ -42,6 +42,7 @@ export const plTranslations: Record<string, string> = {
   'discover.header.nearby': 'Odkrywaj w okolicy!',
   'discover.map.label': 'Mapa wydarzeń',
   'discover.card.attendees': 'Uczestnicy wydarzenia',
+  'discover.card.attendees_header': 'Uczestnicy',
   'discover.card.price.free': 'Bezpłatne',
   'discover.card.join': 'Zobacz szczegóły i dołącz',
   'discover.filters.label': 'Filtry odkrywania',

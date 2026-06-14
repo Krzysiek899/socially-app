@@ -182,27 +182,35 @@ export const DiscoverPage = () => {
                 </div>
               </div>
               <div className="discover-card__people-row">
-                <button
-                  type="button"
-                  className="discover-card__organizer-link"
-                  onClick={() => navigate(`/app/users/${event.organizer.id}`)}
-                  aria-label={event.organizer.displayName}
-                >
-                  <Avatar name={event.organizer.displayName} src={event.organizer.avatarUrl} size="sm" />
-                  <span>{event.organizer.displayName}</span>
-                </button>
-                <div className="discover-card__attendees" aria-label={t('discover.card.attendees')}>
-                  <Cluster gap="1" align="center">
-                    {displayedAttendees.map((attendee) => (
-                      <Avatar
-                        key={attendee.id}
-                        name={attendee.displayName}
-                        src={attendee.avatarUrl}
-                        size="sm"
-                      />
-                    ))}
-                    {overflow > 0 && <Badge size="sm">+{overflow}</Badge>}
-                  </Cluster>
+                <div className="discover-card__organizer-block">
+                  <span className="discover-card__people-label">{t('discover.details.organizer')}</span>
+                  <button
+                    type="button"
+                    className="discover-card__organizer-link"
+                    onClick={() => navigate(`/app/users/${event.organizer.id}`)}
+                    aria-label={event.organizer.displayName}
+                  >
+                    <Avatar name={event.organizer.displayName} src={event.organizer.avatarUrl} size="sm" />
+                    <span>{event.organizer.displayName}</span>
+                  </button>
+                </div>
+                <div className="discover-card__attendees-block" aria-label={t('discover.card.attendees')}>
+                  <span className="discover-card__people-label">
+                    {`${t('discover.card.attendees_header')} (${event.attendeesCount})`}
+                  </span>
+                  <div className="discover-card__attendees">
+                    <Cluster gap="1" align="center">
+                      {displayedAttendees.map((attendee) => (
+                        <Avatar
+                          key={attendee.id}
+                          name={attendee.displayName}
+                          src={attendee.avatarUrl}
+                          size="sm"
+                        />
+                      ))}
+                      {overflow > 0 && <Badge size="sm">+{overflow}</Badge>}
+                    </Cluster>
+                  </div>
                 </div>
               </div>
               <div className="discover-card__actions">
