@@ -36,6 +36,9 @@ export type { DateTimeFieldProps } from './DateTimeField/DateTimeField.tsx';
 export { Dropdown, DROPDOWN_VARIANTS, DROPDOWN_SIZES } from './Dropdown/Dropdown.tsx';
 export type { DropdownProps, DropdownOption } from './Dropdown/Dropdown.tsx';
 
+export { SegmentedToggle } from './SegmentedToggle/SegmentedToggle.tsx';
+export type { SegmentedToggleOption, SegmentedToggleProps } from './SegmentedToggle/SegmentedToggle.tsx';
+
 export { Modal, MODAL_SIZES } from './Modal/Modal.tsx';
 export type { ModalProps, ModalSize } from './Modal/Modal.tsx';
 

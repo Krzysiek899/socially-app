@@ -5,6 +5,7 @@ import {
   Button,
   DateTimeField,
   Dropdown,
+  SegmentedToggle,
   TextArea,
   TextField,
 } from '../../shared/components/index.ts';
@@ -412,39 +413,29 @@ export const CreateEventPage = () => {
 
                 <div className="create-event-page__field create-event-page__capacity-field">
                   <p className="create-event-page__field-label">{t('eventManagement.form.attendees_count')}</p>
-                  <div
-                    className="create-event-page__segmented-control"
-                    role="group"
-                    aria-label={t('eventManagement.form.attendees_count')}
-                  >
-                    <button
-                      type="button"
-                      className={`create-event-page__segmented-button${form.unlimitedCapacity ? ' create-event-page__segmented-button--active' : ''}`}
-                      aria-pressed={form.unlimitedCapacity}
-                      onClick={() => {
+                  <SegmentedToggle
+                    ariaLabel={t('eventManagement.form.attendees_count')}
+                    value={form.unlimitedCapacity ? 'unlimited' : 'limited'}
+                    options={[
+                      { value: 'unlimited', label: t('eventManagement.manage.capacity.unlimited_short') },
+                      { value: 'limited', label: t('eventManagement.manage.capacity.label') },
+                    ]}
+                    onChange={(value) => {
+                      if (value === 'unlimited') {
                         setForm((current) => ({
                           ...current,
                           unlimitedCapacity: true,
                           capacityValue: '',
                         }));
-                      }}
-                    >
-                      {t('eventManagement.manage.capacity.unlimited_short')}
-                    </button>
-                    <button
-                      type="button"
-                      className={`create-event-page__segmented-button${!form.unlimitedCapacity ? ' create-event-page__segmented-button--active' : ''}`}
-                      aria-pressed={!form.unlimitedCapacity}
-                      onClick={() => {
-                        setForm((current) => ({
-                          ...current,
-                          unlimitedCapacity: false,
-                        }));
-                      }}
-                    >
-                      {t('eventManagement.manage.capacity.label')}
-                    </button>
-                  </div>
+                        return;
+                      }
+
+                      setForm((current) => ({
+                        ...current,
+                        unlimitedCapacity: false,
+                      }));
+                    }}
+                  />
                   <TextField
                     id="event-capacity"
                     label={t('eventManagement.manage.capacity.label')}
@@ -461,26 +452,12 @@ export const CreateEventPage = () => {
 
                 <div className="create-event-page__field create-event-page__price-field">
                   <p className="create-event-page__field-label">{t('eventManagement.form.price_mode')}</p>
-                  <div
-                    className="create-event-page__segmented-control"
-                    role="group"
-                    aria-label={t('eventManagement.form.price_mode')}
-                  >
-                    {PRICE_MODE_OPTIONS.map((option) => {
-                      const isActive = form.priceMode === option.value;
-                      return (
-                        <button
-                          key={option.value}
-                          type="button"
-                          className={`create-event-page__segmented-button${isActive ? ' create-event-page__segmented-button--active' : ''}`}
-                          aria-pressed={isActive}
-                          onClick={() => handlePriceModeChange(option.value as PriceMode)}
-                        >
-                          {option.label}
-                        </button>
-                      );
-                    })}
-                  </div>
+                  <SegmentedToggle
+                    ariaLabel={t('eventManagement.form.price_mode')}
+                    value={form.priceMode}
+                    options={PRICE_MODE_OPTIONS}
+                    onChange={(value) => handlePriceModeChange(value as PriceMode)}
+                  />
                   <TextField
                     id="event-price-amount"
                     label={t('eventManagement.form.price_amount')}

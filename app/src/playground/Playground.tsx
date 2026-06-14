@@ -13,6 +13,7 @@ import {
   DateTimeField,
   Modal,
   Dropdown, DROPDOWN_VARIANTS, DROPDOWN_SIZES,
+  SegmentedToggle,
   TopNav,
   ThemeToggle,
   NotificationProvider,
@@ -126,6 +127,7 @@ export function Playground() {
   const { theme, preference, setTheme } = useTheme();
   const [inputValue, setInputValue] = useState('');
   const [textAreaValue, setTextAreaValue] = useState('');
+  const [segmentedValue, setSegmentedValue] = useState<'left' | 'right'>('left');
   const [modalOpen, setModalOpen] = useState<'sm' | 'md' | 'lg' | 'footer' | 'overflow' | null>(null);
 
   return (
@@ -273,6 +275,24 @@ export function Playground() {
             </div>
           ))}
         </div>
+      </Section>
+
+      <hr className="pg__divider" />
+
+      {/* ── SegmentedToggle ── */}
+      <Section title="SegmentedToggle">
+        <Row label="Single select">
+          <SegmentedToggle
+            ariaLabel="Example segmented toggle"
+            value={segmentedValue}
+            options={[
+              { value: 'left', label: 'Left option' },
+              { value: 'right', label: 'Right option' },
+            ]}
+            onChange={setSegmentedValue}
+          />
+          <Badge size="sm" variant="neutral">selected: {segmentedValue}</Badge>
+        </Row>
       </Section>
 
       <hr className="pg__divider" />

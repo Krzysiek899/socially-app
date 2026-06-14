@@ -53,38 +53,6 @@
   font-weight: var(--typography-label-weight);
 }
 
-.create-event-page__segmented-control {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-1);
-  padding: var(--space-1);
-  width: fit-content;
-  border: 1px solid var(--color-border-default);
-  border-radius: var(--radius-md);
-  background: var(--color-surface-subtle);
-}
-
-.create-event-page__segmented-button {
-  border: 0;
-  border-radius: var(--radius-sm);
-  padding: var(--space-1) var(--space-2);
-  background: transparent;
-  color: var(--color-text-default);
-  font-size: var(--typography-label-size);
-  font-weight: var(--typography-label-weight);
-  cursor: pointer;
-}
-
-.create-event-page__segmented-button--active {
-  background: var(--color-primary-subtle);
-  color: var(--color-primary);
-}
-
-.create-event-page__segmented-button:focus-visible {
-  outline: var(--border-width-strong) solid var(--color-border-focus);
-  outline-offset: 1px;
-}
-
 .create-event-page__address-popup {
   position: absolute;
   top: calc(100% + var(--space-1));
