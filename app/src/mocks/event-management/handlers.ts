@@ -8,6 +8,7 @@ import {
   updateAuthoredEventPayloadSchema,
 } from '../../pages/event-management/dto/eventManagementSchemas.ts';
 import type { GeocodeResult } from '../../pages/event-management/domain/eventManagementModels.ts';
+import { getAuthorizedUserId } from '../auth/getAuthorizedUserId.ts';
 import {
   createAuthoredEventForUser,
   getAuthoredEventByIdForUser,
@@ -25,14 +26,6 @@ const organizerByUserId: Record<string, { displayName: string; avatarUrl?: strin
     displayName: 'Jan Kowalski',
     avatarUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=120&q=80',
   },
-};
-
-const getAuthorizedUserId = (authorization: string | null): string | null => {
-  if (!authorization?.startsWith('Bearer token-')) {
-    return null;
-  }
-
-  return authorization.slice('Bearer token-'.length);
 };
 
 type NominatimItem = {

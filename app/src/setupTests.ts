@@ -51,6 +51,24 @@ jest.mock('./pages/discover/DiscoverMap.tsx', () => ({
   DiscoverMap: () => null,
 }));
 
+jest.mock('firebase/auth', () => ({
+  getAuth: jest.fn(() => ({ currentUser: null })),
+  setPersistence: jest.fn(),
+  signInWithEmailAndPassword: jest.fn(),
+  createUserWithEmailAndPassword: jest.fn(),
+  updateProfile: jest.fn(),
+  signOut: jest.fn(),
+  browserLocalPersistence: { type: 'LOCAL' },
+  browserSessionPersistence: { type: 'SESSION' },
+}));
+
+(globalThis as { __SOCIALLY_ENV__?: Record<string, string> }).__SOCIALLY_ENV__ = {
+  VITE_FIREBASE_API_KEY: 'test-api-key',
+  VITE_FIREBASE_AUTH_DOMAIN: 'test-auth-domain',
+  VITE_FIREBASE_PROJECT_ID: 'test-project-id',
+  VITE_FIREBASE_APP_ID: 'test-app-id',
+};
+
 if (!Element.prototype.scrollIntoView) {
   Element.prototype.scrollIntoView = jest.fn();
 }

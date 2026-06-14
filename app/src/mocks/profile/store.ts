@@ -206,6 +206,58 @@ let friendships = new Set(initialFriendships);
 let pendingRequests = new Set(initialPendingRequests);
 let groupMemberships = new Set(initialGroupMemberships);
 
+const toDisplayNameFromUserId = (userId: string): string => {
+  const normalized = userId
+    .replace(/[_\-]+/g, ' ')
+    .trim();
+
+  if (normalized.length === 0) {
+    return 'Nowy użytkownik';
+  }
+
+  return normalized
+    .split(/\s+/)
+    .map((part) => `${part.charAt(0).toUpperCase()}${part.slice(1)}`)
+    .join(' ');
+};
+
+const ensureMockProfileSeedForUser = (userId: string): void => {
+  if (!userDirectory.has(userId)) {
+    userDirectory.set(userId, {
+      id: userId,
+      displayName: toDisplayNameFromUserId(userId),
+    });
+  }
+
+  const directoryEntry = userDirectory.get(userId);
+  if (!directoryEntry) {
+    return;
+  }
+
+  if (!myProfileBaseByUserId.has(userId)) {
+    myProfileBaseByUserId.set(userId, {
+      id: userId,
+      displayName: directoryEntry.displayName,
+      avatarUrl: directoryEntry.avatarUrl,
+      badge: 'Nowy użytkownik',
+      bio: 'Ten profil został utworzony automatycznie dla nowego konta Firebase.',
+    });
+  }
+
+  if (!publicProfileBaseByUserId.has(userId)) {
+    publicProfileBaseByUserId.set(userId, {
+      id: userId,
+      displayName: directoryEntry.displayName,
+      avatarUrl: directoryEntry.avatarUrl,
+      badge: 'Nowy użytkownik',
+      bio: 'Nowy użytkownik Socially.',
+      rating: 0,
+      reviewsCount: 0,
+      reviews: [],
+    });
+  }
+};
+
 const getFriendIds = (userId: string): Set<string> => {
   const friends = new Set<string>();
 
@@ -262,6 +314,7 @@ const toPublicFriendAction = (state: ReturnType<typeof relationState>) => {
 };
 
 export const getMyProfileForUser = (userId: string) => {
+  ensureMockProfileSeedForUser(userId);
   const base = myProfileBaseByUserId.get(userId);
   if (!base) {
     return null;
@@ -307,6 +360,8 @@ export const getMyProfileForUser = (userId: string) => {
 };
 
 export const getPublicProfileForUser = (viewerUserId: string, targetUserId: string) => {
+  ensureMockProfileSeedForUser(viewerUserId);
+  ensureMockProfileSeedForUser(targetUserId);
   const base = publicProfileBaseByUserId.get(targetUserId);
   if (!base || !hasKnownUser(viewerUserId)) {
     return null;

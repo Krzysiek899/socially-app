@@ -1,6 +1,7 @@
 import { http, HttpResponse } from 'msw';
 import { z } from 'zod';
 import { friendMutationPayloadSchema } from '../../pages/profile/dto/profileSchemas.ts';
+import { getAuthorizedUserId } from '../auth/getAuthorizedUserId.ts';
 import {
   acceptFriendRequest,
   getMyProfileForUser,
@@ -9,14 +10,6 @@ import {
   sendFriendRequest,
   unfriendUsers,
 } from './store.ts';
-
-const getAuthorizedUserId = (authorization: string | null): string | null => {
-  if (!authorization?.startsWith('Bearer token-')) {
-    return null;
-  }
-
-  return authorization.slice('Bearer token-'.length);
-};
 
 export const profileHandlers = [
   http.get('/api/profile/me', async ({ request }) => {

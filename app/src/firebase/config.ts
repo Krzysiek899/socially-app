@@ -11,41 +11,15 @@ export type FirebaseConfig = {
   appId: string;
 };
 
-const readNodeEnv = (): string | undefined => {
-  if (typeof globalThis !== 'object' || !('process' in globalThis)) {
-    return undefined;
-  }
-
-  const processValue = (globalThis as { process?: { env?: { NODE_ENV?: string } } }).process;
-  return processValue?.env?.NODE_ENV;
-};
-
-const readViteEnv = (): Partial<Record<FirebaseEnvKey, string>> => {
-  try {
-    const evaluator = new Function('return import.meta.env;');
-    const evaluated = evaluator();
-    if (typeof evaluated === 'object' && evaluated !== null) {
-      return evaluated as Partial<Record<FirebaseEnvKey, string>>;
-    }
-  } catch {
-    // Jest CJS runtime does not support import.meta.
-  }
-
-  return {};
-};
+const env = (globalThis as { __SOCIALLY_ENV__?: Record<string, string | undefined> }).__SOCIALLY_ENV__ ?? {};
 
 const readEnv = (key: FirebaseEnvKey): string => {
-  const viteEnv = readViteEnv();
-  const value = viteEnv[key];
+  const value = env[key];
   if (value) {
     return value;
   }
 
-  if (readNodeEnv() === 'test') {
-    return `test-${key.toLowerCase()}`;
-  }
-
-  throw new Error(`auth.firebase.config_missing.${key.toLowerCase()}`);
+  throw new Error(`auth.firebase.config_missing.${key}`);
 };
 
 export const firebaseConfig: FirebaseConfig = {
