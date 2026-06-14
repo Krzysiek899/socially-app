@@ -8,11 +8,16 @@ import {
   updateAuthoredEventPayloadSchema,
 } from '../../pages/event-management/dto/eventManagementSchemas.ts';
 import type { GeocodeResult } from '../../pages/event-management/domain/eventManagementModels.ts';
+import { getAuthorizedUser, getAuthorizedUserId } from '../auth/getAuthorizedUserId.ts';
 import {
   createAuthoredEventForUser,
   getAuthoredEventByIdForUser,
   getAuthoredEventsForUser,
+  getParticipatingEventsForUser,
   handleJoinRequestForUser,
+  joinEventForUser,
+  leaveEventForUser,
+  upsertKnownUser,
   updateJoinRulesForUser,
   updateAuthoredEventForUser,
 } from '../events/store.ts';
@@ -22,14 +27,6 @@ const organizerByUserId: Record<string, { displayName: string; avatarUrl?: strin
     displayName: 'Jan Kowalski',
     avatarUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=120&q=80',
   },
-};
-
-const getAuthorizedUserId = (authorization: string | null): string | null => {
-  if (!authorization?.startsWith('Bearer token-')) {
-    return null;
-  }
-
-  return authorization.slice('Bearer token-'.length);
 };
 
 type NominatimItem = {
@@ -143,6 +140,14 @@ export const eventManagementHandlers = [
 
     return HttpResponse.json(getAuthoredEventsForUser(userId), { status: 200 });
   }),
+  http.get('/api/events/participating', async ({ request }) => {
+    const userId = getAuthorizedUserId(request.headers.get('authorization'));
+    if (!userId) {
+      return HttpResponse.json({ message: 'unauthorized' }, { status: 401 });
+    }
+
+    return HttpResponse.json(getParticipatingEventsForUser(userId), { status: 200 });
+  }),
   http.get('/api/events/authored/:eventId', async ({ request, params }) => {
     const userId = getAuthorizedUserId(request.headers.get('authorization'));
     if (!userId) {
@@ -213,10 +218,11 @@ export const eventManagementHandlers = [
     return HttpResponse.json({ result }, { status: 200 });
   }),
   http.post('/api/events', async ({ request }) => {
-    const userId = getAuthorizedUserId(request.headers.get('authorization'));
-    if (!userId) {
+    const authorizedUser = getAuthorizedUser(request.headers.get('authorization'));
+    if (!authorizedUser) {
       return HttpResponse.json({ message: 'unauthorized' }, { status: 401 });
     }
+    const { userId } = authorizedUser;
 
     const payloadResult = createEventPayloadSchema.safeParse(await request.json());
     if (!payloadResult.success) {
@@ -224,7 +230,9 @@ export const eventManagementHandlers = [
     }
 
     const payload = payloadResult.data;
-    const organizer = organizerByUserId[userId] ?? { displayName: 'Socially User' };
+    upsertKnownUser(userId, { displayName: authorizedUser.displayName });
+    const organizer = organizerByUserId[userId]
+      ?? (authorizedUser.displayName ? { displayName: authorizedUser.displayName } : { displayName: 'Socially User' });
     const createdEvent = createAuthoredEventForUser(userId, payload, organizer);
     if (!createdEvent) {
       return HttpResponse.json({ message: 'address_unresolvable' }, { status: 422 });
@@ -300,5 +308,49 @@ export const eventManagementHandlers = [
     }
 
     return HttpResponse.json(result.event, { status: 200 });
+  }),
+  http.post('/api/events/:eventId/join', async ({ request, params }) => {
+    const authorizedUser = getAuthorizedUser(request.headers.get('authorization'));
+    if (!authorizedUser) {
+      return HttpResponse.json({ message: 'unauthorized' }, { status: 401 });
+    }
+    const { userId } = authorizedUser;
+
+    if (typeof params.eventId !== 'string') {
+      return HttpResponse.json({ message: 'not_found' }, { status: 404 });
+    }
+
+    upsertKnownUser(userId, { displayName: authorizedUser.displayName });
+    const result = joinEventForUser(userId, params.eventId);
+    if (result.type === 'not_found') {
+      return HttpResponse.json({ message: 'not_found' }, { status: 404 });
+    }
+
+    if (result.type === 'forbidden') {
+      return HttpResponse.json({ message: 'forbidden' }, { status: 403 });
+    }
+
+    if (result.type === 'conflict') {
+      return HttpResponse.json({ message: 'capacity_invalid' }, { status: 409 });
+    }
+
+    return HttpResponse.json({ state: result.state }, { status: 200 });
+  }),
+  http.delete('/api/events/:eventId/participation', async ({ request, params }) => {
+    const userId = getAuthorizedUserId(request.headers.get('authorization'));
+    if (!userId) {
+      return HttpResponse.json({ message: 'unauthorized' }, { status: 401 });
+    }
+
+    if (typeof params.eventId !== 'string') {
+      return HttpResponse.json({ message: 'not_found' }, { status: 404 });
+    }
+
+    const result = leaveEventForUser(userId, params.eventId);
+    if (result.type === 'not_found') {
+      return HttpResponse.json({ message: 'not_found' }, { status: 404 });
+    }
+
+    return HttpResponse.json({ ok: true }, { status: 200 });
   }),
 ];

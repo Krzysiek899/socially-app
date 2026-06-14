@@ -3,6 +3,23 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import App from '../../App.tsx';
 import { t } from '../../i18n/index.ts';
 
+const mockSetPersistence = jest.fn().mockResolvedValue(undefined);
+const mockSignInWithEmailAndPassword = jest.fn();
+const mockCreateUserWithEmailAndPassword = jest.fn();
+const mockUpdateProfile = jest.fn().mockResolvedValue(undefined);
+const mockSignOut = jest.fn().mockResolvedValue(undefined);
+
+jest.mock('firebase/auth', () => ({
+  getAuth: jest.fn(() => ({ currentUser: null })),
+  setPersistence: (...args: unknown[]) => mockSetPersistence(...args),
+  signInWithEmailAndPassword: (...args: unknown[]) => mockSignInWithEmailAndPassword(...args),
+  createUserWithEmailAndPassword: (...args: unknown[]) => mockCreateUserWithEmailAndPassword(...args),
+  updateProfile: (...args: unknown[]) => mockUpdateProfile(...args),
+  signOut: (...args: unknown[]) => mockSignOut(...args),
+  browserLocalPersistence: { type: 'LOCAL' },
+  browserSessionPersistence: { type: 'SESSION' },
+}));
+
 const SESSION_KEY = 'auth.session.v1';
 const DISCOVER_EVENT = {
   id: 'event-1',
@@ -42,53 +59,47 @@ describe('Authentication Flow bootstrap', () => {
       ['user@socially.app', { userId: 'user-1', password: 'Password123!' }],
     ]);
 
-    global.fetch = jest.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
-      const url = typeof input === 'string' ? input : input.toString();
-      const body = JSON.parse((init?.body as string) ?? '{}') as {
-        fullName?: string;
-        email?: string;
-        password?: string;
-      };
-
-      if (url.endsWith('/api/auth/login') && init?.method === 'POST') {
-        const found = body.email ? users.get(body.email.toLowerCase()) : null;
-
-        if (found && body.password === found.password) {
-          return {
-            ok: true,
-            status: 200,
-            json: async () => ({
-              token: `token-${found.userId}`,
-              userId: found.userId,
-              expiresAt: '2099-01-01T00:00:00.000Z',
-            }),
-          } as Response;
+    mockSetPersistence.mockResolvedValue(undefined);
+    mockSignInWithEmailAndPassword.mockImplementation(
+      async (_auth: unknown, email: string, password: string) => {
+        const found = users.get(email.toLowerCase());
+        if (!found || found.password !== password) {
+          throw { code: 'auth/invalid-credential' };
         }
-      }
 
-      if (url.endsWith('/api/auth/register') && init?.method === 'POST') {
-        const normalizedEmail = body.email?.toLowerCase() ?? '';
-        if (normalizedEmail === 'user@socially.app') {
-          return {
-            ok: false,
-            status: 409,
-            json: async () => ({ message: 'email_taken' }),
-          } as Response;
+        return {
+          user: {
+            uid: found.userId,
+            getIdToken: async () => `token-${found.userId}`,
+            stsTokenManager: { expirationTime: Date.parse('2099-01-01T00:00:00.000Z') },
+          },
+        };
+      },
+    );
+    mockCreateUserWithEmailAndPassword.mockImplementation(
+      async (_auth: unknown, email: string, password: string) => {
+        const normalizedEmail = email.toLowerCase();
+        if (normalizedEmail === 'user@socially.app' || users.has(normalizedEmail)) {
+          throw { code: 'auth/email-already-in-use' };
         }
 
         const userId = `user-${normalizedEmail.split('@')[0]}`;
-        users.set(normalizedEmail, { userId, password: body.password ?? '' });
+        users.set(normalizedEmail, { userId, password });
 
         return {
-          ok: true,
-          status: 201,
-          json: async () => ({
-            token: `token-${userId}`,
-            userId,
-            expiresAt: '2099-01-01T00:00:00.000Z',
-          }),
-        } as Response;
-      }
+          user: {
+            uid: userId,
+            getIdToken: async () => `token-${userId}`,
+            stsTokenManager: { expirationTime: Date.parse('2099-01-01T00:00:00.000Z') },
+          },
+        };
+      },
+    );
+    mockUpdateProfile.mockResolvedValue(undefined);
+    mockSignOut.mockResolvedValue(undefined);
+
+    global.fetch = jest.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+      const url = typeof input === 'string' ? input : input.toString();
 
       if (url.includes('/api/discover/events') && (!init?.method || init.method === 'GET')) {
         const headers = new Headers(init?.headers);
@@ -118,7 +129,12 @@ describe('Authentication Flow bootstrap', () => {
 
   afterEach(() => {
     jest.resetAllMocks();
-    localStorage.clear();
+   mockSetPersistence.mockClear();
+   mockSignInWithEmailAndPassword.mockClear();
+   mockCreateUserWithEmailAndPassword.mockClear();
+   mockUpdateProfile.mockClear();
+   mockSignOut.mockClear();
+   localStorage.clear();
    sessionStorage.clear();
    window.history.replaceState({}, '', '/');
   });
@@ -195,6 +211,40 @@ describe('Authentication Flow bootstrap', () => {
     render(<App />);
 
     expect(await screen.findByRole('heading', { name: t('discover.title') })).toBeInTheDocument();
+  });
+
+  it('redirects authenticated User from /login to /app', async () => {
+    localStorage.setItem(
+      SESSION_KEY,
+      JSON.stringify({
+        token: 'token-user-1',
+        userId: 'user-1',
+        expiresAt: '2099-01-01T00:00:00.000Z',
+      }),
+    );
+    window.history.replaceState({}, '', '/login');
+
+    render(<App />);
+
+    expect(await screen.findByRole('heading', { name: t('discover.title') })).toBeInTheDocument();
+    expect(window.location.pathname).toBe('/app');
+  });
+
+  it('redirects authenticated User from /register to /app', async () => {
+    localStorage.setItem(
+      SESSION_KEY,
+      JSON.stringify({
+        token: 'token-user-1',
+        userId: 'user-1',
+        expiresAt: '2099-01-01T00:00:00.000Z',
+      }),
+    );
+    window.history.replaceState({}, '', '/register');
+
+    render(<App />);
+
+    expect(await screen.findByRole('heading', { name: t('discover.title') })).toBeInTheDocument();
+    expect(window.location.pathname).toBe('/app');
   });
 
   it('preserves full returnTo path with query and hash after Login', async () => {

@@ -22,9 +22,28 @@
   gap: var(--space-2);
 }
 
-.discover__filters > [data-layout="grid"][data-columns="3"] {
-  grid-template-columns: minmax(0, 1.4fr) minmax(140px, 0.6fr) auto;
+.discover__filters-row {
+  --discover-filter-control-height: 42px;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: var(--space-2);
   align-items: end;
+}
+
+.discover__here-now-button {
+  align-self: end;
+}
+
+.discover__filters-more {
+  align-self: end;
+}
+
+.discover__filters-row .input-field {
+  min-height: var(--discover-filter-control-height);
+}
+
+.discover__filters-row .btn {
+  min-height: var(--discover-filter-control-height);
 }
 
 .discover__categories-label {
@@ -140,6 +159,13 @@
   gap: var(--space-2);
 }
 
+.discover-card__meta-row {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
 .discover-card__meta span {
   display: inline-flex;
   align-items: center;
@@ -148,23 +174,69 @@
   color: var(--color-text-heading);
 }
 
-.discover-card__organizer {
-  display: inline-flex;
+.discover-card__people-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
   flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.discover-card__organizer-block,
+.discover-card__attendees-block {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.discover-card__people-label {
+  color: var(--color-text-subtle);
+  font-size: var(--typography-label-size);
+  font-weight: var(--typography-label-weight);
+  line-height: var(--typography-label-line-height);
+}
+
+.discover-card__organizer-link {
+  display: inline-flex;
   align-items: center;
   gap: var(--space-2);
+  background: transparent;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
   color: var(--color-text-default);
+  font: inherit;
+}
+
+.discover-card__organizer-link:focus-visible {
+  outline: var(--border-width-strong) solid var(--color-border-focus);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+.discover-card__organizer-link:hover {
+  color: var(--color-primary);
+}
+
+.discover-card__attendees [data-layout="cluster"] {
+  justify-content: flex-end;
 }
 
 .discover-card__attendees {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-1);
+  display: flex;
+  justify-content: flex-end;
+  margin-left: auto;
+  color: var(--color-text-default);
+}
+
+.discover-card__attendees-block {
+  margin-left: auto;
+  align-items: flex-end;
 }
 
 .discover-card__actions {
   display: flex;
-  justify-content: flex-end;
+  justify-content: center;
 }
 
 .discover__map-panel {
@@ -220,5 +292,9 @@
     position: relative;
     top: 0;
     height: 360px;
+  }
+
+  .discover__filters-row {
+    grid-template-columns: 1fr;
   }
 }

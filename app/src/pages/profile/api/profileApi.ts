@@ -1,6 +1,11 @@
 import { requestContract } from '../../../app/apiContractGateway.ts';
 import type { MyProfile, PublicProfile } from '../domain/profileModels.ts';
-import { myProfileSchema, publicProfileSchema } from '../dto/profileSchemas.ts';
+import {
+  friendMutationPayloadSchema,
+  friendMutationResponseSchema,
+  myProfileSchema,
+  publicProfileSchema,
+} from '../dto/profileSchemas.ts';
 
 const profileHttpErrorKey = (status: number): string => {
   if (status === 401) {
@@ -12,6 +17,22 @@ const profileHttpErrorKey = (status: number): string => {
   }
 
   return 'profile.errors.fetch_failed';
+};
+
+const profileMutationHttpErrorKey = (status: number, fallback: string): string => {
+  if (status === 401) {
+    return 'profile.errors.unauthorized';
+  }
+
+  if (status === 404) {
+    return 'profile.errors.not_found';
+  }
+
+  if (status === 409) {
+    return 'profile.errors.friend_action_conflict';
+  }
+
+  return fallback;
 };
 
 export const fetchMyProfileRequest = async (
@@ -46,5 +67,89 @@ export const fetchPublicProfileRequest = async (
       responseValidation: 'profile.errors.response_invalid',
       network: 'profile.errors.network',
       http: profileHttpErrorKey,
+    },
+  });
+
+export const sendFriendRequestRequest = async (
+  targetUserId: string,
+  token: string,
+  signal: AbortSignal,
+): Promise<{ ok: true }> =>
+  requestContract<{ targetUserId: string }, { ok: true }>({
+    url: '/api/profile/friends/request',
+    method: 'POST',
+    payload: { targetUserId },
+    payloadSchema: friendMutationPayloadSchema,
+    token,
+    signal,
+    responseSchema: friendMutationResponseSchema,
+    errorKeys: {
+      requestValidation: 'profile.errors.request_invalid',
+      responseValidation: 'profile.errors.response_invalid',
+      network: 'profile.errors.network',
+      http: (status: number) => profileMutationHttpErrorKey(status, 'profile.errors.friend_request_failed'),
+    },
+  });
+
+export const acceptFriendRequestRequest = async (
+  targetUserId: string,
+  token: string,
+  signal: AbortSignal,
+): Promise<{ ok: true }> =>
+  requestContract<{ targetUserId: string }, { ok: true }>({
+    url: '/api/profile/friends/accept',
+    method: 'POST',
+    payload: { targetUserId },
+    payloadSchema: friendMutationPayloadSchema,
+    token,
+    signal,
+    responseSchema: friendMutationResponseSchema,
+    errorKeys: {
+      requestValidation: 'profile.errors.request_invalid',
+      responseValidation: 'profile.errors.response_invalid',
+      network: 'profile.errors.network',
+      http: (status: number) => profileMutationHttpErrorKey(status, 'profile.errors.friend_accept_failed'),
+    },
+  });
+
+export const rejectFriendRequestRequest = async (
+  targetUserId: string,
+  token: string,
+  signal: AbortSignal,
+): Promise<{ ok: true }> =>
+  requestContract<{ targetUserId: string }, { ok: true }>({
+    url: '/api/profile/friends/reject',
+    method: 'POST',
+    payload: { targetUserId },
+    payloadSchema: friendMutationPayloadSchema,
+    token,
+    signal,
+    responseSchema: friendMutationResponseSchema,
+    errorKeys: {
+      requestValidation: 'profile.errors.request_invalid',
+      responseValidation: 'profile.errors.response_invalid',
+      network: 'profile.errors.network',
+      http: (status: number) => profileMutationHttpErrorKey(status, 'profile.errors.friend_reject_failed'),
+    },
+  });
+
+export const unfriendUserRequest = async (
+  targetUserId: string,
+  token: string,
+  signal: AbortSignal,
+): Promise<{ ok: true }> =>
+  requestContract<{ targetUserId: string }, { ok: true }>({
+    url: '/api/profile/friends/unfriend',
+    method: 'POST',
+    payload: { targetUserId },
+    payloadSchema: friendMutationPayloadSchema,
+    token,
+    signal,
+    responseSchema: friendMutationResponseSchema,
+    errorKeys: {
+      requestValidation: 'profile.errors.request_invalid',
+      responseValidation: 'profile.errors.response_invalid',
+      network: 'profile.errors.network',
+      http: (status: number) => profileMutationHttpErrorKey(status, 'profile.errors.friend_unfriend_failed'),
     },
   });

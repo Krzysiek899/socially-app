@@ -36,8 +36,12 @@ export const discoverEventSchema = z.object({
   }),
   attendees: z.array(discoverAttendeeSchema),
   attendeesCount: z.number().int().min(0),
+  participantCapacity: z.number().int().positive().nullable().optional(),
   photoUrl: z.string().url().optional(),
   category: discoverCategorySchema,
+  participation: z.object({
+    state: z.enum(['joined', 'pending']),
+  }).optional(),
 });
 
 export const discoverEventsResponseSchema = z.array(discoverEventSchema);

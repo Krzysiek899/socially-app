@@ -1,5 +1,6 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
 import { TopNav } from '../../shared/components/TopNav/TopNav.tsx';
 
 describe('TopNav — Brand slot', () => {
@@ -16,10 +17,12 @@ describe('TopNav — Brand slot', () => {
 describe('TopNav — NavLink slot', () => {
   it('renders NavLink children as links', () => {
     render(
-      <TopNav>
-        <TopNav.NavLink href="/home">Home</TopNav.NavLink>
-        <TopNav.NavLink href="/explore">Explore</TopNav.NavLink>
-      </TopNav>
+      <MemoryRouter>
+        <TopNav>
+          <TopNav.NavLink href="/home">Home</TopNav.NavLink>
+          <TopNav.NavLink href="/explore">Explore</TopNav.NavLink>
+        </TopNav>
+      </MemoryRouter>
     );
     expect(screen.getByRole('link', { name: /home/i })).toHaveAttribute('href', '/home');
     expect(screen.getByRole('link', { name: /explore/i })).toHaveAttribute('href', '/explore');
@@ -27,10 +30,12 @@ describe('TopNav — NavLink slot', () => {
 
   it('sets aria-current="page" on the active NavLink', () => {
     render(
-      <TopNav>
-        <TopNav.NavLink href="/home" active>Home</TopNav.NavLink>
-        <TopNav.NavLink href="/explore">Explore</TopNav.NavLink>
-      </TopNav>
+      <MemoryRouter>
+        <TopNav>
+          <TopNav.NavLink href="/home" active>Home</TopNav.NavLink>
+          <TopNav.NavLink href="/explore">Explore</TopNav.NavLink>
+        </TopNav>
+      </MemoryRouter>
     );
     expect(screen.getByRole('link', { name: /home/i })).toHaveAttribute('aria-current', 'page');
     expect(screen.getByRole('link', { name: /explore/i })).not.toHaveAttribute('aria-current');
@@ -38,10 +43,12 @@ describe('TopNav — NavLink slot', () => {
 
   it('applies top-nav__link--active class on the active NavLink', () => {
     render(
-      <TopNav>
-        <TopNav.NavLink href="/home" active>Home</TopNav.NavLink>
-        <TopNav.NavLink href="/explore">Explore</TopNav.NavLink>
-      </TopNav>
+      <MemoryRouter>
+        <TopNav>
+          <TopNav.NavLink href="/home" active>Home</TopNav.NavLink>
+          <TopNav.NavLink href="/explore">Explore</TopNav.NavLink>
+        </TopNav>
+      </MemoryRouter>
     );
     expect(screen.getByRole('link', { name: /home/i })).toHaveClass('top-nav__link--active');
     expect(screen.getByRole('link', { name: /explore/i })).not.toHaveClass('top-nav__link--active');
