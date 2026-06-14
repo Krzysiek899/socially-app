@@ -338,4 +338,15 @@ describe('Discover page states', () => {
     expect(mapPins).toHaveLength(2);
     expect(cards.length).toBeGreaterThanOrEqual(2);
   });
+
+  it('shows attendees as current/capacity when event has limit', async () => {
+    global.fetch = jest.fn(async () => ({
+      ok: true,
+      status: 200,
+      json: async () => [{ ...baseEvent, participantCapacity: 8 }],
+    })) as typeof fetch;
+
+    render(<App />);
+    expect(await screen.findByText('Uczestnicy (2/8)')).toBeInTheDocument();
+  });
 });

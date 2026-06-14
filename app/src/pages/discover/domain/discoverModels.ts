@@ -44,6 +44,7 @@ export type DiscoverEvent = {
   };
   attendees: DiscoverEventAttendee[];
   attendeesCount: number;
+  participantCapacity?: number | null;
   photoUrl?: string;
   category: DiscoverCategoryCode;
   participation?: {

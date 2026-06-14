@@ -388,7 +388,17 @@ const withJoinedParticipationApplied = (event: AuthoredEvent | DiscoverEvent): A
 
 export const getAllDiscoverEvents = () =>
   discoverEventsResponseSchema.parse(
-    [...discoverSeedEvents, ...getAllAuthoredEvents()].map((event) => withJoinedParticipationApplied(event)),
+    [...discoverSeedEvents, ...getAllAuthoredEvents()].map((event) => {
+      const eventWithParticipation = withJoinedParticipationApplied(event);
+      if ('management' in eventWithParticipation) {
+        return {
+          ...eventWithParticipation,
+          participantCapacity: eventWithParticipation.management.capacity,
+        };
+      }
+
+      return eventWithParticipation;
+    }),
   );
 
 export const getDiscoverEventById = (eventId: string) =>

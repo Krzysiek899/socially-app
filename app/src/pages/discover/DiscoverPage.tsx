@@ -59,6 +59,14 @@ const formatAddress = (event: DiscoverEvent): string => {
 
 const getDisplayedAttendees = (attendees: DiscoverEvent['attendees']) => attendees.slice(0, 8);
 
+const formatAttendeesCount = (event: DiscoverEvent): string => {
+  if (event.participantCapacity) {
+    return `${event.attendeesCount}/${event.participantCapacity}`;
+  }
+
+  return `${event.attendeesCount}`;
+};
+
 export const DiscoverPage = () => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
@@ -169,7 +177,7 @@ export const DiscoverPage = () => {
               <strong>{event.title}</strong>
               <span><CalendarDays size={14} aria-hidden="true" />{formatDateTime(event.dateTime)}</span>
               <span>{formatPrice(event)}</span>
-              <span><Users size={14} aria-hidden="true" />{event.attendeesCount}</span>
+              <span><Users size={14} aria-hidden="true" />{formatAttendeesCount(event)}</span>
             </div>
           ),
           content: (
@@ -196,7 +204,7 @@ export const DiscoverPage = () => {
                 </div>
                 <div className="discover-card__attendees-block" aria-label={t('discover.card.attendees')}>
                   <span className="discover-card__people-label">
-                    {`${t('discover.card.attendees_header')} (${event.attendeesCount})`}
+                    {`${t('discover.card.attendees_header')} (${formatAttendeesCount(event)})`}
                   </span>
                   <div className="discover-card__attendees">
                     <Cluster gap="1" align="center">
