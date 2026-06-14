@@ -218,5 +218,6 @@ export const plTranslations: Record<string, string> = {
   'profile.errors.not_found': 'Nie znaleziono profilu.',
   'profile.errors.submit_review_failed': 'Nie udało się zapisać Twojej opinii. Spróbuj ponownie.',
   'common.cancel': 'Anuluj',
+  'common.back': 'Powrót',
   'common.submit': 'Wyślij',
 };
