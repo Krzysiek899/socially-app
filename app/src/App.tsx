@@ -1,7 +1,8 @@
 import * as React from 'react';
 import { Provider } from 'react-redux';
-import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
+import { BrowserRouter, Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import { NotificationProvider } from './shared/components/index.ts';
+import ReactGA from 'react-ga4';
 import { store } from './redux/store.ts';
 import { Playground } from './playground/Playground.tsx';
 import { AuthGuard } from './pages/auth/AuthGuard.tsx';
@@ -23,6 +24,18 @@ import {
   saveAuthSession,
   saveSessionPersistencePreference,
 } from './pages/auth/domain/authSession.ts';
+
+// Komponent śledzący przejścia pomiędzy ścieżkami w SPA
+const PageTracker = () => {
+  const location = useLocation();
+
+  React.useEffect(() => {
+    // Wysłanie zdarzenia pageview z aktualną ścieżką oraz parametrami query (np. ?search=...)
+    ReactGA.send({ hitType: 'pageview', page: location.pathname + location.search });
+  }, [location]); // Uruchamia się przy montowaniu komponentu oraz przy każdej zmianie lokacji
+
+  return null; // Komponent nie renderuje niczego w warstwie wizualnej
+};
 
 const AppRoutes = () => (
   <Routes>
@@ -63,6 +76,7 @@ function App() {
     <Provider store={store}>
       <NotificationProvider>
         <BrowserRouter>
+          <PageTracker />
           <AppRoutes />
         </BrowserRouter>
       </NotificationProvider>
