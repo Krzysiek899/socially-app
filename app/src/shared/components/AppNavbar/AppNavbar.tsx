@@ -51,7 +51,7 @@ export function AppNavbar({ active = 'discover' }: AppNavbarProps): React.JSX.El
 
   const handleLogout = () => {
     setIsProfileMenuOpen(false);
-    dispatch(logout());
+    void dispatch(logout());
     navigate('/login', { replace: true });
   };
 

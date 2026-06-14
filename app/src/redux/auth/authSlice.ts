@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice, type PayloadAction } from '@reduxjs/toolkit';
-import { loginRequest, registerRequest } from '../../pages/auth/api/authApi.ts';
+import { loginRequest, logoutRequest, registerRequest } from '../../pages/auth/api/authApi.ts';
 import type { AuthSession, SessionPersistencePreference } from '../../pages/auth/domain/authSession.ts';
 
 type AuthState = {
@@ -29,6 +29,10 @@ export const register = createAsyncThunk(
   async (payload: { fullName: string; email: string; password: string }) => registerRequest(payload),
 );
 
+export const logout = createAsyncThunk('auth/logout', async () => {
+  await logoutRequest();
+});
+
 const authSlice = createSlice({
   name: 'auth',
   initialState,
@@ -42,12 +46,6 @@ const authSlice = createSlice({
     },
     sessionPersistencePreferenceSet: (state, action: PayloadAction<SessionPersistencePreference>) => {
       state.sessionPersistencePreference = action.payload;
-    },
-    logout: (state) => {
-      state.session = null;
-      state.bootstrapped = true;
-      state.status = 'idle';
-      state.errorKey = null;
     },
   },
   extraReducers: (builder) => {
@@ -79,6 +77,12 @@ const authSlice = createSlice({
       .addCase(register.rejected, (state, action) => {
         state.status = 'failed';
         state.errorKey = (action.error.message ?? 'auth.registration.submit_failed');
+      })
+      .addCase(logout.fulfilled, (state) => {
+        state.session = null;
+        state.bootstrapped = true;
+        state.status = 'idle';
+        state.errorKey = null;
       });
   },
 });
@@ -87,6 +91,5 @@ export const {
   authSessionRestored,
   sessionPersistencePreferenceRestored,
   sessionPersistencePreferenceSet,
-  logout,
 } = authSlice.actions;
 export const authReducer = authSlice.reducer;

@@ -2,6 +2,19 @@ import React from 'react';
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import App from '../../App.tsx';
 
+const mockSignOut = jest.fn().mockResolvedValue(undefined);
+
+jest.mock('firebase/auth', () => ({
+  getAuth: jest.fn(() => ({ currentUser: null })),
+  setPersistence: jest.fn(),
+  signInWithEmailAndPassword: jest.fn(),
+  createUserWithEmailAndPassword: jest.fn(),
+  updateProfile: jest.fn(),
+  signOut: (...args: unknown[]) => mockSignOut(...args),
+  browserLocalPersistence: { type: 'LOCAL' },
+  browserSessionPersistence: { type: 'SESSION' },
+}));
+
 jest.mock('../../pages/discover/DiscoverMap.tsx', () => ({
   DiscoverMap: () => <div data-testid="discover-map" />,
 }));
@@ -70,6 +83,7 @@ describe('AppNavbar profile menu', () => {
 
   afterEach(() => {
     jest.resetAllMocks();
+    mockSignOut.mockClear();
     localStorage.clear();
     sessionStorage.clear();
     window.history.replaceState({}, '', '/');
@@ -155,5 +169,6 @@ describe('AppNavbar profile menu', () => {
     await waitFor(() => {
       expect(window.location.pathname).toBe('/login');
     });
+    expect(mockSignOut).toHaveBeenCalledTimes(1);
   });
 });
