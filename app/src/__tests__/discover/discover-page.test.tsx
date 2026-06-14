@@ -182,4 +182,29 @@ describe('Discover page states', () => {
     const url = latestCall ? String(latestCall[0]) : '';
     expect(url).toContain('startsWithinMinutes=120');
   });
+
+  it('shows only events from next 120 minutes in Here & Now mode', async () => {
+    const fetchSpy = jest.fn(async () => ({
+      ok: true,
+      status: 200,
+      json: async () => [baseEvent],
+    })) as typeof fetch;
+    global.fetch = fetchSpy;
+
+    const items = await fetchDiscoverEventsRequest({
+      searchQuery: '',
+      categories: [],
+      price: 'all',
+      dateFrom: '',
+      dateTo: '',
+      hereNowEnabled: true,
+      startsWithinMinutes: 120,
+    }, 'token-user-1', new AbortController().signal);
+
+    const latestCall = fetchSpy.mock.calls.at(-1);
+    const url = latestCall ? String(latestCall[0]) : '';
+    expect(url).toContain('startsWithinMinutes=120');
+    expect(items).toHaveLength(1);
+    expect(items[0]?.title).toContain('Frontend Meetup');
+  });
 });
