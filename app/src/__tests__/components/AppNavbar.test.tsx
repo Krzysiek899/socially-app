@@ -171,4 +171,31 @@ describe('AppNavbar profile menu', () => {
     });
     expect(mockSignOut).toHaveBeenCalledTimes(1);
   });
+
+  it('uses my profile display name for navbar avatar initials on profile route', async () => {
+    window.history.replaceState({}, '', '/app/profile');
+    global.fetch = jest.fn(async (input: RequestInfo | URL) => {
+      const url = typeof input === 'string' ? input : input.toString();
+      if (url.includes('/api/profile/me')) {
+        return {
+          ok: true,
+          status: 200,
+          json: async () => myProfileResponse,
+        } as Response;
+      }
+
+      return {
+        ok: true,
+        status: 200,
+        json: async () => discoverEventsResponse,
+      } as Response;
+    }) as typeof fetch;
+
+    render(<App />);
+
+    await screen.findByRole('heading', { name: 'Odkrywaj' });
+    const navbarAvatar = screen.getAllByRole('img', { name: 'Jan Kowalski' })[0];
+    expect(navbarAvatar).toBeInTheDocument();
+    expect(within(navbarAvatar).getByAltText('Jan Kowalski')).toHaveAttribute('src', 'https://images.example.com/jan.png');
+  });
 });

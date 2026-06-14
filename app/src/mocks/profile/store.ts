@@ -221,12 +221,24 @@ const toDisplayNameFromUserId = (userId: string): string => {
     .join(' ');
 };
 
-const ensureMockProfileSeedForUser = (userId: string): void => {
+const ensureMockProfileSeedForUser = (userId: string, preferredDisplayName?: string): void => {
+  const normalizedPreferredDisplayName = preferredDisplayName?.trim();
+
   if (!userDirectory.has(userId)) {
     userDirectory.set(userId, {
       id: userId,
-      displayName: toDisplayNameFromUserId(userId),
+      displayName: normalizedPreferredDisplayName && normalizedPreferredDisplayName.length > 0
+        ? normalizedPreferredDisplayName
+        : toDisplayNameFromUserId(userId),
     });
+  } else if (normalizedPreferredDisplayName && normalizedPreferredDisplayName.length > 0) {
+    const existingDirectoryEntry = userDirectory.get(userId);
+    if (existingDirectoryEntry) {
+      userDirectory.set(userId, {
+        ...existingDirectoryEntry,
+        displayName: normalizedPreferredDisplayName,
+      });
+    }
   }
 
   const directoryEntry = userDirectory.get(userId);
@@ -242,6 +254,14 @@ const ensureMockProfileSeedForUser = (userId: string): void => {
       badge: 'Nowy użytkownik',
       bio: 'Ten profil został utworzony automatycznie dla nowego konta Firebase.',
     });
+  } else if (normalizedPreferredDisplayName && normalizedPreferredDisplayName.length > 0) {
+    const existingMyProfile = myProfileBaseByUserId.get(userId);
+    if (existingMyProfile) {
+      myProfileBaseByUserId.set(userId, {
+        ...existingMyProfile,
+        displayName: normalizedPreferredDisplayName,
+      });
+    }
   }
 
   if (!publicProfileBaseByUserId.has(userId)) {
@@ -255,6 +275,14 @@ const ensureMockProfileSeedForUser = (userId: string): void => {
       reviewsCount: 0,
       reviews: [],
     });
+  } else if (normalizedPreferredDisplayName && normalizedPreferredDisplayName.length > 0) {
+    const existingPublicProfile = publicProfileBaseByUserId.get(userId);
+    if (existingPublicProfile) {
+      publicProfileBaseByUserId.set(userId, {
+        ...existingPublicProfile,
+        displayName: normalizedPreferredDisplayName,
+      });
+    }
   }
 };
 
@@ -313,8 +341,8 @@ const toPublicFriendAction = (state: ReturnType<typeof relationState>) => {
   return 'can_send_request' as const;
 };
 
-export const getMyProfileForUser = (userId: string) => {
-  ensureMockProfileSeedForUser(userId);
+export const getMyProfileForUser = (userId: string, preferredDisplayName?: string) => {
+  ensureMockProfileSeedForUser(userId, preferredDisplayName);
   const base = myProfileBaseByUserId.get(userId);
   if (!base) {
     return null;
@@ -359,9 +387,13 @@ export const getMyProfileForUser = (userId: string) => {
   });
 };
 
-export const getPublicProfileForUser = (viewerUserId: string, targetUserId: string) => {
+export const getPublicProfileForUser = (
+  viewerUserId: string,
+  targetUserId: string,
+  preferredDisplayName?: string,
+) => {
   ensureMockProfileSeedForUser(viewerUserId);
-  ensureMockProfileSeedForUser(targetUserId);
+  ensureMockProfileSeedForUser(targetUserId, preferredDisplayName);
   const base = publicProfileBaseByUserId.get(targetUserId);
   if (!base || !hasKnownUser(viewerUserId)) {
     return null;

@@ -62,7 +62,7 @@ export const registerRequest = async (payload: {
     await updateProfile(result.user, { displayName: validatedPayload.fullName });
 
     return {
-      token: await result.user.getIdToken(),
+      token: await result.user.getIdToken(true),
       userId: result.user.uid,
       expiresAt: new Date(
         result.user.stsTokenManager.expirationTime ?? Date.now() + 60 * 60 * 1000,

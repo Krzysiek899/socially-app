@@ -6,6 +6,7 @@ import {
   setPersistence,
   signInWithEmailAndPassword,
   signOut,
+  updateProfile,
 } from 'firebase/auth';
 
 jest.mock('firebase/auth', () => ({
@@ -67,6 +68,27 @@ describe('authApi Firebase adapter', () => {
     await expect(
       registerRequest({ fullName: 'Jan Kowalski', email: 'user@socially.app', password: 'Password123!' }),
     ).rejects.toThrow('auth.registration.email_taken');
+  });
+
+  it('updates Firebase displayName and refreshes token on registration', async () => {
+    const getIdToken = jest.fn().mockResolvedValue('token-user-2');
+    const user = {
+      uid: 'user-2',
+      getIdToken,
+      stsTokenManager: { expirationTime: Date.parse('2099-01-01T00:00:00.000Z') },
+    };
+
+    (createUserWithEmailAndPassword as jest.Mock).mockResolvedValue({ user });
+
+    const session = await registerRequest({
+      fullName: 'Jan Kowalski',
+      email: 'new-user@socially.app',
+      password: 'Password123!',
+    });
+
+    expect(updateProfile).toHaveBeenCalledWith(user, { displayName: 'Jan Kowalski' });
+    expect(getIdToken).toHaveBeenCalledWith(true);
+    expect(session).toMatchObject({ userId: 'user-2', token: 'token-user-2' });
   });
 
   it('calls signOut in logoutRequest', async () => {

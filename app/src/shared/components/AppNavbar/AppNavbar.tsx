@@ -7,7 +7,7 @@ import { ThemeToggle } from '../ThemeToggle/ThemeToggle.tsx';
 import { TopNav } from '../TopNav/TopNav.tsx';
 import { t } from '../../../i18n/index.ts';
 import { logout } from '../../../redux/auth/authSlice.ts';
-import { useAppDispatch } from '../../../redux/hooks.ts';
+import { useAppDispatch, useAppSelector } from '../../../redux/hooks.ts';
 import './AppNavbar.css';
 
 export interface AppNavbarProps {
@@ -21,6 +21,10 @@ export function AppNavbar({ active = 'discover' }: AppNavbarProps): React.JSX.El
   const navigate = useNavigate();
   const menuRef = React.useRef<HTMLDivElement | null>(null);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = React.useState(false);
+  const myProfile = useAppSelector((state) => state.profile.myProfile.profile);
+  const fallbackName = t('discover.nav.profile');
+  const profileName = myProfile?.displayName ?? fallbackName;
+  const profileAvatarUrl = myProfile?.avatarUrl;
 
   React.useEffect(() => {
     if (!isProfileMenuOpen) {
@@ -81,7 +85,7 @@ export function AppNavbar({ active = 'discover' }: AppNavbarProps): React.JSX.El
             aria-expanded={isProfileMenuOpen}
             onClick={toggleProfileMenu}
           >
-            <Avatar name={t('discover.nav.profile')} size="sm" />
+            <Avatar name={profileName} src={profileAvatarUrl} size="sm" />
           </button>
           {isProfileMenuOpen ? (
             <div className="app-navbar__profile-dropdown" role="menu">

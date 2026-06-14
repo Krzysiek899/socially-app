@@ -14,7 +14,12 @@ const decodeJwtPayload = (token: string): Record<string, unknown> | null => {
   }
 };
 
-export const getAuthorizedUserId = (authorization: string | null): string | null => {
+export type AuthorizedUser = {
+  userId: string;
+  displayName?: string;
+};
+
+export const getAuthorizedUser = (authorization: string | null): AuthorizedUser | null => {
   if (!authorization?.startsWith('Bearer ')) {
     return null;
   }
@@ -25,19 +30,25 @@ export const getAuthorizedUserId = (authorization: string | null): string | null
   }
 
   if (token.startsWith('token-')) {
-    return token.slice('token-'.length);
+    return { userId: token.slice('token-'.length) };
   }
 
   const payload = decodeJwtPayload(token);
   const firebaseUserId = payload?.user_id;
-  if (typeof firebaseUserId === 'string' && firebaseUserId.length > 0) {
-    return firebaseUserId;
-  }
-
   const subject = payload?.sub;
-  if (typeof subject === 'string' && subject.length > 0) {
-    return subject;
+  const displayName = typeof payload?.name === 'string' ? payload.name : undefined;
+
+  if (typeof firebaseUserId === 'string' && firebaseUserId.length > 0) {
+    return { userId: firebaseUserId, displayName };
   }
 
-  return 'user-1';
+  if (typeof subject === 'string' && subject.length > 0) {
+    return { userId: subject, displayName };
+  }
+
+  return { userId: 'user-1', displayName };
+};
+
+export const getAuthorizedUserId = (authorization: string | null): string | null => {
+  return getAuthorizedUser(authorization)?.userId ?? null;
 };
