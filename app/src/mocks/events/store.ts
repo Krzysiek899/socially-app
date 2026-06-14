@@ -314,6 +314,25 @@ const knownUserById: Record<string, { displayName: string; avatarUrl?: string }>
   },
 };
 
+export const upsertKnownUser = (
+  userId: string,
+  user: { displayName?: string; avatarUrl?: string },
+): void => {
+  const normalizedDisplayName = user.displayName?.trim();
+  const nextDisplayName = normalizedDisplayName && normalizedDisplayName.length > 0
+    ? normalizedDisplayName
+    : knownUserById[userId]?.displayName;
+
+  if (!nextDisplayName) {
+    return;
+  }
+
+  knownUserById[userId] = {
+    displayName: nextDisplayName,
+    avatarUrl: user.avatarUrl ?? knownUserById[userId]?.avatarUrl,
+  };
+};
+
 const participationByEventId = new Map<string, ParticipationRecord[]>([
   [
     'event-warsaw-tech-meetup',

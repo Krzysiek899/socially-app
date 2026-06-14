@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { DISCOVER_CATEGORY_CODES } from '../../pages/discover/domain/discoverModels.ts';
 import { isEventStartingWithinMinutes } from '../../pages/discover/domain/hereNow.ts';
 import { discoverEventsResponseSchema } from '../../pages/discover/dto/discoverSchemas.ts';
+import { getAuthorizedUserId } from '../auth/getAuthorizedUserId.ts';
 import { getAllDiscoverEvents, getDiscoverEventById, getParticipationStateForUser } from '../events/store.ts';
 
 const discoverFiltersSchema = z.object({
@@ -42,11 +43,10 @@ const matchesDateTo = (eventDateTime: string, dateTo?: string) => {
 
 export const discoverHandlers = [
   http.get('/api/discover/events', async ({ request }) => {
-    const authHeader = request.headers.get('authorization');
-    if (!authHeader?.startsWith('Bearer token-')) {
+    const userId = getAuthorizedUserId(request.headers.get('authorization'));
+    if (!userId) {
       return HttpResponse.json({ message: 'unauthorized' }, { status: 401 });
     }
-    const userId = authHeader.slice('Bearer token-'.length);
 
     const url = new URL(request.url);
     const filters = parseDiscoverFilters(url);
@@ -108,11 +108,10 @@ export const discoverHandlers = [
     ), { status: 200 });
   }),
   http.get('/api/discover/events/:eventId', async ({ request, params }) => {
-    const authHeader = request.headers.get('authorization');
-    if (!authHeader?.startsWith('Bearer token-')) {
+    const userId = getAuthorizedUserId(request.headers.get('authorization'));
+    if (!userId) {
       return HttpResponse.json({ message: 'unauthorized' }, { status: 401 });
     }
-    const userId = authHeader.slice('Bearer token-'.length);
 
     const event = typeof params.eventId === 'string' ? getDiscoverEventById(params.eventId) : undefined;
     if (!event) {

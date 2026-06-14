@@ -1,15 +1,8 @@
 import { http, HttpResponse } from 'msw';
 import { z } from 'zod';
 import { groupMutationPayloadSchema } from '../../pages/groups/dto/groupSchemas.ts';
+import { getAuthorizedUserId } from '../auth/getAuthorizedUserId.ts';
 import { getGroupDetailsForUser, joinGroup, leaveGroup } from '../profile/store.ts';
-
-const getAuthorizedUserId = (authorization: string | null): string | null => {
-  if (!authorization?.startsWith('Bearer token-')) {
-    return null;
-  }
-
-  return authorization.slice('Bearer token-'.length);
-};
 
 export const groupsHandlers = [
   http.get('/api/groups/:groupId', ({ request, params }) => {

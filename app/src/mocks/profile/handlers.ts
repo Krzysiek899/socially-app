@@ -1,6 +1,7 @@
 import { http, HttpResponse } from 'msw';
 import { z } from 'zod';
 import { friendMutationPayloadSchema } from '../../pages/profile/dto/profileSchemas.ts';
+import { getAuthorizedUser, getAuthorizedUserId } from '../auth/getAuthorizedUserId.ts';
 import {
   acceptFriendRequest,
   getMyProfileForUser,
@@ -10,22 +11,14 @@ import {
   unfriendUsers,
 } from './store.ts';
 
-const getAuthorizedUserId = (authorization: string | null): string | null => {
-  if (!authorization?.startsWith('Bearer token-')) {
-    return null;
-  }
-
-  return authorization.slice('Bearer token-'.length);
-};
-
 export const profileHandlers = [
   http.get('/api/profile/me', async ({ request }) => {
-    const userId = getAuthorizedUserId(request.headers.get('authorization'));
-    if (!userId) {
+    const authorizedUser = getAuthorizedUser(request.headers.get('authorization'));
+    if (!authorizedUser) {
       return HttpResponse.json({ message: 'unauthorized' }, { status: 401 });
     }
 
-    const profile = getMyProfileForUser(userId);
+    const profile = getMyProfileForUser(authorizedUser.userId, authorizedUser.displayName);
     if (!profile) {
       return HttpResponse.json({ message: 'not_found' }, { status: 404 });
     }
@@ -33,13 +26,17 @@ export const profileHandlers = [
     return HttpResponse.json(profile, { status: 200 });
   }),
   http.get('/api/profile/users/:userId', async ({ request, params }) => {
-    const authorizedUserId = getAuthorizedUserId(request.headers.get('authorization'));
-    if (!authorizedUserId) {
+    const authorizedUser = getAuthorizedUser(request.headers.get('authorization'));
+    if (!authorizedUser) {
       return HttpResponse.json({ message: 'unauthorized' }, { status: 401 });
     }
 
     const requestedUserId = typeof params.userId === 'string' ? params.userId : '';
-    const profile = getPublicProfileForUser(authorizedUserId, requestedUserId);
+    const profile = getPublicProfileForUser(
+      authorizedUser.userId,
+      requestedUserId,
+      authorizedUser.displayName,
+    );
     if (!profile) {
       return HttpResponse.json({ message: 'not_found' }, { status: 404 });
     }

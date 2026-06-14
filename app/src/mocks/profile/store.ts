@@ -206,6 +206,86 @@ let friendships = new Set(initialFriendships);
 let pendingRequests = new Set(initialPendingRequests);
 let groupMemberships = new Set(initialGroupMemberships);
 
+const toDisplayNameFromUserId = (userId: string): string => {
+  const normalized = userId
+    .replace(/[_\-]+/g, ' ')
+    .trim();
+
+  if (normalized.length === 0) {
+    return 'Nowy użytkownik';
+  }
+
+  return normalized
+    .split(/\s+/)
+    .map((part) => `${part.charAt(0).toUpperCase()}${part.slice(1)}`)
+    .join(' ');
+};
+
+const ensureMockProfileSeedForUser = (userId: string, preferredDisplayName?: string): void => {
+  const normalizedPreferredDisplayName = preferredDisplayName?.trim();
+
+  if (!userDirectory.has(userId)) {
+    userDirectory.set(userId, {
+      id: userId,
+      displayName: normalizedPreferredDisplayName && normalizedPreferredDisplayName.length > 0
+        ? normalizedPreferredDisplayName
+        : toDisplayNameFromUserId(userId),
+    });
+  } else if (normalizedPreferredDisplayName && normalizedPreferredDisplayName.length > 0) {
+    const existingDirectoryEntry = userDirectory.get(userId);
+    if (existingDirectoryEntry) {
+      userDirectory.set(userId, {
+        ...existingDirectoryEntry,
+        displayName: normalizedPreferredDisplayName,
+      });
+    }
+  }
+
+  const directoryEntry = userDirectory.get(userId);
+  if (!directoryEntry) {
+    return;
+  }
+
+  if (!myProfileBaseByUserId.has(userId)) {
+    myProfileBaseByUserId.set(userId, {
+      id: userId,
+      displayName: directoryEntry.displayName,
+      avatarUrl: directoryEntry.avatarUrl,
+      badge: 'Nowy użytkownik',
+      bio: 'Ten profil został utworzony automatycznie dla nowego konta Firebase.',
+    });
+  } else if (normalizedPreferredDisplayName && normalizedPreferredDisplayName.length > 0) {
+    const existingMyProfile = myProfileBaseByUserId.get(userId);
+    if (existingMyProfile) {
+      myProfileBaseByUserId.set(userId, {
+        ...existingMyProfile,
+        displayName: normalizedPreferredDisplayName,
+      });
+    }
+  }
+
+  if (!publicProfileBaseByUserId.has(userId)) {
+    publicProfileBaseByUserId.set(userId, {
+      id: userId,
+      displayName: directoryEntry.displayName,
+      avatarUrl: directoryEntry.avatarUrl,
+      badge: 'Nowy użytkownik',
+      bio: 'Nowy użytkownik Socially.',
+      rating: 0,
+      reviewsCount: 0,
+      reviews: [],
+    });
+  } else if (normalizedPreferredDisplayName && normalizedPreferredDisplayName.length > 0) {
+    const existingPublicProfile = publicProfileBaseByUserId.get(userId);
+    if (existingPublicProfile) {
+      publicProfileBaseByUserId.set(userId, {
+        ...existingPublicProfile,
+        displayName: normalizedPreferredDisplayName,
+      });
+    }
+  }
+};
+
 const getFriendIds = (userId: string): Set<string> => {
   const friends = new Set<string>();
 
@@ -261,7 +341,8 @@ const toPublicFriendAction = (state: ReturnType<typeof relationState>) => {
   return 'can_send_request' as const;
 };
 
-export const getMyProfileForUser = (userId: string) => {
+export const getMyProfileForUser = (userId: string, preferredDisplayName?: string) => {
+  ensureMockProfileSeedForUser(userId, preferredDisplayName);
   const base = myProfileBaseByUserId.get(userId);
   if (!base) {
     return null;
@@ -306,7 +387,13 @@ export const getMyProfileForUser = (userId: string) => {
   });
 };
 
-export const getPublicProfileForUser = (viewerUserId: string, targetUserId: string) => {
+export const getPublicProfileForUser = (
+  viewerUserId: string,
+  targetUserId: string,
+  preferredDisplayName?: string,
+) => {
+  ensureMockProfileSeedForUser(viewerUserId, preferredDisplayName);
+  ensureMockProfileSeedForUser(targetUserId);
   const base = publicProfileBaseByUserId.get(targetUserId);
   if (!base || !hasKnownUser(viewerUserId)) {
     return null;

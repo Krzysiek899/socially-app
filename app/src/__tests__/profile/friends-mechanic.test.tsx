@@ -68,6 +68,20 @@ describe('Friends mechanic contracts', () => {
     const myProfile = getMyProfileForUser('user-1');
     expect(myProfile?.incomingRequests.map((entry) => entry.id)).toContain('org-anna');
   });
+
+  it('seeds Firebase users with preferred display name when available', () => {
+    const myProfile = getMyProfileForUser('firebase-uid-123', 'Jan Kowalski');
+    const publicProfile = getPublicProfileForUser('firebase-uid-123', 'firebase-uid-123', 'Jan Kowalski');
+
+    expect(myProfile?.displayName).toBe('Jan Kowalski');
+    expect(publicProfile?.displayName).toBe('Jan Kowalski');
+  });
+
+  it('does not override target public profile name with viewer display name', () => {
+    const publicProfile = getPublicProfileForUser('firebase-uid-999', 'org-anna', 'Jan Kowalski');
+
+    expect(publicProfile?.displayName).toBe('Anna Wójcik');
+  });
 });
 
 describe('Friends mechanic UI integration', () => {

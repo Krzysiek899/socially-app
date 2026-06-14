@@ -36,7 +36,7 @@ export const MyProfilePage = (): React.JSX.Element => {
   }, [profile?.id]);
 
   const handleLogout = React.useCallback(() => {
-    dispatch(logout());
+    void dispatch(logout());
     navigate('/login', { replace: true });
   }, [dispatch, navigate]);
 
