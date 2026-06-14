@@ -1,6 +1,7 @@
 import { http, HttpResponse } from 'msw';
 import { z } from 'zod';
 import { DISCOVER_CATEGORY_CODES } from '../../pages/discover/domain/discoverModels.ts';
+import { isEventStartingWithinMinutes } from '../../pages/discover/domain/hereNow.ts';
 import { discoverEventsResponseSchema } from '../../pages/discover/dto/discoverSchemas.ts';
 import { getAllDiscoverEvents, getDiscoverEventById, getParticipationStateForUser } from '../events/store.ts';
 
@@ -10,6 +11,7 @@ const discoverFiltersSchema = z.object({
   price: z.enum(['free', 'paid']).optional(),
   dateFrom: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
   dateTo: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
+  startsWithinMinutes: z.coerce.number().int().positive().optional(),
 });
 
 const parseDiscoverFilters = (url: URL) =>
@@ -19,6 +21,7 @@ const parseDiscoverFilters = (url: URL) =>
     price: url.searchParams.get('price') ?? undefined,
     dateFrom: url.searchParams.get('dateFrom') ?? undefined,
     dateTo: url.searchParams.get('dateTo') ?? undefined,
+    startsWithinMinutes: url.searchParams.get('startsWithinMinutes') ?? undefined,
   });
 
 const matchesDateFrom = (eventDateTime: string, dateFrom?: string) => {
@@ -81,6 +84,13 @@ export const discoverHandlers = [
       })
       .filter((event) => matchesDateFrom(event.dateTime, filters.dateFrom))
       .filter((event) => matchesDateTo(event.dateTime, filters.dateTo))
+      .filter((event) => {
+        if (!filters.startsWithinMinutes) {
+          return true;
+        }
+
+        return isEventStartingWithinMinutes(event.dateTime, new Date().toISOString(), filters.startsWithinMinutes);
+      })
       .sort((left, right) => left.dateTime.localeCompare(right.dateTime));
 
     return HttpResponse.json(discoverEventsResponseSchema.parse(

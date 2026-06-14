@@ -25,6 +25,10 @@ const toQueryString = (filters: DiscoverFilters): string => {
     params.set('dateTo', filters.dateTo);
   }
 
+  if (filters.hereNowEnabled && filters.startsWithinMinutes) {
+    params.set('startsWithinMinutes', String(filters.startsWithinMinutes));
+  }
+
   return params.toString();
 };
 

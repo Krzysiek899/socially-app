@@ -98,6 +98,76 @@ const discoverSeedEvents = discoverEventsResponseSchema.parse([
     photoUrl: 'https://images.unsplash.com/photo-1415201364774-f6f0bb35f28f?auto=format&fit=crop&w=640&q=80',
   },
   {
+    id: 'event-krakow-mistrzejowice-sunset-run',
+    title: 'Sunset Run — Mistrzejowice',
+    dateTime: '2026-06-14T13:10:00Z',
+    description: 'Lekki bieg osiedlowy po Mistrzejowicach i Plantach Mistrzejowickich.',
+    category: 'SPORT',
+    address: {
+      city: 'Kraków',
+      street: 'os. Piastów',
+      buildingNumber: '53',
+      postalCode: '31-625',
+    },
+    location: {
+      lat: 50.0953,
+      lng: 20.0008,
+    },
+    price: {
+      amount: 0,
+      currency: 'PLN',
+      isFree: true,
+    },
+    organizer: {
+      id: 'org-kasia',
+      displayName: 'Kasia Nowak',
+    },
+    attendeesCount: 7,
+    attendees: [
+      { id: 'u23', displayName: 'Patryk L.' },
+      { id: 'u24', displayName: 'Monika J.' },
+      { id: 'u25', displayName: 'Sebastian W.' },
+      { id: 'u26', displayName: 'Natalia D.' },
+      { id: 'u27', displayName: 'Damian K.' },
+      { id: 'u28', displayName: 'Maja C.' },
+      { id: 'u29', displayName: 'Krzysztof P.' },
+    ],
+  },
+  {
+    id: 'event-krakow-center-coffee-walk',
+    title: 'Coffee Walk — Centrum Krakowa',
+    dateTime: '2026-06-14T12:50:00Z',
+    description: 'Spacer i networking wokół Rynku Głównego z krótkim przystankiem na kawę.',
+    category: 'COMMUNITY',
+    address: {
+      city: 'Kraków',
+      street: 'Rynek Główny',
+      buildingNumber: '1',
+      postalCode: '31-042',
+    },
+    location: {
+      lat: 50.0619,
+      lng: 19.9373,
+    },
+    price: {
+      amount: 0,
+      currency: 'PLN',
+      isFree: true,
+    },
+    organizer: {
+      id: 'org-michal',
+      displayName: 'Michał Zając',
+    },
+    attendeesCount: 5,
+    attendees: [
+      { id: 'u30', displayName: 'Ewelina K.' },
+      { id: 'u31', displayName: 'Adam S.' },
+      { id: 'u32', displayName: 'Iwona T.' },
+      { id: 'u33', displayName: 'Łukasz R.' },
+      { id: 'u34', displayName: 'Paulina B.' },
+    ],
+  },
+  {
     id: 'event-warsaw-tech-meetup',
     title: 'Frontend Meetup Warszawa',
     dateTime: '2026-06-15T16:00:00Z',
@@ -318,7 +388,17 @@ const withJoinedParticipationApplied = (event: AuthoredEvent | DiscoverEvent): A
 
 export const getAllDiscoverEvents = () =>
   discoverEventsResponseSchema.parse(
-    [...discoverSeedEvents, ...getAllAuthoredEvents()].map((event) => withJoinedParticipationApplied(event)),
+    [...discoverSeedEvents, ...getAllAuthoredEvents()].map((event) => {
+      const eventWithParticipation = withJoinedParticipationApplied(event);
+      if ('management' in eventWithParticipation) {
+        return {
+          ...eventWithParticipation,
+          participantCapacity: eventWithParticipation.management.capacity,
+        };
+      }
+
+      return eventWithParticipation;
+    }),
   );
 
 export const getDiscoverEventById = (eventId: string) =>
