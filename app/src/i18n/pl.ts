@@ -43,7 +43,7 @@ export const plTranslations: Record<string, string> = {
   'discover.map.label': 'Mapa wydarzeń',
   'discover.card.attendees': 'Uczestnicy wydarzenia',
   'discover.card.price.free': 'Bezpłatne',
-  'discover.card.join': 'Dołącz do wydarzenia',
+  'discover.card.join': 'Zobacz szczegóły i dołącz',
   'discover.filters.label': 'Filtry odkrywania',
   'discover.filters.search': 'Szukaj wydarzeń',
   'discover.filters.search.placeholder': 'Szukaj po tytule lub opisie...',

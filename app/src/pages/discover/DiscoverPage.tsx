@@ -176,40 +176,37 @@ export const DiscoverPage = () => {
             <Stack gap="2" align="stretch" as="div" style={{ width: '100%' }}>
               <p>{event.description}</p>
               <div className="discover-card__meta">
-                <Stack gap="2">
+                <div className="discover-card__meta-row">
                   <span><MapPinned size={14} aria-hidden="true" />{formatAddress(event)}</span>
-                </Stack>
+                  <Badge variant="info" size="sm">{t(`discover.category.${event.category}`)}</Badge>
+                </div>
               </div>
-              <div className="discover-card__organizer">
-                <Cluster gap="2" align="center">
+              <div className="discover-card__people-row">
+                <button
+                  type="button"
+                  className="discover-card__organizer-link"
+                  onClick={() => navigate(`/app/users/${event.organizer.id}`)}
+                  aria-label={event.organizer.displayName}
+                >
                   <Avatar name={event.organizer.displayName} src={event.organizer.avatarUrl} size="sm" />
                   <span>{event.organizer.displayName}</span>
-                  <Badge variant="info" size="sm">{t(`discover.category.${event.category}`)}</Badge>
-                  <Button
-                    type="button"
-                    size="sm"
-                    variant="ghost"
-                    onClick={() => navigate(`/app/users/${event.organizer.id}`)}
-                  >
-                    {t('profile.actions.view_public')}
-                  </Button>
-                </Cluster>
-              </div>
-              <div className="discover-card__attendees" aria-label={t('discover.card.attendees')}>
-                <Cluster gap="1" align="center">
-                  {displayedAttendees.map((attendee) => (
-                    <Avatar
-                      key={attendee.id}
-                      name={attendee.displayName}
-                      src={attendee.avatarUrl}
-                      size="sm"
-                    />
-                  ))}
-                  {overflow > 0 && <Badge size="sm">+{overflow}</Badge>}
-                </Cluster>
+                </button>
+                <div className="discover-card__attendees" aria-label={t('discover.card.attendees')}>
+                  <Cluster gap="1" align="center">
+                    {displayedAttendees.map((attendee) => (
+                      <Avatar
+                        key={attendee.id}
+                        name={attendee.displayName}
+                        src={attendee.avatarUrl}
+                        size="sm"
+                      />
+                    ))}
+                    {overflow > 0 && <Badge size="sm">+{overflow}</Badge>}
+                  </Cluster>
+                </div>
               </div>
               <div className="discover-card__actions">
-                <Cluster justify="flex-end">
+                <Cluster justify="center">
                   <Button
                     type="button"
                     size="sm"

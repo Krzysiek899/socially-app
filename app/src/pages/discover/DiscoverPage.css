@@ -159,6 +159,13 @@
   gap: var(--space-2);
 }
 
+.discover-card__meta-row {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
 .discover-card__meta span {
   display: inline-flex;
   align-items: center;
@@ -167,23 +174,50 @@
   color: var(--color-text-heading);
 }
 
-.discover-card__organizer {
-  display: inline-flex;
+.discover-card__people-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.discover-card__organizer-link {
+  display: inline-flex;
   align-items: center;
   gap: var(--space-2);
+  background: transparent;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
   color: var(--color-text-default);
+  font: inherit;
+}
+
+.discover-card__organizer-link:focus-visible {
+  outline: var(--border-width-strong) solid var(--color-border-focus);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+.discover-card__organizer-link:hover {
+  color: var(--color-primary);
+}
+
+.discover-card__attendees [data-layout="cluster"] {
+  justify-content: flex-end;
 }
 
 .discover-card__attendees {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-1);
+  display: flex;
+  justify-content: flex-end;
+  margin-left: auto;
+  color: var(--color-text-default);
 }
 
 .discover-card__actions {
   display: flex;
-  justify-content: flex-end;
+  justify-content: center;
 }
 
 .discover__map-panel {
