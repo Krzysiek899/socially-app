@@ -39,6 +39,7 @@ type MyProfileBase = {
   badge: string;
   avatarUrl?: string;
   bio: string;
+  isApproved: boolean;
 };
 
 type MutationResult = { type: 'ok' } | { type: 'not_found' } | { type: 'conflict' };
@@ -120,6 +121,7 @@ const myProfileBaseByUserId = new Map<string, MyProfileBase>([
       badge: 'Świetny organizator',
       avatarUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=160&q=80',
       bio: 'Pasjonat lokalnych inicjatyw i sportów zespołowych. Od 5 lat organizuję weekendowe turnieje piłki nożnej oraz wspólne wyjścia do kina. Zawsze dbam o to, by nikt nie czuł się wykluczony.',
+      isApproved: false,
     },
   ],
 ]);
@@ -253,6 +255,7 @@ const ensureMockProfileSeedForUser = (userId: string, preferredDisplayName?: str
       avatarUrl: directoryEntry.avatarUrl,
       badge: 'Nowy użytkownik',
       bio: 'Ten profil został utworzony automatycznie dla nowego konta Firebase.',
+      isApproved: false,
     });
   } else if (normalizedPreferredDisplayName && normalizedPreferredDisplayName.length > 0) {
     const existingMyProfile = myProfileBaseByUserId.get(userId);
@@ -605,6 +608,68 @@ export const submitReview = (
     type: 'ok',
     review: existingReviewIndex !== -1 ? updatedReviews[existingReviewIndex] : updatedReviews[0],
   };
+};
+
+export const updateMyProfileForUser = (
+  userId: string,
+  payload: { displayName?: string; bio?: string },
+) => {
+  if (!hasKnownUser(userId)) {
+    return null;
+  }
+
+  const base = myProfileBaseByUserId.get(userId);
+  if (!base) {
+    return null;
+  }
+
+  const nextDisplayName = payload.displayName?.trim();
+  const nextBio = payload.bio?.trim();
+
+  const updatedBase: MyProfileBase = {
+    ...base,
+    ...(nextDisplayName && nextDisplayName.length > 0 ? { displayName: nextDisplayName } : {}),
+    ...(typeof nextBio === 'string' ? { bio: nextBio } : {}),
+  };
+
+  myProfileBaseByUserId.set(userId, updatedBase);
+
+  const directoryEntry = userDirectory.get(userId);
+  if (directoryEntry && nextDisplayName && nextDisplayName.length > 0) {
+    userDirectory.set(userId, {
+      ...directoryEntry,
+      displayName: nextDisplayName,
+    });
+  }
+
+  const publicBase = publicProfileBaseByUserId.get(userId);
+  if (publicBase) {
+    publicProfileBaseByUserId.set(userId, {
+      ...publicBase,
+      ...(nextDisplayName && nextDisplayName.length > 0 ? { displayName: nextDisplayName } : {}),
+      ...(typeof nextBio === 'string' ? { bio: nextBio } : {}),
+    });
+  }
+
+  return getMyProfileForUser(userId, updatedBase.displayName);
+};
+
+export const approveMyProfileForUser = (userId: string) => {
+  if (!hasKnownUser(userId)) {
+    return null;
+  }
+
+  const base = myProfileBaseByUserId.get(userId);
+  if (!base) {
+    return null;
+  }
+
+  myProfileBaseByUserId.set(userId, {
+    ...base,
+    isApproved: true,
+  });
+
+  return getMyProfileForUser(userId);
 };
 
 export const resetProfileStore = (): void => {
