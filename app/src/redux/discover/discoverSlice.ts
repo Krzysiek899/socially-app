@@ -30,6 +30,8 @@ const initialState: DiscoverState = {
     price: 'all',
     dateFrom: '',
     dateTo: '',
+    hereNowEnabled: false,
+    startsWithinMinutes: null,
   },
   currentRequestId: null,
 };

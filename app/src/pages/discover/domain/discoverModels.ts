@@ -57,4 +57,6 @@ export type DiscoverFilters = {
   price: DiscoverPriceFilter;
   dateFrom: string;
   dateTo: string;
+  hereNowEnabled: boolean;
+  startsWithinMinutes: number | null;
 };

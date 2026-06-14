@@ -2,6 +2,7 @@ import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import App from '../../App.tsx';
 import { t } from '../../i18n/index.ts';
+import { fetchDiscoverEventsRequest } from '../../pages/discover/api/discoverApi.ts';
 
 jest.mock('../../pages/discover/DiscoverMap.tsx', () => ({
   DiscoverMap: ({
@@ -157,5 +158,28 @@ describe('Discover page states', () => {
       expect(window.location.pathname).toBe('/app/events/event-1');
     });
     expect(await screen.findByRole('heading', { name: 'Frontend Meetup' })).toBeInTheDocument();
+  });
+
+  it('adds startsWithinMinutes query when Here & Now is active', async () => {
+    const fetchSpy = jest.fn(async () => ({
+      ok: true,
+      status: 200,
+      json: async () => [],
+    })) as typeof fetch;
+    global.fetch = fetchSpy;
+
+    await fetchDiscoverEventsRequest({
+      searchQuery: '',
+      categories: [],
+      price: 'all',
+      dateFrom: '',
+      dateTo: '',
+      hereNowEnabled: true,
+      startsWithinMinutes: 120,
+    }, 'token-user-1', new AbortController().signal);
+
+    const latestCall = fetchSpy.mock.calls.at(-1);
+    const url = latestCall ? String(latestCall[0]) : '';
+    expect(url).toContain('startsWithinMinutes=120');
   });
 });
