@@ -1,20 +1,24 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { BookOpen, CodeXml, UsersRound } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Avatar } from '../../shared/components/index.ts';
 import { Grid } from '../../shared/layout/index.tsx';
 import { logout } from '../../redux/auth/authSlice.ts';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks.ts';
-import { fetchMyProfile } from '../../redux/profile/profileSlice.ts';
+import { fetchMyProfile, updateMyProfile, approveMyProfile } from '../../redux/profile/profileSlice.ts';
 import { t } from '../../i18n/index.ts';
 import { MyProfileHero } from './components/MyProfileHero.tsx';
 import { MyProfileListCard, MyProfileListRow } from './components/MyProfileListCard.tsx';
 import { ProfileSurface } from './components/ProfileSurface.tsx';
+import { EditProfileDialog } from './components/EditProfileDialog.tsx';
+import type { UpdateProfileRequestDTO } from './dto/profileSchemas.ts';
 
 export const MyProfilePage = (): React.JSX.Element => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const { profile, status, errorKey } = useAppSelector((state) => state.profile.myProfile);
+
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
   const loadProfile = React.useCallback(() => {
     void dispatch(fetchMyProfile());
@@ -28,6 +32,15 @@ export const MyProfilePage = (): React.JSX.Element => {
     dispatch(logout());
     navigate('/login', { replace: true });
   }, [dispatch, navigate]);
+
+  const handleSaveProfile = React.useCallback((data: UpdateProfileRequestDTO) => {
+    dispatch(updateMyProfile(data));
+    setIsEditDialogOpen(false);
+  }, [dispatch]);
+
+  const handleApproveProfile = React.useCallback(() => {
+    dispatch(approveMyProfile());
+  }, [dispatch]);
 
   const friendRows = React.useMemo(
     () => profile?.friends.map((friend) => (
@@ -69,7 +82,12 @@ export const MyProfilePage = (): React.JSX.Element => {
     >
       {profile ? (
         <React.Fragment>
-          <MyProfileHero profile={profile} onLogout={handleLogout} />
+          <MyProfileHero 
+            profile={profile} 
+            onLogout={handleLogout} 
+            onEdit={() => setIsEditDialogOpen(true)}
+            onApprove={handleApproveProfile}
+          />
           <Grid columns={2} gap="3">
             <MyProfileListCard
               title={t('profile.my.friends')}
@@ -86,6 +104,16 @@ export const MyProfilePage = (): React.JSX.Element => {
               ctaLabel={t('profile.my.show_all_groups')}
             />
           </Grid>
+          
+          <EditProfileDialog
+            isOpen={isEditDialogOpen}
+            onClose={() => setIsEditDialogOpen(false)}
+            onSave={handleSaveProfile}
+            initialData={{
+              displayName: profile.displayName,
+              bio: profile.bio
+            }}
+          />
         </React.Fragment>
       ) : null}
     </ProfileSurface>

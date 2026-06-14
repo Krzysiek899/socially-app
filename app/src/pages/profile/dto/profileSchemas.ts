@@ -18,6 +18,7 @@ export const myProfileSchema = z.object({
     name: z.string().min(1),
     iconKey: z.enum(['sport', 'book', 'tech']),
   })),
+  isApproved: z.boolean().default(false), 
 });
 
 export const publicProfileReviewSchema = z.object({
@@ -55,13 +56,18 @@ export const publicProfileSchema = z.object({
   friendAction: z.enum(['can_send_request']),
 });
 
-
 export const createReviewRequestSchema = z.object({
   rating: z.number().int().min(1).max(5),
   content: z.string(), 
 });
 
 
+export const updateProfileSchema = z.object({
+  displayName: z.string().min(2, "Imię musi mieć co najmniej 2 znaki").optional(),
+  bio: z.string().max(300, "Opis jest za długi").optional(),
+});
+
 export type CreateReviewRequestDTO = z.infer<typeof createReviewRequestSchema>;
 export type PublicProfileReviewDTO = z.infer<typeof publicProfileReviewSchema>;
 export type PublicProfileDTO = z.infer<typeof publicProfileSchema>;
+export type UpdateProfileRequestDTO = z.infer<typeof updateProfileSchema>; 

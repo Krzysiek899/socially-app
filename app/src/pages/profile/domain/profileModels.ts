@@ -22,6 +22,7 @@ export type MyProfile = {
   friends: MyProfileFriend[];
   groupsCount: number;
   groups: MyProfileGroup[];
+  isApproved: boolean; 
 };
 
 export type PublicProfileReview = {

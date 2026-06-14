@@ -381,3 +381,83 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* ════════════════════════════════════════════════════════════════════════
+   MODAL: EDYTUJ PROFIL
+   ════════════════════════════════════════════════════════════════════════ */
+.my-profile__dialog-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  padding: var(--space-4, 1rem);
+}
+
+.my-profile__dialog-surface {
+  background: var(--color-surface-default);
+  border: var(--border-width-default) solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  padding: var(--space-6);
+  width: 100%;
+  max-width: 500px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+}
+
+.my-profile__dialog-title {
+  margin: 0 0 var(--space-4) 0;
+  color: var(--color-primary); /* Make the title pop! */
+  font-size: var(--typography-heading-size);
+  font-weight: var(--typography-heading-weight);
+}
+
+.my-profile__dialog-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.my-profile__dialog-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  align-items: center
+}
+
+.my-profile__dialog-input-group label {
+  color: var(--color-text-heading);
+  font-size: var(--typography-label-size);
+  font-weight: bold;
+}
+
+.my-profile__dialog-input,
+.my-profile__dialog-textarea {
+  width: 100%;
+  padding: var(--space-3);
+  border-radius: var(--radius-sm);
+  border: var(--border-width-default) solid var(--color-border-default);
+  background: var(--color-surface-subtle);
+  color: var(--color-text-default);
+  font-family: inherit;
+  align-items: center
+}
+
+.my-profile__dialog-textarea {
+  min-height: 120px;
+  resize: vertical;
+}
+
+.my-profile__dialog-input:focus,
+.my-profile__dialog-textarea:focus {
+  outline: 2px solid var(--color-primary);
+  outline-offset: -1px;
+}
+
+.my-profile__dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-3);
+  margin-top: var(--space-2);
+}

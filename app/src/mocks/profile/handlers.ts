@@ -10,6 +10,7 @@ const myProfiles = new Map([
     avatarUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=160&q=80',
     bio: 'Pasjonat lokalnych inicjatyw i sportów zespołowych. Od 5 lat organizuję weekendowe turnieje piłki nożnej oraz wspólne wyjścia do kina. Zawsze dbam o to, by nikt nie czuł się wykluczony.',
     friendsCount: 124,
+    isApproved: false, 
     friends: [
       { id: 'friend-1', displayName: 'Anna Nowak', avatarUrl: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=120&q=80' },
       { id: 'friend-2', displayName: 'Marek Wiśniewski', avatarUrl: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=120&q=80' },
@@ -101,6 +102,7 @@ const getAuthorizedUserId = (authorization: string | null): string | null => {
 };
 
 export const profileHandlers = [
+  // 1. GET MY PROFILE
   http.get('/api/profile/me', async ({ request }) => {
     const userId = getAuthorizedUserId(request.headers.get('authorization'));
     if (!userId) {
@@ -115,6 +117,7 @@ export const profileHandlers = [
     return HttpResponse.json(profile, { status: 200 });
   }),
 
+  // 2. GET PUBLIC PROFILE
   http.get('/api/profile/users/:userId', async ({ request, params }) => {
     const authorizedUserId = getAuthorizedUserId(request.headers.get('authorization'));
     if (!authorizedUserId) {
@@ -137,6 +140,7 @@ export const profileHandlers = [
     return HttpResponse.json(sanitizedProfile, { status: 200 });
   }),
 
+  // 3. POST NEW REVIEW
   http.post('/api/profile/users/:userId/reviews', async ({ request, params }) => {
     const authorizedUserId = getAuthorizedUserId(request.headers.get('authorization'));
     if (!authorizedUserId) {
@@ -204,4 +208,39 @@ export const profileHandlers = [
       return HttpResponse.json(newReviewMock, { status: 201 });
     }
   }),
+
+ 
+  http.patch('/api/profile/me', async ({ request }) => {
+    const userId = getAuthorizedUserId(request.headers.get('authorization'));
+    if (!userId) return HttpResponse.json({ message: 'unauthorized' }, { status: 401 });
+
+    const profile = myProfiles.get(userId);
+    if (!profile) return HttpResponse.json({ message: 'not_found' }, { status: 404 });
+
+    const body = await request.json() as { displayName?: string; bio?: string };
+    
+    const updatedProfile = {
+      ...profile,
+      ...body,
+    };
+
+    myProfiles.set(userId, updatedProfile);
+    return HttpResponse.json(updatedProfile, { status: 200 });
+  }),
+
+  http.patch('/api/profile/me/approve', async ({ request }) => {
+    const userId = getAuthorizedUserId(request.headers.get('authorization'));
+    if (!userId) return HttpResponse.json({ message: 'unauthorized' }, { status: 401 });
+
+    const profile = myProfiles.get(userId);
+    if (!profile) return HttpResponse.json({ message: 'not_found' }, { status: 404 });
+
+    const updatedProfile = {
+      ...profile,
+      isApproved: true,
+    };
+
+    myProfiles.set(userId, updatedProfile);
+    return HttpResponse.json({ success: true, isApproved: true }, { status: 200 });
+  })
 ];
