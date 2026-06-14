@@ -74,6 +74,18 @@ export const authoredEventSchema = discoverEventSchema.extend({
 export const createEventResponseSchema = authoredEventSchema;
 export const authoredEventsResponseSchema = z.array(authoredEventSchema);
 export const authoredEventResponseSchema = authoredEventSchema;
+export const participatingEventSchema = discoverEventSchema.extend({
+  participation: z.object({
+    state: z.enum(['joined', 'pending']),
+  }),
+});
+export const participatingEventsResponseSchema = z.array(participatingEventSchema);
+export const joinEventResponseSchema = z.object({
+  state: z.enum(['joined', 'pending']),
+});
+export const leaveEventResponseSchema = z.object({
+  ok: z.literal(true),
+});
 
 export const geocodeSearchPayloadSchema = z.object({
   query: z.string().trim().min(3),

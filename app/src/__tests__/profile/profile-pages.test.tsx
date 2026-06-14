@@ -3,6 +3,19 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import App from '../../App.tsx';
 import { t } from '../../i18n/index.ts';
 
+const mockSignOut = jest.fn().mockResolvedValue(undefined);
+
+jest.mock('firebase/auth', () => ({
+  getAuth: jest.fn(() => ({ currentUser: null })),
+  setPersistence: jest.fn(),
+  signInWithEmailAndPassword: jest.fn(),
+  createUserWithEmailAndPassword: jest.fn(),
+  updateProfile: jest.fn(),
+  signOut: (...args: unknown[]) => mockSignOut(...args),
+  browserLocalPersistence: { type: 'LOCAL' },
+  browserSessionPersistence: { type: 'SESSION' },
+}));
+
 jest.mock('../../pages/discover/DiscoverMap.tsx', () => ({
   DiscoverMap: () => <div data-testid="discover-map" />,
 }));
@@ -21,6 +34,7 @@ const myProfileResponse = {
     { id: 'friend-2', displayName: 'Marek Wiśniewski', avatarUrl: 'https://images.example.com/marek.png' },
     { id: 'friend-3', displayName: 'Kasia Kowalczyk', avatarUrl: 'https://images.example.com/kasia.png' },
   ],
+  incomingRequests: [],
   groupsCount: 8,
   groups: [
     { id: 'group-1', name: 'Biegacze Powiśle', iconKey: 'sport' },
@@ -96,6 +110,7 @@ describe('Profile pages', () => {
 
   afterEach(() => {
     jest.resetAllMocks();
+    mockSignOut.mockClear();
     localStorage.clear();
     sessionStorage.clear();
     window.history.replaceState({}, '', '/');
@@ -140,6 +155,32 @@ describe('Profile pages', () => {
     expect(screen.getByText('Brak grup do wyświetlenia.')).toBeInTheDocument();
   });
 
+  it('expands all my groups after clicking show-all CTA', async () => {
+    window.history.replaceState({}, '', '/app/profile');
+    global.fetch = jest.fn(async () => ({
+      ok: true,
+      status: 200,
+      json: async () => ({
+        ...myProfileResponse,
+        groupsCount: 5,
+        groups: [
+          { id: 'group-1', name: 'Biegacze Powiśle', iconKey: 'sport' },
+          { id: 'group-2', name: 'Klub Czytelniczy', iconKey: 'book' },
+          { id: 'group-3', name: 'Tech Meetup WAW', iconKey: 'tech' },
+          { id: 'group-4', name: 'Board Games', iconKey: 'book' },
+          { id: 'group-5', name: 'Startup Talks', iconKey: 'tech' },
+        ],
+      }),
+    })) as typeof fetch;
+
+    render(<App />);
+
+    fireEvent.click(await screen.findByRole('button', { name: 'Zobacz wszystkie' }));
+
+    expect(await screen.findByRole('button', { name: 'Board Games' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Startup Talks' })).toBeInTheDocument();
+  });
+
   it('renders a public profile route with dedicated figma sections', async () => {
     window.history.replaceState({}, '', '/app/users/org-anna');
     global.fetch = jest.fn(async () => ({
@@ -159,6 +200,23 @@ describe('Profile pages', () => {
     expect(screen.getByText('Paweł Nowak')).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Grupy' })).toBeInTheDocument();
     expect(screen.getByText('Jazz Kraków')).toBeInTheDocument();
+  });
+
+  it('navigates to group details from public profile groups card', async () => {
+    window.history.replaceState({}, '', '/app/users/org-anna');
+    global.fetch = jest.fn(async () => ({
+      ok: true,
+      status: 200,
+      json: async () => publicProfileResponse,
+    })) as typeof fetch;
+
+    render(<App />);
+
+    fireEvent.click(await screen.findByText('Jazz Kraków'));
+
+    await waitFor(() => {
+      expect(window.location.pathname).toBe('/app/groups/group-1');
+    });
   });
 
   it('renders dedicated public profile empty states', async () => {
@@ -182,64 +240,82 @@ describe('Profile pages', () => {
     expect(screen.getByText('Brak grup do wyświetlenia.')).toBeInTheDocument();
   });
 
-  it('opens public profile from discover organizer action', async () => {
+  it('opens public profile from discover event details action', async () => {
     window.history.replaceState({}, '', '/app');
+    const discoverEvent = {
+      id: 'event-krakow-jazz-night',
+      title: 'Jazz Night nad Wisłą',
+      dateTime: '2026-06-20T17:30:00Z',
+      description: 'Wieczorny koncert jazzowy i jam session na bulwarach.',
+      category: 'MUSIC',
+      address: {
+        city: 'Kraków',
+        street: 'Bulwar Czerwieński',
+        buildingNumber: '1',
+        postalCode: '31-069',
+      },
+      location: {
+        lat: 50.0515,
+        lng: 19.9366,
+      },
+      price: {
+        amount: 0,
+        currency: 'PLN',
+        isFree: true,
+      },
+      organizer: {
+        id: 'org-anna',
+        displayName: 'Anna Wójcik',
+      },
+      attendeesCount: 1,
+      attendees: [{ id: 'u1', displayName: 'Paweł K.' }],
+    };
+
     global.fetch = jest.fn(async (input: RequestInfo | URL) => {
       const url = typeof input === 'string' ? input : input.toString();
 
-      if (url.includes('/api/profile/users/org-anna')) {
+      if (url.includes('/api/profile/users/')) {
+        const isOrganizer = url.includes('/api/profile/users/org-anna');
         return {
           ok: true,
           status: 200,
-          json: async () => publicProfileResponse,
+          json: async () => ({
+            ...publicProfileResponse,
+            id: isOrganizer ? 'org-anna' : 'u1',
+            displayName: isOrganizer ? 'Anna Wójcik' : 'Paweł K.',
+          }),
+        } as Response;
+      }
+
+      if (url.includes('/api/discover/events/event-krakow-jazz-night')) {
+        return {
+          ok: true,
+          status: 200,
+          json: async () => discoverEvent,
         } as Response;
       }
 
       return {
         ok: true,
         status: 200,
-        json: async () => [
-          {
-            id: 'event-krakow-jazz-night',
-            title: 'Jazz Night nad Wisłą',
-            dateTime: '2026-06-20T17:30:00Z',
-            description: 'Wieczorny koncert jazzowy i jam session na bulwarach.',
-            category: 'MUSIC',
-            address: {
-              city: 'Kraków',
-              street: 'Bulwar Czerwieński',
-              buildingNumber: '1',
-              postalCode: '31-069',
-            },
-            location: {
-              lat: 50.0515,
-              lng: 19.9366,
-            },
-            price: {
-              amount: 0,
-              currency: 'PLN',
-              isFree: true,
-            },
-            organizer: {
-              id: 'org-anna',
-              displayName: 'Anna Wójcik',
-            },
-            attendeesCount: 1,
-            attendees: [{ id: 'u1', displayName: 'Paweł K.' }],
-          },
-        ],
+        json: async () => [discoverEvent],
       } as Response;
     }) as typeof fetch;
 
     render(<App />);
 
+    fireEvent.click(await screen.findByRole('button', { name: t('discover.card.join') }));
+    await waitFor(() => {
+      expect(window.location.pathname).toBe('/app/events/event-krakow-jazz-night');
+    });
+
     const publicProfileButtons = await screen.findAllByRole('button', { name: t('profile.actions.view_public') });
-    fireEvent.click(publicProfileButtons[0]);
+    fireEvent.click(publicProfileButtons[publicProfileButtons.length - 1]);
 
     await waitFor(() => {
-      expect(window.location.pathname).toBe('/app/users/org-anna');
+      expect(window.location.pathname).toBe('/app/users/u1');
     });
-    expect(await screen.findByRole('heading', { name: 'Anna Wójcik' })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: 'Paweł K.' })).toBeInTheDocument();
   });
 
   it('logs out from my profile and redirects to login', async () => {
@@ -257,5 +333,6 @@ describe('Profile pages', () => {
     await waitFor(() => {
       expect(window.location.pathname).toBe('/login');
     });
+    expect(mockSignOut).toHaveBeenCalledTimes(1);
   });
 });

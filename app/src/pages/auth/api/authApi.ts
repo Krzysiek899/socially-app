@@ -1,29 +1,47 @@
+import {
+  browserLocalPersistence,
+  browserSessionPersistence,
+  createUserWithEmailAndPassword,
+  setPersistence,
+  signInWithEmailAndPassword,
+  signOut,
+  updateProfile,
+} from 'firebase/auth';
+import { firebaseAuth } from '../../../firebase/auth.ts';
 import type { AuthSession } from '../domain/authSession.ts';
 import {
   loginPayloadSchema,
-  loginResponseSchema,
   registerPayloadSchema,
-  registerResponseSchema,
 } from '../dto/authSchemas.ts';
 
 export const loginRequest = async (payload: {
   email: string;
   password: string;
+  rememberMe: boolean;
 }): Promise<AuthSession> => {
   const validatedPayload = loginPayloadSchema.parse(payload);
+  await setPersistence(
+    firebaseAuth,
+    validatedPayload.rememberMe ? browserLocalPersistence : browserSessionPersistence,
+  );
 
-  const response = await fetch('/api/auth/login', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(validatedPayload),
-  });
+  try {
+    const result = await signInWithEmailAndPassword(
+      firebaseAuth,
+      validatedPayload.email,
+      validatedPayload.password,
+    );
 
-  if (!response.ok) {
+    return {
+      token: await result.user.getIdToken(),
+      userId: result.user.uid,
+      expiresAt: new Date(
+        result.user.stsTokenManager.expirationTime ?? Date.now() + 60 * 60 * 1000,
+      ).toISOString(),
+    };
+  } catch {
     throw new Error('auth.login.invalid_credentials');
   }
-
-  const responseBody = await response.json();
-  return loginResponseSchema.parse(responseBody);
 };
 
 export const registerRequest = async (payload: {
@@ -32,21 +50,38 @@ export const registerRequest = async (payload: {
   password: string;
 }): Promise<AuthSession> => {
   const validatedPayload = registerPayloadSchema.parse(payload);
+  await setPersistence(firebaseAuth, browserLocalPersistence);
 
-  const response = await fetch('/api/auth/register', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(validatedPayload),
-  });
+  try {
+    const result = await createUserWithEmailAndPassword(
+      firebaseAuth,
+      validatedPayload.email,
+      validatedPayload.password,
+    );
 
-  if (!response.ok) {
-    if (response.status === 409) {
+    await updateProfile(result.user, { displayName: validatedPayload.fullName });
+
+    return {
+      token: await result.user.getIdToken(true),
+      userId: result.user.uid,
+      expiresAt: new Date(
+        result.user.stsTokenManager.expirationTime ?? Date.now() + 60 * 60 * 1000,
+      ).toISOString(),
+    };
+  } catch (error) {
+    if (
+      typeof error === 'object' &&
+      error !== null &&
+      'code' in error &&
+      String(error.code) === 'auth/email-already-in-use'
+    ) {
       throw new Error('auth.registration.email_taken');
     }
 
     throw new Error('auth.registration.submit_failed');
   }
+};
 
-  const responseBody = await response.json();
-  return registerResponseSchema.parse(responseBody);
+export const logoutRequest = async (): Promise<void> => {
+  await signOut(firebaseAuth);
 };

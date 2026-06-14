@@ -76,6 +76,14 @@ describe('Manage authored event flow', () => {
         } as Response;
       }
 
+      if (url.endsWith('/api/events/participating') && (!init?.method || init.method === 'GET')) {
+        return {
+          ok: true,
+          status: 200,
+          json: async () => [],
+        } as Response;
+      }
+
       if (url.endsWith('/api/events/authored/event-owned-1') && (!init?.method || init.method === 'GET')) {
         return {
           ok: true,

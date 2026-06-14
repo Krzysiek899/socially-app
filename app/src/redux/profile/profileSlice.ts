@@ -1,6 +1,13 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import type { RootState } from '../store.ts';
-import { fetchMyProfileRequest, fetchPublicProfileRequest } from '../../pages/profile/api/profileApi.ts';
+import {
+  acceptFriendRequestRequest,
+  fetchMyProfileRequest,
+  fetchPublicProfileRequest,
+  rejectFriendRequestRequest,
+  sendFriendRequestRequest,
+  unfriendUserRequest,
+} from '../../pages/profile/api/profileApi.ts';
 import type { MyProfile, PublicProfile } from '../../pages/profile/domain/profileModels.ts';
 
 type ProfileStatus = 'idle' | 'loading' | 'succeeded' | 'failed';
@@ -77,6 +84,96 @@ export const fetchPublicProfile = createAsyncThunk<
     return await fetchPublicProfileRequest(userId, token, thunkApi.signal);
   } catch (error) {
     return thunkApi.rejectWithValue(getErrorKey(error, 'profile.errors.fetch_failed'));
+  }
+});
+
+const refreshProfilesAfterRelationMutation = async (
+  thunkApi: {
+    dispatch: (action: unknown) => unknown;
+    getState: () => RootState;
+  },
+  targetUserId: string,
+): Promise<void> => {
+  await thunkApi.dispatch(fetchMyProfile());
+
+  const requestedUserId = thunkApi.getState().profile.publicProfile.requestedUserId;
+  const publicUserId = requestedUserId ?? targetUserId;
+  await thunkApi.dispatch(fetchPublicProfile(publicUserId));
+};
+
+export const sendFriendRequest = createAsyncThunk<
+  { ok: true },
+  string,
+  { state: RootState; rejectValue: string }
+>('profile/sendFriendRequest', async (targetUserId, thunkApi) => {
+  const token = thunkApi.getState().auth.session?.token;
+  if (!token) {
+    return thunkApi.rejectWithValue('profile.errors.unauthorized');
+  }
+
+  try {
+    const response = await sendFriendRequestRequest(targetUserId, token, thunkApi.signal);
+    await refreshProfilesAfterRelationMutation(thunkApi, targetUserId);
+    return response;
+  } catch (error) {
+    return thunkApi.rejectWithValue(getErrorKey(error, 'profile.errors.friend_request_failed'));
+  }
+});
+
+export const acceptFriendRequest = createAsyncThunk<
+  { ok: true },
+  string,
+  { state: RootState; rejectValue: string }
+>('profile/acceptFriendRequest', async (targetUserId, thunkApi) => {
+  const token = thunkApi.getState().auth.session?.token;
+  if (!token) {
+    return thunkApi.rejectWithValue('profile.errors.unauthorized');
+  }
+
+  try {
+    const response = await acceptFriendRequestRequest(targetUserId, token, thunkApi.signal);
+    await refreshProfilesAfterRelationMutation(thunkApi, targetUserId);
+    return response;
+  } catch (error) {
+    return thunkApi.rejectWithValue(getErrorKey(error, 'profile.errors.friend_accept_failed'));
+  }
+});
+
+export const rejectFriendRequest = createAsyncThunk<
+  { ok: true },
+  string,
+  { state: RootState; rejectValue: string }
+>('profile/rejectFriendRequest', async (targetUserId, thunkApi) => {
+  const token = thunkApi.getState().auth.session?.token;
+  if (!token) {
+    return thunkApi.rejectWithValue('profile.errors.unauthorized');
+  }
+
+  try {
+    const response = await rejectFriendRequestRequest(targetUserId, token, thunkApi.signal);
+    await refreshProfilesAfterRelationMutation(thunkApi, targetUserId);
+    return response;
+  } catch (error) {
+    return thunkApi.rejectWithValue(getErrorKey(error, 'profile.errors.friend_reject_failed'));
+  }
+});
+
+export const unfriendUser = createAsyncThunk<
+  { ok: true },
+  string,
+  { state: RootState; rejectValue: string }
+>('profile/unfriendUser', async (targetUserId, thunkApi) => {
+  const token = thunkApi.getState().auth.session?.token;
+  if (!token) {
+    return thunkApi.rejectWithValue('profile.errors.unauthorized');
+  }
+
+  try {
+    const response = await unfriendUserRequest(targetUserId, token, thunkApi.signal);
+    await refreshProfilesAfterRelationMutation(thunkApi, targetUserId);
+    return response;
+  } catch (error) {
+    return thunkApi.rejectWithValue(getErrorKey(error, 'profile.errors.friend_unfriend_failed'));
   }
 });
 

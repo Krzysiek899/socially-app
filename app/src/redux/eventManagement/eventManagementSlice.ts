@@ -2,9 +2,12 @@ import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import type { RootState } from '../store.ts';
 import {
   createAuthoredEventRequest,
+  fetchParticipatingEventsRequest,
   fetchAuthoredEventRequest,
   fetchAuthoredEventsRequest,
   handleJoinRequestActionRequest,
+  joinEventRequest,
+  leaveEventRequest,
   updateJoinRulesRequest,
   updateAuthoredEventRequest,
 } from '../../pages/event-management/api/eventManagementApi.ts';
@@ -12,6 +15,8 @@ import type {
   AuthoredEvent,
   CreateEventPayload,
   JoinRequestAction,
+  ParticipatingEvent,
+  ParticipationState,
   UpdateJoinRulesPayload,
   UpdateAuthoredEventPayload,
 } from '../../pages/event-management/domain/eventManagementModels.ts';
@@ -22,6 +27,10 @@ type MutationStatus = 'idle' | 'submitting' | 'succeeded' | 'failed';
 
 type EventManagementState = {
   authoredItems: AuthoredEvent[];
+  participatingItems: ParticipatingEvent[];
+  participatingStatus: LoadStatus;
+  participatingErrorKey: string | null;
+  participatingRequestId: string | null;
   authoredStatus: LoadStatus;
   authoredErrorKey: string | null;
   authoredRequestId: string | null;
@@ -41,10 +50,20 @@ type EventManagementState = {
   requestActionStatus: MutationStatus;
   requestActionErrorKey: string | null;
   requestActionRequestId: string | null;
+  joinStatus: MutationStatus;
+  joinErrorKey: string | null;
+  joinRequestId: string | null;
+  leaveStatus: MutationStatus;
+  leaveErrorKey: string | null;
+  leaveRequestId: string | null;
 };
 
 const initialState: EventManagementState = {
   authoredItems: [],
+  participatingItems: [],
+  participatingStatus: 'idle',
+  participatingErrorKey: null,
+  participatingRequestId: null,
   authoredStatus: 'idle',
   authoredErrorKey: null,
   authoredRequestId: null,
@@ -64,6 +83,12 @@ const initialState: EventManagementState = {
   requestActionStatus: 'idle',
   requestActionErrorKey: null,
   requestActionRequestId: null,
+  joinStatus: 'idle',
+  joinErrorKey: null,
+  joinRequestId: null,
+  leaveStatus: 'idle',
+  leaveErrorKey: null,
+  leaveRequestId: null,
 };
 
 const getErrorKey = (error: unknown, fallback: string): string => {
@@ -86,6 +111,23 @@ export const fetchAuthoredEvents = createAsyncThunk<
 
   try {
     return await fetchAuthoredEventsRequest(token, thunkApi.signal);
+  } catch (error) {
+    return thunkApi.rejectWithValue(getErrorKey(error, 'eventManagement.errors.fetch_failed'));
+  }
+});
+
+export const fetchParticipatingEvents = createAsyncThunk<
+  ParticipatingEvent[],
+  void,
+  { state: RootState; rejectValue: string }
+>('eventManagement/fetchParticipatingEvents', async (_, thunkApi) => {
+  const token = thunkApi.getState().auth.session?.token;
+  if (!token) {
+    return thunkApi.rejectWithValue('eventManagement.errors.unauthorized');
+  }
+
+  try {
+    return await fetchParticipatingEventsRequest(token, thunkApi.signal);
   } catch (error) {
     return thunkApi.rejectWithValue(getErrorKey(error, 'eventManagement.errors.fetch_failed'));
   }
@@ -176,6 +218,46 @@ export const handleJoinRequestAction = createAsyncThunk<
   }
 });
 
+export const joinEventParticipation = createAsyncThunk<
+  { state: ParticipationState },
+  string,
+  { state: RootState; rejectValue: string }
+>('eventManagement/joinEventParticipation', async (eventId, thunkApi) => {
+  const token = thunkApi.getState().auth.session?.token;
+  if (!token) {
+    return thunkApi.rejectWithValue('eventManagement.errors.unauthorized');
+  }
+
+  try {
+    const result = await joinEventRequest(eventId, token, thunkApi.signal);
+    await thunkApi.dispatch(fetchParticipatingEvents());
+    await thunkApi.dispatch(fetchAuthoredEvents());
+    return result;
+  } catch (error) {
+    return thunkApi.rejectWithValue(getErrorKey(error, 'eventManagement.errors.join_failed'));
+  }
+});
+
+export const leaveEventParticipation = createAsyncThunk<
+  { ok: true },
+  string,
+  { state: RootState; rejectValue: string }
+>('eventManagement/leaveEventParticipation', async (eventId, thunkApi) => {
+  const token = thunkApi.getState().auth.session?.token;
+  if (!token) {
+    return thunkApi.rejectWithValue('eventManagement.errors.unauthorized');
+  }
+
+  try {
+    const result = await leaveEventRequest(eventId, token, thunkApi.signal);
+    await thunkApi.dispatch(fetchParticipatingEvents());
+    await thunkApi.dispatch(fetchAuthoredEvents());
+    return result;
+  } catch (error) {
+    return thunkApi.rejectWithValue(getErrorKey(error, 'eventManagement.errors.leave_failed'));
+  }
+});
+
 const upsertAuthoredItem = (state: EventManagementState, updatedItem: AuthoredEvent) => {
   const existingIndex = state.authoredItems.findIndex((event) => event.id === updatedItem.id);
   if (existingIndex >= 0) {
@@ -218,6 +300,34 @@ const eventManagementSlice = createSlice({
         state.authoredStatus = 'failed';
         state.authoredErrorKey = action.payload ?? action.error.message ?? 'eventManagement.errors.fetch_failed';
         state.authoredRequestId = null;
+      })
+      .addCase(fetchParticipatingEvents.pending, (state, action) => {
+        state.participatingStatus = 'loading';
+        state.participatingErrorKey = null;
+        state.participatingRequestId = action.meta.requestId;
+      })
+      .addCase(fetchParticipatingEvents.fulfilled, (state, action) => {
+        if (state.participatingRequestId !== action.meta.requestId) {
+          return;
+        }
+
+        state.participatingItems = action.payload;
+        state.participatingStatus = 'succeeded';
+        state.participatingErrorKey = null;
+        state.participatingRequestId = null;
+      })
+      .addCase(fetchParticipatingEvents.rejected, (state, action) => {
+        if (state.participatingRequestId !== action.meta.requestId) {
+          return;
+        }
+
+        if (action.meta.aborted) {
+          return;
+        }
+
+        state.participatingStatus = 'failed';
+        state.participatingErrorKey = action.payload ?? action.error.message ?? 'eventManagement.errors.fetch_failed';
+        state.participatingRequestId = null;
       })
       .addCase(createAuthoredEvent.pending, (state, action) => {
         state.createStatus = 'submitting';
@@ -361,6 +471,58 @@ const eventManagementSlice = createSlice({
         state.requestActionStatus = 'failed';
         state.requestActionErrorKey = action.payload ?? action.error.message ?? 'eventManagement.errors.request_action_failed';
         state.requestActionRequestId = null;
+      })
+      .addCase(joinEventParticipation.pending, (state, action) => {
+        state.joinStatus = 'submitting';
+        state.joinErrorKey = null;
+        state.joinRequestId = action.meta.requestId;
+      })
+      .addCase(joinEventParticipation.fulfilled, (state, action) => {
+        if (state.joinRequestId !== action.meta.requestId) {
+          return;
+        }
+
+        state.joinStatus = 'succeeded';
+        state.joinErrorKey = null;
+        state.joinRequestId = null;
+      })
+      .addCase(joinEventParticipation.rejected, (state, action) => {
+        if (state.joinRequestId !== action.meta.requestId) {
+          return;
+        }
+        if (action.meta.aborted) {
+          return;
+        }
+
+        state.joinStatus = 'failed';
+        state.joinErrorKey = action.payload ?? action.error.message ?? 'eventManagement.errors.join_failed';
+        state.joinRequestId = null;
+      })
+      .addCase(leaveEventParticipation.pending, (state, action) => {
+        state.leaveStatus = 'submitting';
+        state.leaveErrorKey = null;
+        state.leaveRequestId = action.meta.requestId;
+      })
+      .addCase(leaveEventParticipation.fulfilled, (state, action) => {
+        if (state.leaveRequestId !== action.meta.requestId) {
+          return;
+        }
+
+        state.leaveStatus = 'succeeded';
+        state.leaveErrorKey = null;
+        state.leaveRequestId = null;
+      })
+      .addCase(leaveEventParticipation.rejected, (state, action) => {
+        if (state.leaveRequestId !== action.meta.requestId) {
+          return;
+        }
+        if (action.meta.aborted) {
+          return;
+        }
+
+        state.leaveStatus = 'failed';
+        state.leaveErrorKey = action.payload ?? action.error.message ?? 'eventManagement.errors.leave_failed';
+        state.leaveRequestId = null;
       });
   },
 });
