@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { CalendarDays, Eye, MapPinned, Users } from 'lucide-react';
+import { CalendarDays, Eye, MapPinned, Users, ArrowLeft } from 'lucide-react'; 
 import { useNavigate, useParams } from 'react-router-dom';
 import { AppNavbar, Avatar, Badge, Button, DateTimeField, Dropdown, Modal, TextField } from '../../shared/components/index.ts';
 import { Cluster, Page, Section, Split, Stack } from '../../shared/layout/index.tsx';
@@ -12,6 +12,7 @@ import {
   updateJoinRules,
 } from '../../redux/eventManagement/eventManagementSlice.ts';
 import type { JoinVisibility } from './domain/eventManagementModels.ts';
+import { useSmartBack } from '../../shared/hooks/useSmartBack.ts'; 
 import './ManageEventPage.css';
 
 type PriceMode = 'free' | 'paid';
@@ -126,6 +127,8 @@ export const ManageEventPage = () => {
     approvalRequired: true,
   });
   const [localErrorKey, setLocalErrorKey] = React.useState<string | null>(null);
+
+  const goBack = useSmartBack('/app/my-events');
 
   React.useEffect(() => {
     if (!eventId) {
@@ -280,9 +283,18 @@ export const ManageEventPage = () => {
       <Page maxWidth="xl">
         <Section spacing="sm">
           <Stack gap="3">
+            
+            <div style={{ paddingBottom: '0.5rem' }}>
+              <Button type="button" variant="secondary" size="sm" onClick={goBack}>
+                <ArrowLeft size={16} style={{ marginRight: '6px' }} />
+                {t('common.back')} 
+              </Button>
+            </div>
+
             <h1 className="manage-event-page__title">{t('eventManagement.manage.title')}</h1>
 
             {selectedStatus === 'loading' && <p>{t('eventManagement.manage.loading')}</p>}
+
             {selectedStatus === 'failed' && <p role="alert">{t(selectedErrorKey ?? 'eventManagement.errors.fetch_failed')}</p>}
 
             {selectedStatus === 'succeeded' && selectedItem && (
@@ -328,7 +340,7 @@ export const ManageEventPage = () => {
                           <p>
                             {selectedItem.management.capacity === null
                               ? t('eventManagement.manage.capacity.unlimited')
-                              : `${selectedItem.management.capacity} osób`}
+                              : t('eventManagement.manage.capacity.value').replace('{value}', String(selectedItem.management.capacity))}
                           </p>
                         </div>
                       </div>
@@ -515,6 +527,7 @@ export const ManageEventPage = () => {
             onChange={handleEditInputChange('capacityValue')}
             disabled={editForm.unlimitedCapacity}
           />
+
           <TextField id="manage-edit-description" label={t('eventManagement.form.description')} value={editForm.description} onChange={handleEditInputChange('description')} />
         </Stack>
       </Modal>

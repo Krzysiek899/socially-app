@@ -243,6 +243,7 @@ export const plTranslations: Record<string, string> = {
   'profile.errors.update_failed': 'Nie udało się zaktualizować profilu.',
   'profile.errors.approve_failed': 'Nie udało się zweryfikować profilu.',
   'common.cancel': 'Anuluj',
+  'common.back': 'Powrót',
   'common.submit': 'Wyślij',
 
   'profile.errors.friend_action_conflict': 'Nie można wykonać tej akcji relacji w aktualnym stanie.',

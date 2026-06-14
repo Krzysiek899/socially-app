@@ -1,5 +1,5 @@
 import React from 'react';
-import { CalendarDays, CircleUserRound, Heart, MapPinned, Share2, Users, Wallet } from 'lucide-react';
+import { ArrowLeft, CalendarDays, CircleUserRound, Heart, MapPinned, Share2, Users, Wallet } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { AppNavbar, Avatar, Badge, Button, useNotifications } from '../../shared/components/index.ts';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks.ts';
@@ -9,6 +9,7 @@ import { Cluster, Grid, Page, Section, Split, Stack } from '../../shared/layout/
 import { t } from '../../i18n/index.ts';
 import { joinEventParticipation } from '../../redux/eventManagement/eventManagementSlice.ts';
 import { fetchDiscoverEvents } from '../../redux/discover/discoverSlice.ts';
+import { useSmartBack } from '../../shared/hooks/useSmartBack.ts';
 import './EventDetailsPage.css';
 
 type LoadStatus = 'loading' | 'succeeded' | 'failed';
@@ -67,6 +68,7 @@ export const EventDetailsPage = () => {
   const [event, setEvent] = React.useState<DiscoverEvent | null>(null);
   const displayAttendees = React.useMemo(() => (event ? getDisplayAttendees(event) : []), [event]);
   const hiddenAttendeesCount = event ? Math.max(event.attendeesCount - displayAttendees.length, 0) : 0;
+  const goBack = useSmartBack('/app');
 
   const loadEvent = React.useCallback(async (signal: AbortSignal) => {
     if (!eventId || !token) {
@@ -141,8 +143,9 @@ export const EventDetailsPage = () => {
         <Section spacing="sm">
           <Stack gap="4">
             <Cluster justify="space-between" align="center" gap="2">
-              <Button type="button" variant="secondary" size="sm" onClick={() => navigate('/app')}>
-                {t('discover.details.back')}
+              <Button type="button" variant="secondary" size="sm" onClick={goBack}>
+                <ArrowLeft size={16} style={{ marginRight: '6px' }} />
+                {t('common.back')}
               </Button>
               <Cluster gap="2">
                 {event && currentUserId === event.organizer.id && (

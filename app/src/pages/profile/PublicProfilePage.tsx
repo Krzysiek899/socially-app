@@ -1,8 +1,9 @@
 import React from 'react';
 import { useParams } from 'react-router-dom';
+import { ArrowLeft } from 'lucide-react';
 import { Stack } from '../../shared/layout/index.tsx';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks.ts';
-import { useNotifications } from '../../shared/components/index.ts';
+import { Button, useNotifications } from '../../shared/components/index.ts';
 import {
   acceptFriendRequest,
   fetchPublicProfile,
@@ -16,12 +17,14 @@ import { PublicProfileHero } from './components/PublicProfileHero.tsx';
 import { PublicProfileMutualFriendsCard } from './components/PublicProfileMutualFriendsCard.tsx';
 import { PublicProfileReviewsCard } from './components/PublicProfileReviewsCard.tsx';
 import { ProfileSurface } from './components/ProfileSurface.tsx';
+import { useSmartBack } from '../../shared/hooks/useSmartBack.ts';
 
 export const PublicProfilePage = (): React.JSX.Element => {
   const { userId } = useParams<{ userId: string }>();
   const dispatch = useAppDispatch();
   const { notify } = useNotifications();
   const { profile, status, errorKey } = useAppSelector((state) => state.profile.publicProfile);
+  const goBack = useSmartBack('/app/discover');
 
   const loadProfile = React.useCallback(() => {
     if (!userId) {
@@ -117,6 +120,13 @@ export const PublicProfilePage = (): React.JSX.Element => {
     >
     {profile ? (
       <Stack gap="4">
+        <div style={{ paddingBottom: '0.25rem' }}>
+          <Button type="button" variant="secondary" size="sm" onClick={goBack}>
+            <ArrowLeft size={16} style={{ marginRight: '6px' }} />
+            {t('common.back')}
+          </Button>
+        </div>
+
         <PublicProfileHero
           profile={profile}
           onSendRequest={handleSendRequest}
