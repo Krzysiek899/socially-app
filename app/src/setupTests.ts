@@ -54,3 +54,7 @@ jest.mock('./pages/discover/DiscoverMap.tsx', () => ({
 if (!Element.prototype.scrollIntoView) {
   Element.prototype.scrollIntoView = jest.fn();
 }
+
+if (!global.fetch) {
+  global.fetch = jest.fn();
+}
