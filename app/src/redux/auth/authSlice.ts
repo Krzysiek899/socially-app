@@ -21,7 +21,7 @@ const initialState: AuthState = {
 export const login = createAsyncThunk(
   'auth/login',
   async (payload: { email: string; password: string; rememberMe: boolean }) =>
-    loginRequest({ email: payload.email, password: payload.password }),
+    loginRequest({ email: payload.email, password: payload.password, rememberMe: payload.rememberMe }),
 );
 
 export const register = createAsyncThunk(
