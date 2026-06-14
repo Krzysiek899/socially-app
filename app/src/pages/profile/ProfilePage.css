@@ -166,23 +166,30 @@
 
 .my-profile__list-row {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
   gap: var(--space-3);
-  min-height: 3.5rem;
+  min-height: 3rem;
+  padding: var(--space-2) var(--space-3);
+  border: var(--border-width-default) solid var(--color-border-default);
+  border-radius: var(--radius-sm);
+  box-sizing: border-box;
 }
 
 .my-profile__list-row--button {
   width: 100%;
-  border: 0;
-  padding: 0;
+  border: var(--border-width-default) solid var(--color-border-default);
+  padding: var(--space-2) var(--space-3);
   background: transparent;
   text-align: left;
   cursor: pointer;
+  box-sizing: border-box;
 }
 
 .my-profile__list-row-label {
-  color: var(--color-text-default);
+  color: var(--color-text-heading);
+  font-weight: var(--typography-subheading-weight);
+  font-size: 0.95rem;
 }
 
 .my-profile__list-row > [data-layout="cluster"]:first-child {
@@ -193,6 +200,8 @@
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
+  flex-wrap: wrap;
+  justify-content: flex-end;
 }
 
 .my-profile__empty-text {
@@ -357,6 +366,12 @@
   gap: var(--space-3);
 }
 
+.public-profile__friend-row-content {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
 .public-profile__review-item {
   display: grid;
   gap: var(--space-2);
@@ -387,7 +402,8 @@
 }
 
 .public-profile__friend-name {
-  color: var(--color-text-default);
+  color: var(--color-text-heading);
+  font-weight: var(--typography-subheading-weight);
 }
 
 /* Styl wewnętrzny formularza w Modalu */

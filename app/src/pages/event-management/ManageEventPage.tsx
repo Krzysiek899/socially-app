@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { CalendarDays, Eye, MapPinned, Users, ArrowLeft, Wallet } from 'lucide-react'; 
+import { CalendarDays, ChevronRight, Eye, MapPinned, Users, ArrowLeft, Wallet } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { AppNavbar, Avatar, Badge, Button, DateTimeField, Dropdown, Modal, SegmentedToggle, TextArea, TextField } from '../../shared/components/index.ts';
 import { Cluster, Page, Section, Split, Stack } from '../../shared/layout/index.tsx';
@@ -423,8 +423,8 @@ export const ManageEventPage = () => {
             {selectedStatus === 'failed' && <p role="alert">{t(selectedErrorKey ?? 'eventManagement.errors.fetch_failed')}</p>}
 
             {selectedStatus === 'succeeded' && selectedItem && (
-              <Split fraction="2/3" gap="3">
-                <article className="manage-event-page__card">
+              <Split className="manage-event-page__layout" fraction="2/3" gap="3">
+                <article className="manage-event-page__card manage-event-page__card--primary">
                   <Stack gap="3">
                     <Cluster justify="space-between" align="center">
                       <span className="manage-event-page__section-label">{t('eventManagement.manage.section.info')}</span>
@@ -483,46 +483,46 @@ export const ManageEventPage = () => {
                       <p className="manage-event-page__description">{selectedItem.description}</p>
                     </div>
 
-                    <Cluster gap="2">
-                      <Button type="button" variant="secondary" onClick={() => setIsEditModalOpen(true)}>
-                        {t('eventManagement.manage.actions.edit')}
-                      </Button>
-                      <Button type="button" onClick={() => setIsRulesModalOpen(true)}>
-                        {t('eventManagement.manage.actions.rules')}
-                      </Button>
-                    </Cluster>
+                    <div className="manage-event-page__primary-actions">
+                      <Cluster gap="2">
+                        <Button type="button" variant="secondary" onClick={() => setIsEditModalOpen(true)}>
+                          {t('eventManagement.manage.actions.edit')}
+                        </Button>
+                        <Button type="button" onClick={() => setIsRulesModalOpen(true)}>
+                          {t('eventManagement.manage.actions.rules')}
+                        </Button>
+                      </Cluster>
+                    </div>
                   </Stack>
                 </article>
 
                 <aside className="manage-event-page__column">
                   <article className="manage-event-page__card">
                     <Stack gap="2">
-                      <Cluster justify="space-between" align="center">
+                      <div className="manage-event-page__title-row">
                         <h2 className="manage-event-page__list-title">{t('eventManagement.manage.participants.title')}</h2>
-                        <Badge size="sm" variant="neutral">
+                        <span className="manage-event-page__count-chip">
                           {formatParticipantsCounter(selectedItem.management.participants.length, selectedItem.management.capacity)}
-                        </Badge>
-                      </Cluster>
+                        </span>
+                      </div>
 
                       <Stack gap="2">
                         {selectedItem.management.participants.length === 0 && (
                           <p className="manage-event-page__empty">{t('eventManagement.manage.participants.empty')}</p>
                         )}
                         {selectedItem.management.participants.map((participant) => (
-                          <Cluster key={participant.id} justify="space-between" align="center">
+                          <button
+                            key={participant.id}
+                            type="button"
+                            className="manage-event-page__person-row manage-event-page__person-row--button"
+                            onClick={() => navigate(`/users/${participant.id}`)}
+                          >
                             <Cluster gap="2" align="center">
                               <Avatar name={participant.displayName} src={participant.avatarUrl} size="sm" />
-                              <span>{participant.displayName}</span>
+                              <span className="manage-event-page__person-name">{participant.displayName}</span>
                             </Cluster>
-                            <Button
-                              type="button"
-                              size="sm"
-                              variant="secondary"
-                              onClick={() => navigate(`/users/${participant.id}`)}
-                            >
-                              {t('profile.actions.view_public')}
-                            </Button>
-                          </Cluster>
+                            <ChevronRight size={16} aria-hidden="true" />
+                          </button>
                         ))}
                       </Stack>
                     </Stack>
@@ -530,30 +530,44 @@ export const ManageEventPage = () => {
 
                   <article className="manage-event-page__card">
                     <Stack gap="2">
-                      <Cluster justify="space-between" align="center">
+                      <div className="manage-event-page__title-row">
                         <h2 className="manage-event-page__list-title">{t('eventManagement.manage.requests.title')}</h2>
-                        <Badge size="sm" variant="warning">{String(selectedItem.management.joinRequests.length)}</Badge>
-                      </Cluster>
+                        <span className="manage-event-page__count-chip">{String(selectedItem.management.joinRequests.length)}</span>
+                      </div>
 
                       <Stack gap="2">
                         {selectedItem.management.joinRequests.length === 0 && (
                           <p className="manage-event-page__empty">{t('eventManagement.manage.requests.empty')}</p>
                         )}
                         {selectedItem.management.joinRequests.map((request) => (
-                          <Cluster key={request.id} justify="space-between" align="center">
+                          <div
+                            key={request.id}
+                            role="button"
+                            tabIndex={0}
+                            className="manage-event-page__person-row manage-event-page__person-row--interactive"
+                            onClick={() => navigate(`/users/${request.userId}`)}
+                            onKeyDown={(event) => {
+                              if (event.key === 'Enter' || event.key === ' ') {
+                                event.preventDefault();
+                                navigate(`/users/${request.userId}`);
+                              }
+                            }}
+                          >
                             <Cluster gap="2" align="center">
                               <Avatar name={request.displayName} src={request.avatarUrl} size="sm" />
                               <div>
                                 <p className="manage-event-page__request-name">{request.displayName}</p>
-                                <p className="manage-event-page__request-time">{t('eventManagement.manage.requests.pending')}</p>
                               </div>
                             </Cluster>
-                            <Cluster gap="1">
+                            <Cluster gap="1" className="manage-event-page__request-actions">
                               <Button
                                 type="button"
                                 size="sm"
                                 variant="danger"
-                                onClick={() => handleRequestAction(request.id, 'reject')}
+                                onClick={(event) => {
+                                  event.stopPropagation();
+                                  handleRequestAction(request.id, 'reject');
+                                }}
                                 disabled={requestActionStatus === 'submitting'}
                               >
                                 {t('eventManagement.manage.requests.reject')}
@@ -562,13 +576,16 @@ export const ManageEventPage = () => {
                                 type="button"
                                 size="sm"
                                 variant="ok"
-                                onClick={() => handleRequestAction(request.id, 'approve')}
+                                onClick={(event) => {
+                                  event.stopPropagation();
+                                  handleRequestAction(request.id, 'approve');
+                                }}
                                 disabled={requestActionStatus === 'submitting'}
                               >
                                 {t('eventManagement.manage.requests.approve')}
                               </Button>
                             </Cluster>
-                          </Cluster>
+                          </div>
                         ))}
                       </Stack>
                     </Stack>

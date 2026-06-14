@@ -271,9 +271,9 @@ const authoredEventsByUser = new Map<string, AuthoredEvent[]>([
         },
         attendeesCount: 3,
         attendees: [
-          { id: 'attendee-1', displayName: 'Ola M.' },
-          { id: 'attendee-2', displayName: 'Adam P.' },
-          { id: 'attendee-3', displayName: 'Karolina Z.' },
+          { id: 'participant-ola', displayName: 'Ola Brzezińska' },
+          { id: 'participant-piotr', displayName: 'Piotr Stępień' },
+          { id: 'friend-emilia', displayName: 'Emilia Zawadzka' },
         ],
         management: {
           isActive: true,
@@ -283,22 +283,74 @@ const authoredEventsByUser = new Map<string, AuthoredEvent[]>([
             approvalRequired: true,
           },
           participants: [
-            { id: 'attendee-1', displayName: 'Ola M.' },
-            { id: 'attendee-2', displayName: 'Adam P.' },
-            { id: 'attendee-3', displayName: 'Karolina Z.' },
+            { id: 'participant-ola', displayName: 'Ola Brzezińska' },
+            { id: 'participant-piotr', displayName: 'Piotr Stępień' },
+            { id: 'friend-emilia', displayName: 'Emilia Zawadzka' },
           ],
           joinRequests: [
             {
               id: 'request-1',
-              userId: 'request-user-1',
-              displayName: 'Marek Wiśniewski',
+              userId: 'request-krzysztof',
+              displayName: 'Krzysztof Malec',
               requestedAt: '2026-06-13T12:00:00.000Z',
             },
             {
               id: 'request-2',
-              userId: 'request-user-2',
-              displayName: 'Alicja Mazur',
+              userId: 'request-julia',
+              displayName: 'Julia Krawiec',
               requestedAt: '2026-06-13T12:30:00.000Z',
+            },
+          ],
+        },
+      },
+      {
+        id: 'event-user-1-design-critique',
+        title: 'Design Critique: Onboarding',
+        dateTime: '2026-08-10T17:30:00Z',
+        description: 'Przegląd ekranów onboardingowych i wspólna sesja feedbacku.',
+        category: 'TECH',
+        address: {
+          city: 'Warszawa',
+          street: 'Tamka',
+          buildingNumber: '12',
+          postalCode: '00-349',
+        },
+        location: {
+          lat: 52.2405,
+          lng: 21.0216,
+        },
+        price: {
+          amount: 0,
+          currency: 'PLN',
+          isFree: true,
+        },
+        organizer: {
+          id: 'user-1',
+          displayName: 'Jan Kowalski',
+          avatarUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=120&q=80',
+        },
+        attendeesCount: 2,
+        attendees: [
+          { id: 'friend-julia', displayName: 'Julia Krawiec' },
+          { id: 'participant-lena', displayName: 'Lena Kubiak' },
+        ],
+        management: {
+          isActive: true,
+          capacity: 20,
+          joinRules: {
+            visibility: 'PUBLIC',
+            approvalRequired: true,
+          },
+          participants: [
+            { id: 'friend-julia', displayName: 'Julia Krawiec' },
+            { id: 'participant-lena', displayName: 'Lena Kubiak' },
+          ],
+          joinRequests: [
+            {
+              id: 'request-3',
+              userId: 'friend-pawel',
+              displayName: 'Paweł Nowak',
+              requestedAt: '2026-08-01T11:20:00.000Z',
             },
           ],
         },
@@ -311,6 +363,41 @@ const knownUserById: Record<string, { displayName: string; avatarUrl?: string }>
   'user-1': {
     displayName: 'Jan Kowalski',
     avatarUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=120&q=80',
+  },
+  'org-anna': {
+    displayName: 'Anna Wójcik',
+    avatarUrl: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=120&q=80',
+  },
+  'org-dawid': {
+    displayName: 'Dawid Cieślak',
+    avatarUrl: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=120&q=80',
+  },
+  'org-kasia': {
+    displayName: 'Kasia Mazur',
+  },
+  'friend-pawel': {
+    displayName: 'Paweł Nowak',
+  },
+  'friend-julia': {
+    displayName: 'Julia Krawiec',
+  },
+  'friend-emilia': {
+    displayName: 'Emilia Zawadzka',
+  },
+  'participant-ola': {
+    displayName: 'Ola Brzezińska',
+  },
+  'participant-piotr': {
+    displayName: 'Piotr Stępień',
+  },
+  'participant-lena': {
+    displayName: 'Lena Kubiak',
+  },
+  'request-krzysztof': {
+    displayName: 'Krzysztof Malec',
+  },
+  'request-julia': {
+    displayName: 'Julia Krawiec',
   },
 };
 
@@ -338,6 +425,18 @@ const participationByEventId = new Map<string, ParticipationRecord[]>([
     'event-warsaw-tech-meetup',
     [
       { userId: 'user-1', state: 'pending' },
+    ],
+  ],
+  [
+    'event-krakow-jazz-night',
+    [
+      { userId: 'user-1', state: 'joined' },
+    ],
+  ],
+  [
+    'event-krakow-center-coffee-walk',
+    [
+      { userId: 'user-1', state: 'joined' },
     ],
   ],
 ]);

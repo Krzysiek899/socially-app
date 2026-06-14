@@ -9,7 +9,6 @@ import {
   approveMyProfile,
   fetchMyProfile,
   rejectFriendRequest,
-  unfriendUser,
   updateMyProfile,
 } from '../../redux/profile/profileSlice.ts';
 import { t } from '../../i18n/index.ts';
@@ -61,21 +60,6 @@ export const MyProfilePage = (): React.JSX.Element => {
       });
   }, [dispatch, notify]);
 
-  const handleUnfriend = React.useCallback((targetUserId: string) => {
-    void dispatch(unfriendUser(targetUserId))
-      .unwrap()
-      .catch((errorKeyFromApi: unknown) => {
-        notify({
-          variant: 'error',
-          message: t(
-            typeof errorKeyFromApi === 'string'
-              ? errorKeyFromApi
-              : 'profile.errors.friend_unfriend_failed',
-          ),
-        });
-      });
-  }, [dispatch, notify]);
-
   const handleAcceptRequest = React.useCallback((targetUserId: string) => {
     void dispatch(acceptFriendRequest(targetUserId))
       .unwrap()
@@ -106,25 +90,20 @@ export const MyProfilePage = (): React.JSX.Element => {
       });
   }, [dispatch, notify]);
 
+  const handleViewProfile = React.useCallback((targetUserId: string) => {
+    navigate(`/users/${targetUserId}`);
+  }, [navigate]);
+
   const friendRows = React.useMemo(
     () => profile?.friends.map((friend) => (
       <MyProfileListRow
         key={friend.id}
         leading={<Avatar name={friend.displayName} src={friend.avatarUrl} size="sm" />}
         label={friend.displayName}
-        action={(
-          <Button
-            type="button"
-            variant="secondary"
-            size="sm"
-            onClick={() => handleUnfriend(friend.id)}
-          >
-            {t('profile.actions.unfriend')}
-          </Button>
-        )}
+        onClick={() => handleViewProfile(friend.id)}
       />
     )) ?? [],
-    [handleUnfriend, profile],
+    [handleViewProfile, profile],
   );
 
   const incomingRequestRows = React.useMemo(
@@ -133,20 +112,27 @@ export const MyProfilePage = (): React.JSX.Element => {
         key={request.id}
         leading={<Avatar name={request.displayName} src={request.avatarUrl} size="sm" />}
         label={request.displayName}
+        onClick={() => handleViewProfile(request.id)}
         action={(
-          <Cluster gap="2" align="center">
+          <Cluster gap="2" align="center" className="my-profile__row-actions">
             <Button
               type="button"
               size="sm"
-              onClick={() => handleAcceptRequest(request.id)}
+              onClick={(event) => {
+                event.stopPropagation();
+                handleAcceptRequest(request.id);
+              }}
             >
               {t('profile.actions.accept_request')}
             </Button>
             <Button
               type="button"
               size="sm"
-              variant="secondary"
-              onClick={() => handleRejectRequest(request.id)}
+              variant="danger"
+              onClick={(event) => {
+                event.stopPropagation();
+                handleRejectRequest(request.id);
+              }}
             >
               {t('profile.actions.reject_request')}
             </Button>
@@ -154,7 +140,7 @@ export const MyProfilePage = (): React.JSX.Element => {
         )}
       />
     )) ?? [],
-    [handleAcceptRequest, handleRejectRequest, profile],
+    [handleAcceptRequest, handleRejectRequest, handleViewProfile, profile],
   );
 
   const sharedGroups = React.useMemo(() => {
@@ -192,14 +178,14 @@ export const MyProfilePage = (): React.JSX.Element => {
               <MyProfileListCard
                 title={t('profile.my.friends')}
                 totalCount={profile.friendsCount}
-                countLabel={`${profile.friendsCount} ${t('profile.my.friends_count')}`}
+                countLabel={`(${profile.friendsCount})`}
                 items={friendRows}
                 emptyText={t('profile.my.empty_friends')}
                 ctaLabel={t('profile.my.show_all_friends')}
               />
               <MyProfileListCard
                 title={t('profile.my.incoming_requests')}
-                countLabel={`${profile.incomingRequests.length}`}
+                countLabel={`(${profile.incomingRequests.length})`}
                 items={incomingRequestRows}
                 emptyText={t('profile.my.empty_incoming_requests')}
               />

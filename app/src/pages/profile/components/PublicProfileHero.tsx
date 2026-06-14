@@ -64,7 +64,7 @@ export const PublicProfileHero = ({
             </Cluster>
           ) : null}
           {profile.friendAction === 'friends' ? (
-            <Button type="button" size="lg" variant="secondary" onClick={onUnfriend}>
+            <Button type="button" size="lg" variant="danger" onClick={onUnfriend}>
               {t('profile.actions.unfriend')}
             </Button>
           ) : null}

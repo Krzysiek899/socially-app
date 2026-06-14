@@ -19,6 +19,10 @@ export type AuthorizedUser = {
   displayName?: string;
 };
 
+const demoUserIdByEmail: Record<string, string> = {
+  'user@socially.app': 'user-1',
+};
+
 export const getAuthorizedUser = (authorization: string | null): AuthorizedUser | null => {
   if (!authorization?.startsWith('Bearer ')) {
     return null;
@@ -36,7 +40,13 @@ export const getAuthorizedUser = (authorization: string | null): AuthorizedUser 
   const payload = decodeJwtPayload(token);
   const firebaseUserId = payload?.user_id;
   const subject = payload?.sub;
+  const email = typeof payload?.email === 'string' ? payload.email.toLowerCase() : undefined;
   const displayName = typeof payload?.name === 'string' ? payload.name : undefined;
+  const demoMappedUserId = email ? demoUserIdByEmail[email] : undefined;
+
+  if (demoMappedUserId) {
+    return { userId: demoMappedUserId, displayName };
+  }
 
   if (typeof firebaseUserId === 'string' && firebaseUserId.length > 0) {
     return { userId: firebaseUserId, displayName };
