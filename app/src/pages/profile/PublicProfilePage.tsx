@@ -138,7 +138,6 @@ export const PublicProfilePage = (): React.JSX.Element => {
           <div className="public-profile__primary-column">
             <PublicProfileReviewsCard
               rating={profile.rating}
-              reviewsCount={profile.reviewsCount}
               reviews={profile.reviews}
             />
           </div>
