@@ -225,6 +225,11 @@ export const plTranslations: Record<string, string> = {
   'profile.public.empty_reviews': 'Brak opinii do wyświetlenia.',
   'profile.public.empty_mutual_friends': 'Brak wspólnych znajomych do wyświetlenia.',
   'profile.public.empty_groups': 'Brak grup do wyświetlenia.',
+  'profile.public.add_review': 'Napisz opinię',
+  'profile.public.add_review_title': 'Oceń użytkownika',
+  'profile.public.your_rating': 'Twoja ocena',
+  'profile.public.review_content': 'Komentarz (opcjonalnie)',
+
   'profile.menu.toggle': 'Otwórz menu profilu',
   'profile.state.loading': 'Ładowanie profilu...',
   'profile.state.error_title': 'Nie udało się załadować profilu',
@@ -234,6 +239,10 @@ export const plTranslations: Record<string, string> = {
   'profile.errors.response_invalid': 'Nieprawidłowe dane profilu.',
   'profile.errors.request_invalid': 'Nieprawidłowe parametry profilu.',
   'profile.errors.not_found': 'Nie znaleziono profilu.',
+  'profile.errors.submit_review_failed': 'Nie udało się zapisać Twojej opinii. Spróbuj ponownie.',
+  'common.cancel': 'Anuluj',
+  'common.submit': 'Wyślij',
+
   'profile.errors.friend_action_conflict': 'Nie można wykonać tej akcji relacji w aktualnym stanie.',
   'profile.errors.friend_request_failed': 'Nie udało się wysłać zaproszenia do znajomych.',
   'profile.errors.friend_accept_failed': 'Nie udało się zaakceptować zaproszenia.',

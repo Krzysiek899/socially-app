@@ -1,5 +1,4 @@
 import { http, HttpResponse } from 'msw';
-import { z } from 'zod';
 import { friendMutationPayloadSchema } from '../../pages/profile/dto/profileSchemas.ts';
 import { getAuthorizedUser, getAuthorizedUserId } from '../auth/getAuthorizedUserId.ts';
 import {
@@ -8,6 +7,7 @@ import {
   getPublicProfileForUser,
   rejectFriendRequest,
   sendFriendRequest,
+  submitReview,
   unfriendUsers,
 } from './store.ts';
 
@@ -25,6 +25,7 @@ export const profileHandlers = [
 
     return HttpResponse.json(profile, { status: 200 });
   }),
+
   http.get('/api/profile/users/:userId', async ({ request, params }) => {
     const authorizedUser = getAuthorizedUser(request.headers.get('authorization'));
     if (!authorizedUser) {
@@ -41,7 +42,42 @@ export const profileHandlers = [
       return HttpResponse.json({ message: 'not_found' }, { status: 404 });
     }
 
-    return HttpResponse.json(profile, { status: 200 });
+    const sanitizedProfile = {
+      ...profile,
+      reviews: profile.reviews.filter(
+        (review) => review.content && review.content.trim().length > 0
+      ),
+    };
+
+    return HttpResponse.json(sanitizedProfile, { status: 200 });
+  }),
+
+  http.post('/api/profile/users/:userId/reviews', async ({ request, params }) => {
+    const userId = getAuthorizedUserId(request.headers.get('authorization'));
+    if (!userId) {
+      return HttpResponse.json({ message: 'unauthorized' }, { status: 401 });
+    }
+
+    const targetUserId = typeof params.userId === 'string' ? params.userId : '';
+
+    let payload: { rating: number; content: string };
+    try {
+      payload = (await request.json()) as { rating: number; content: string };
+    } catch {
+      return HttpResponse.json({ message: 'request_invalid' }, { status: 400 });
+    }
+
+    const result = submitReview(userId, targetUserId, payload.rating, payload.content);
+    if (result.type === 'not_found') {
+      return HttpResponse.json({ message: 'not_found' }, { status: 404 });
+    }
+
+    if (result.type === 'ok' && 'review' in result) {
+      const statusCode = result.review.publishedAtLabel === 'Przed chwilą' ? 201 : 200;
+      return HttpResponse.json(result.review, { status: statusCode });
+    }
+
+    return HttpResponse.json({ message: 'error' }, { status: 500 });
   }),
   http.post('/api/profile/friends/request', async ({ request }) => {
     const userId = getAuthorizedUserId(request.headers.get('authorization'));
@@ -49,14 +85,11 @@ export const profileHandlers = [
       return HttpResponse.json({ message: 'unauthorized' }, { status: 401 });
     }
 
-    let targetUserId = '';
+    let targetUserId: string;
     try {
       const payload = friendMutationPayloadSchema.parse(await request.json());
       targetUserId = payload.targetUserId;
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        return HttpResponse.json({ message: 'request_invalid' }, { status: 400 });
-      }
+    } catch {
       return HttpResponse.json({ message: 'request_invalid' }, { status: 400 });
     }
 
@@ -76,14 +109,11 @@ export const profileHandlers = [
       return HttpResponse.json({ message: 'unauthorized' }, { status: 401 });
     }
 
-    let targetUserId = '';
+    let targetUserId: string;
     try {
       const payload = friendMutationPayloadSchema.parse(await request.json());
       targetUserId = payload.targetUserId;
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        return HttpResponse.json({ message: 'request_invalid' }, { status: 400 });
-      }
+    } catch {
       return HttpResponse.json({ message: 'request_invalid' }, { status: 400 });
     }
 
@@ -103,14 +133,11 @@ export const profileHandlers = [
       return HttpResponse.json({ message: 'unauthorized' }, { status: 401 });
     }
 
-    let targetUserId = '';
+    let targetUserId: string;
     try {
       const payload = friendMutationPayloadSchema.parse(await request.json());
       targetUserId = payload.targetUserId;
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        return HttpResponse.json({ message: 'request_invalid' }, { status: 400 });
-      }
+    } catch {
       return HttpResponse.json({ message: 'request_invalid' }, { status: 400 });
     }
 
@@ -130,14 +157,11 @@ export const profileHandlers = [
       return HttpResponse.json({ message: 'unauthorized' }, { status: 401 });
     }
 
-    let targetUserId = '';
+    let targetUserId: string;
     try {
       const payload = friendMutationPayloadSchema.parse(await request.json());
       targetUserId = payload.targetUserId;
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        return HttpResponse.json({ message: 'request_invalid' }, { status: 400 });
-      }
+    } catch {
       return HttpResponse.json({ message: 'request_invalid' }, { status: 400 });
     }
 

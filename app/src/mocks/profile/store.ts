@@ -540,6 +540,73 @@ export const leaveGroup = (viewerUserId: string, groupId: string): MutationResul
   return { type: 'ok' };
 };
 
+export const submitReview = (
+  reviewerId: string,
+  targetUserId: string,
+  rating: number,
+  content: string,
+): MutationResult | { type: 'ok'; review: any } => {
+  if (!hasKnownUser(reviewerId) || !hasKnownUser(targetUserId)) {
+    return { type: 'not_found' };
+  }
+
+  const targetProfile = publicProfileBaseByUserId.get(targetUserId);
+  if (!targetProfile) {
+    return { type: 'not_found' };
+  }
+
+  const reviewerData = userDirectory.get(reviewerId);
+  if (!reviewerData) {
+    return { type: 'not_found' };
+  }
+
+  const deterministicReviewId = `review-from-${reviewerId}`;
+  const existingReviewIndex = targetProfile.reviews.findIndex((r) => r.id === deterministicReviewId);
+
+  const updatedReviews = [...targetProfile.reviews];
+  let newReviewsCount = targetProfile.reviewsCount;
+  let newRating = targetProfile.rating;
+
+  const currentTotalScore = targetProfile.rating * targetProfile.reviewsCount;
+
+  if (existingReviewIndex !== -1) {
+    const oldReview = targetProfile.reviews[existingReviewIndex];
+    newRating = (currentTotalScore - oldReview.rating + rating) / targetProfile.reviewsCount;
+
+    updatedReviews[existingReviewIndex] = {
+      ...oldReview,
+      rating,
+      content,
+      publishedAtLabel: 'Aktualizowano przed chwilą',
+    };
+  } else {
+    const newReview = {
+      id: deterministicReviewId,
+      authorName: reviewerData.displayName,
+      authorAvatarUrl: reviewerData.avatarUrl,
+      rating,
+      publishedAtLabel: 'Przed chwilą',
+      content,
+    };
+
+    updatedReviews.unshift(newReview);
+    newReviewsCount = targetProfile.reviewsCount + 1;
+    newRating = (currentTotalScore + rating) / newReviewsCount;
+  }
+
+  publicProfileBaseByUserId.set(targetUserId, {
+    ...targetProfile,
+    reviewsCount: newReviewsCount,
+    rating: newRating,
+    reviews: updatedReviews,
+  });
+
+  return {
+    type: 'ok',
+    review: existingReviewIndex !== -1 ? updatedReviews[existingReviewIndex] : updatedReviews[0],
+  };
+};
+
 export const resetProfileStore = (): void => {
   friendships = new Set(initialFriendships);
   pendingRequests = new Set(initialPendingRequests);

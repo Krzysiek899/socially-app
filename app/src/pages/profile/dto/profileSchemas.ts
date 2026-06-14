@@ -39,7 +39,7 @@ export const publicProfileReviewSchema = z.object({
   authorAvatarUrl: z.string().url().optional(),
   rating: z.number().min(0).max(5),
   publishedAtLabel: z.string().min(1),
-  content: z.string().min(1),
+  content: z.string(),
 });
 
 export const publicProfileMutualFriendSchema = z.object({
@@ -67,3 +67,14 @@ export const publicProfileSchema = z.object({
   groups: z.array(publicProfileGroupSchema),
   friendAction: z.enum(['can_send_request', 'request_sent', 'respond_to_request', 'friends']),
 });
+
+
+export const createReviewRequestSchema = z.object({
+  rating: z.number().int().min(1).max(5),
+  content: z.string(), 
+});
+
+
+export type CreateReviewRequestDTO = z.infer<typeof createReviewRequestSchema>;
+export type PublicProfileReviewDTO = z.infer<typeof publicProfileReviewSchema>;
+export type PublicProfileDTO = z.infer<typeof publicProfileSchema>;
