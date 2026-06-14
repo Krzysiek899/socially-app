@@ -1,5 +1,5 @@
 import React, { useMemo, useRef } from 'react';
-import { CalendarDays, MapPinned, Search, SlidersHorizontal, Users } from 'lucide-react';
+import { CalendarDays, Funnel, MapPinned, Search, Users } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks.ts';
 import { Accordion, AppNavbar, Avatar, Badge, Button, DateField, Dropdown, TextField, useNotifications } from '../../shared/components/index.ts';
@@ -145,6 +145,17 @@ export const DiscoverPage = () => {
     );
   }, [dispatch, notify]);
 
+  const handleHereNowToggle = React.useCallback(() => {
+    const enabled = !filters.hereNowEnabled;
+    dispatch(hereNowToggled(enabled));
+    if (enabled) {
+      requestUserLocation();
+      return;
+    }
+
+    void dispatch(fetchDiscoverEvents());
+  }, [dispatch, filters.hereNowEnabled, requestUserLocation]);
+
   const accordionItems = useMemo(
     () =>
       items.map((event) => {
@@ -242,7 +253,18 @@ export const DiscoverPage = () => {
                 </header>
 
                 <section className="discover__filters" aria-label={t('discover.filters.label')}>
-                  <Grid columns={3} gap="2">
+                  <div className="discover__filters-row">
+                    <div className="discover__here-now-button">
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant={filters.hereNowEnabled ? 'primary' : 'attention'}
+                        onClick={handleHereNowToggle}
+                        aria-label={t('discover.filters.here_now')}
+                      >
+                        {t('discover.filters.here_now')}
+                      </Button>
+                    </div>
                     <TextField
                       id="discover-search"
                       label={t('discover.filters.search')}
@@ -251,14 +273,7 @@ export const DiscoverPage = () => {
                       leadingIcon={<Search size={16} />}
                       onChange={(event) => dispatch(searchQuerySet(event.target.value))}
                     />
-                    <Dropdown
-                      id="discover-price"
-                      label={t('discover.filters.price')}
-                      options={PRICE_OPTIONS.map((option) => ({ value: option.value, label: option.label }))}
-                      value={filters.price}
-                      onChange={(event) => dispatch(priceFilterSet(event.target.value as 'all' | 'free' | 'paid'))}
-                    />
-                    <Cluster align="end" justify="flex-start">
+                    <div className="discover__filters-more">
                       <Button
                         type="button"
                         size="sm"
@@ -266,12 +281,20 @@ export const DiscoverPage = () => {
                         onClick={() => setAdvancedFiltersVisible((value) => !value)}
                         aria-label={t('discover.filters.advanced')}
                       >
-                        <SlidersHorizontal size={16} />
+                        <Funnel size={16} />
                       </Button>
-                    </Cluster>
-                  </Grid>
+                    </div>
+                  </div>
                   {advancedFiltersVisible && (
-                    <Grid columns={2} gap="2">
+                    <>
+                      <Grid columns={3} gap="2">
+                        <Dropdown
+                          id="discover-price"
+                          label={t('discover.filters.price')}
+                          options={PRICE_OPTIONS.map((option) => ({ value: option.value, label: option.label }))}
+                          value={filters.price}
+                          onChange={(event) => dispatch(priceFilterSet(event.target.value as 'all' | 'free' | 'paid'))}
+                        />
                       <DateField
                         id="discover-date-from"
                         label={t('discover.filters.date.from')}
@@ -286,54 +309,38 @@ export const DiscoverPage = () => {
                         min={filters.dateFrom || undefined}
                         onChange={(event) => dispatch(dateToSet(event.target.value))}
                       />
-                    </Grid>
-                  )}
-                  <label className="discover__here-now-toggle">
-                    <input
-                      type="checkbox"
-                      checked={filters.hereNowEnabled}
-                      onChange={(event) => {
-                        const enabled = event.target.checked;
-                        dispatch(hereNowToggled(enabled));
-                        if (enabled) {
-                          requestUserLocation();
-                          return;
-                        }
-
-                        void dispatch(fetchDiscoverEvents());
-                      }}
-                    />
-                    {t('discover.filters.here_now')}
-                  </label>
-                  <div className="discover__categories-label">{t('discover.filters.category')}</div>
-                  <div className="discover__category-chips" aria-label={t('discover.filters.category')}>
-                    <Cluster gap="1">
-                      {CATEGORY_OPTIONS.map((option) => {
-                        const selected = filters.categories.includes(option.value as DiscoverCategoryCode);
-                        return (
+                      </Grid>
+                      <div className="discover__categories-label">{t('discover.filters.category')}</div>
+                      <div className="discover__category-chips" aria-label={t('discover.filters.category')}>
+                        <Cluster gap="1">
+                          {CATEGORY_OPTIONS.map((option) => {
+                            const selected = filters.categories.includes(option.value as DiscoverCategoryCode);
+                            return (
+                              <Button
+                                key={option.value}
+                                type="button"
+                                size="sm"
+                                variant={selected ? 'primary' : 'secondary'}
+                                onClick={() => toggleCategory(option.value as DiscoverCategoryCode)}
+                                aria-label={option.label}
+                              >
+                                {option.label}
+                              </Button>
+                            );
+                          })}
                           <Button
-                            key={option.value}
                             type="button"
                             size="sm"
-                            variant={selected ? 'primary' : 'secondary'}
-                            onClick={() => toggleCategory(option.value as DiscoverCategoryCode)}
-                            aria-label={option.label}
+                            variant="ghost"
+                            onClick={() => dispatch(categoriesSet([]))}
+                            disabled={filters.categories.length === 0}
                           >
-                            {option.label}
+                            {t('discover.filters.category.clear')}
                           </Button>
-                        );
-                      })}
-                      <Button
-                        type="button"
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => dispatch(categoriesSet([]))}
-                        disabled={filters.categories.length === 0}
-                      >
-                        {t('discover.filters.category.clear')}
-                      </Button>
-                    </Cluster>
-                  </div>
+                        </Cluster>
+                      </div>
+                    </>
+                  )}
                 </section>
 
                 <section className="discover__list" aria-live="polite" aria-busy={status === 'loading'}>

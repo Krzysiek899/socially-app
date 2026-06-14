@@ -224,7 +224,7 @@ describe('Discover page states', () => {
     })) as typeof fetch;
 
     render(<App />);
-    fireEvent.click(await screen.findByRole('checkbox', { name: t('discover.filters.here_now') }));
+    fireEvent.click(await screen.findByRole('button', { name: t('discover.filters.here_now') }));
 
     await waitFor(() => {
       expect(getCurrentPosition).toHaveBeenCalled();
@@ -247,10 +247,10 @@ describe('Discover page states', () => {
     })) as typeof fetch;
 
     render(<App />);
-    fireEvent.click(await screen.findByRole('checkbox', { name: t('discover.filters.here_now') }));
+    fireEvent.click(await screen.findByRole('button', { name: t('discover.filters.here_now') }));
 
     await waitFor(() => {
-      expect(screen.getByRole('checkbox', { name: t('discover.filters.here_now') })).not.toBeChecked();
+      expect(screen.getByRole('button', { name: t('discover.filters.here_now') })).toHaveClass('btn--attention');
     });
   });
 
@@ -270,10 +270,10 @@ describe('Discover page states', () => {
     })) as typeof fetch;
 
     render(<App />);
-    fireEvent.click(await screen.findByRole('checkbox', { name: t('discover.filters.here_now') }));
+    fireEvent.click(await screen.findByRole('button', { name: t('discover.filters.here_now') }));
 
     expect(await screen.findByRole('alert')).toHaveTextContent(t('discover.here_now.toast.permission_denied'));
-    expect(screen.getByRole('checkbox', { name: t('discover.filters.here_now') })).not.toBeChecked();
+    expect(screen.getByRole('button', { name: t('discover.filters.here_now') })).toHaveClass('btn--attention');
   });
 
   it('shows dedicated Here & Now empty state when no events match 5 km + 2h', async () => {
@@ -292,7 +292,7 @@ describe('Discover page states', () => {
     })) as typeof fetch;
 
     render(<App />);
-    fireEvent.click(await screen.findByRole('checkbox', { name: t('discover.filters.here_now') }));
+    fireEvent.click(await screen.findByRole('button', { name: t('discover.filters.here_now') }));
 
     expect(await screen.findByText(t('discover.state.empty_here_now'))).toBeInTheDocument();
   });
@@ -325,7 +325,7 @@ describe('Discover page states', () => {
     })) as typeof fetch;
 
     render(<App />);
-    fireEvent.click(await screen.findByRole('checkbox', { name: t('discover.filters.here_now') }));
+    fireEvent.click(await screen.findByRole('button', { name: t('discover.filters.here_now') }));
 
     const map = await screen.findByTestId('discover-map');
     expect(map).toBeInTheDocument();

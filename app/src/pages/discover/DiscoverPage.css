@@ -22,9 +22,19 @@
   gap: var(--space-2);
 }
 
-.discover__filters > [data-layout="grid"][data-columns="3"] {
-  grid-template-columns: minmax(0, 1.4fr) minmax(140px, 0.6fr) auto;
+.discover__filters-row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: var(--space-2);
   align-items: end;
+}
+
+.discover__here-now-button {
+  align-self: end;
+}
+
+.discover__filters-more {
+  align-self: end;
 }
 
 .discover__categories-label {
@@ -220,5 +230,9 @@
     position: relative;
     top: 0;
     height: 360px;
+  }
+
+  .discover__filters-row {
+    grid-template-columns: 1fr;
   }
 }
