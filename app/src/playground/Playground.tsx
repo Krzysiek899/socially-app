@@ -3,6 +3,7 @@ import './Playground.css';
 import {
   Button,    BUTTON_VARIANTS, BUTTON_SIZES,
   TextField, TEXT_FIELD_SIZES,
+  TextArea, TEXT_AREA_SIZES,
   Card,      CARD_VARIANTS,
   Avatar,    AVATAR_SIZES,
   Badge,     BADGE_VARIANTS, BADGE_SIZES,
@@ -124,6 +125,7 @@ function NotificationSection() {
 export function Playground() {
   const { theme, preference, setTheme } = useTheme();
   const [inputValue, setInputValue] = useState('');
+  const [textAreaValue, setTextAreaValue] = useState('');
   const [modalOpen, setModalOpen] = useState<'sm' | 'md' | 'lg' | 'footer' | 'overflow' | null>(null);
 
   return (
@@ -219,6 +221,55 @@ export function Playground() {
           {TEXT_FIELD_SIZES.map((s) => (
             <div key={s} style={{ flex: '0 0 200px' }}>
               <TextField id={`pg-size-${s}`} label={`Size ${s}`} size={s} placeholder={s} />
+            </div>
+          ))}
+        </div>
+      </Section>
+
+      <hr className="pg__divider" />
+
+      {/* ── TextArea ── */}
+      <Section title="TextArea">
+        <div className="pg__input-grid">
+          <TextArea
+            id="pg-textarea-default"
+            label="Default textarea"
+            placeholder="Write event details…"
+            value={textAreaValue}
+            onChange={(e) => setTextAreaValue(e.target.value)}
+            helperText="This is helper text"
+          />
+          <TextArea
+            id="pg-textarea-error"
+            label="Error state"
+            variant="error"
+            defaultValue="Too short"
+            errorText="This field is required"
+          />
+          <TextArea
+            id="pg-textarea-disabled"
+            label="Disabled"
+            disabled
+            defaultValue="Locked value"
+          />
+          <TextArea
+            id="pg-textarea-required"
+            label="Required field"
+            required
+            placeholder="Cannot be empty"
+          />
+          <TextArea
+            id="pg-textarea-lg"
+            label="Large size"
+            size="lg"
+            placeholder="Large textarea"
+          />
+        </div>
+        <div className="pg__row" style={{ marginTop: 'var(--space-4)' }}>
+          <span className="pg__row-label">Sizes</span>
+          {TEXT_AREA_SIZES.map((s) => (
+            <div key={s} style={{ flex: '0 0 200px' }}>
+              <TextArea id={`pg-textarea-size-${s}`} label={`Size ${s}`} size={s} placeholder={s} />
             </div>
           ))}
         </div>

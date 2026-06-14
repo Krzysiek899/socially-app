@@ -5,6 +5,7 @@ import {
   Button,
   DateTimeField,
   Dropdown,
+  TextArea,
   TextField,
 } from '../../shared/components/index.ts';
 import { Cluster, Grid, Page, Section, Stack } from '../../shared/layout/index.tsx';
@@ -179,7 +180,9 @@ export const CreateEventPage = () => {
   );
   const showValidation = submitted;
 
-  const handleInputChange = (key: keyof Omit<FormState, 'addressQuery'>) => (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = (key: keyof Omit<FormState, 'addressQuery'>) => (
+    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
     setForm((current) => ({ ...current, [key]: event.target.value }));
   };
 
@@ -195,8 +198,7 @@ export const CreateEventPage = () => {
     setForm((current) => ({ ...current, category: event.target.value }));
   };
 
-  const handlePriceModeChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    const nextMode = event.target.value === 'paid' ? 'paid' : 'free';
+  const handlePriceModeChange = (nextMode: PriceMode) => {
     setForm((current) => ({
       ...current,
       priceMode: nextMode,
@@ -338,91 +340,49 @@ export const CreateEventPage = () => {
           <Stack gap="4">
             <header className="create-event-page__header">
               <h1>{t('eventManagement.create.title')}</h1>
-              <p>{t('eventManagement.create.subtitle')}</p>
             </header>
 
             <form className="create-event-page__form" onSubmit={handleSubmit} noValidate>
               <Grid columns={2} gap="2">
-                <TextField
-                  id="event-title"
-                  label={t('eventManagement.form.title')}
-                  value={form.title}
-                  onChange={handleInputChange('title')}
-                  required
-                  variant={showValidation && errors.title ? 'error' : 'default'}
-                  errorText={showValidation && errors.title ? t(errors.title) : undefined}
-                />
-                <Dropdown
-                  id="event-category"
-                  label={t('eventManagement.form.category')}
-                  options={CATEGORY_OPTIONS}
-                  placeholder={t('eventManagement.form.category_placeholder')}
-                  value={form.category}
-                  onChange={handleCategoryChange}
-                  required
-                  variant={showValidation && errors.category ? 'error' : 'default'}
-                  errorText={showValidation && errors.category ? t(errors.category) : undefined}
-                />
-                <DateTimeField
-                  id="event-date-time"
-                  label={t('eventManagement.form.date_time')}
-                  value={form.dateTime}
-                  onChange={handleInputChange('dateTime')}
-                  required
-                  variant={showValidation && errors.dateTime ? 'error' : 'default'}
-                  errorText={showValidation && errors.dateTime ? t(errors.dateTime) : undefined}
-                />
-                <Dropdown
-                  id="event-price-mode"
-                  label={t('eventManagement.form.price_mode')}
-                  options={PRICE_MODE_OPTIONS}
-                  value={form.priceMode}
-                  onChange={handlePriceModeChange}
-                />
-                <TextField
-                  id="event-price-amount"
-                  label={t('eventManagement.form.price_amount')}
-                  type="number"
-                  min={0}
-                  step={1}
-                  value={form.priceAmount}
-                  onChange={handleInputChange('priceAmount')}
-                  disabled={form.priceMode === 'free'}
-                  required={form.priceMode === 'paid'}
-                  variant={showValidation && errors.priceAmount ? 'error' : 'default'}
-                  errorText={showValidation && errors.priceAmount ? t(errors.priceAmount) : undefined}
-                />
-                <div className="create-event-page__capacity-field">
-                  <label className="create-event-page__toggle-row" htmlFor="event-unlimited-capacity">
-                    <input
-                      id="event-unlimited-capacity"
-                      type="checkbox"
-                      checked={form.unlimitedCapacity}
-                      onChange={(event) => {
-                        const checked = event.target.checked;
-                        setForm((current) => ({
-                          ...current,
-                          unlimitedCapacity: checked,
-                          capacityValue: checked ? '' : current.capacityValue,
-                        }));
-                      }}
-                    />
-                    <span>{t('eventManagement.manage.capacity.unlimited_toggle')}</span>
-                  </label>
+                <div className="create-event-page__field create-event-page__field--full">
                   <TextField
-                    id="event-capacity"
-                    label={t('eventManagement.manage.capacity.label')}
-                    type="number"
-                    min={1}
-                    step={1}
-                    value={form.capacityValue}
-                    onChange={handleInputChange('capacityValue')}
-                    disabled={form.unlimitedCapacity}
-                    variant={showValidation && errors.capacity ? 'error' : 'default'}
-                    errorText={showValidation && errors.capacity ? t(errors.capacity) : undefined}
+                    id="event-title"
+                    label={t('eventManagement.form.title')}
+                    value={form.title}
+                    onChange={handleInputChange('title')}
+                    required
+                    variant={showValidation && errors.title ? 'error' : 'default'}
+                    errorText={showValidation && errors.title ? t(errors.title) : undefined}
                   />
                 </div>
-                <div className="create-event-page__address-anchor">
+
+                <div className="create-event-page__field">
+                  <Dropdown
+                    id="event-category"
+                    label={t('eventManagement.form.category')}
+                    options={CATEGORY_OPTIONS}
+                    placeholder={t('eventManagement.form.category_placeholder')}
+                    value={form.category}
+                    onChange={handleCategoryChange}
+                    required
+                    variant={showValidation && errors.category ? 'error' : 'default'}
+                    errorText={showValidation && errors.category ? t(errors.category) : undefined}
+                  />
+                </div>
+
+                <div className="create-event-page__field">
+                  <DateTimeField
+                    id="event-date-time"
+                    label={t('eventManagement.form.date_time')}
+                    value={form.dateTime}
+                    onChange={handleInputChange('dateTime')}
+                    required
+                    variant={showValidation && errors.dateTime ? 'error' : 'default'}
+                    errorText={showValidation && errors.dateTime ? t(errors.dateTime) : undefined}
+                  />
+                </div>
+
+                <div className="create-event-page__field create-event-page__field--full create-event-page__address-anchor">
                   <TextField
                     id="event-address"
                     label={t('eventManagement.form.address')}
@@ -449,17 +409,106 @@ export const CreateEventPage = () => {
                     </div>
                   )}
                 </div>
+
+                <div className="create-event-page__field create-event-page__capacity-field">
+                  <p className="create-event-page__field-label">{t('eventManagement.form.attendees_count')}</p>
+                  <div
+                    className="create-event-page__segmented-control"
+                    role="group"
+                    aria-label={t('eventManagement.form.attendees_count')}
+                  >
+                    <button
+                      type="button"
+                      className={`create-event-page__segmented-button${form.unlimitedCapacity ? ' create-event-page__segmented-button--active' : ''}`}
+                      aria-pressed={form.unlimitedCapacity}
+                      onClick={() => {
+                        setForm((current) => ({
+                          ...current,
+                          unlimitedCapacity: true,
+                          capacityValue: '',
+                        }));
+                      }}
+                    >
+                      {t('eventManagement.manage.capacity.unlimited_short')}
+                    </button>
+                    <button
+                      type="button"
+                      className={`create-event-page__segmented-button${!form.unlimitedCapacity ? ' create-event-page__segmented-button--active' : ''}`}
+                      aria-pressed={!form.unlimitedCapacity}
+                      onClick={() => {
+                        setForm((current) => ({
+                          ...current,
+                          unlimitedCapacity: false,
+                        }));
+                      }}
+                    >
+                      {t('eventManagement.manage.capacity.label')}
+                    </button>
+                  </div>
+                  <TextField
+                    id="event-capacity"
+                    label={t('eventManagement.manage.capacity.label')}
+                    type="number"
+                    min={1}
+                    step={1}
+                    value={form.capacityValue}
+                    onChange={handleInputChange('capacityValue')}
+                    disabled={form.unlimitedCapacity}
+                    variant={showValidation && errors.capacity ? 'error' : 'default'}
+                    errorText={showValidation && errors.capacity ? t(errors.capacity) : undefined}
+                  />
+                </div>
+
+                <div className="create-event-page__field create-event-page__price-field">
+                  <p className="create-event-page__field-label">{t('eventManagement.form.price_mode')}</p>
+                  <div
+                    className="create-event-page__segmented-control"
+                    role="group"
+                    aria-label={t('eventManagement.form.price_mode')}
+                  >
+                    {PRICE_MODE_OPTIONS.map((option) => {
+                      const isActive = form.priceMode === option.value;
+                      return (
+                        <button
+                          key={option.value}
+                          type="button"
+                          className={`create-event-page__segmented-button${isActive ? ' create-event-page__segmented-button--active' : ''}`}
+                          aria-pressed={isActive}
+                          onClick={() => handlePriceModeChange(option.value as PriceMode)}
+                        >
+                          {option.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <TextField
+                    id="event-price-amount"
+                    label={t('eventManagement.form.price_amount')}
+                    type="number"
+                    min={0}
+                    step={1}
+                    value={form.priceAmount}
+                    onChange={handleInputChange('priceAmount')}
+                    disabled={form.priceMode === 'free'}
+                    required={form.priceMode === 'paid'}
+                    variant={showValidation && errors.priceAmount ? 'error' : 'default'}
+                    errorText={showValidation && errors.priceAmount ? t(errors.priceAmount) : undefined}
+                  />
+                </div>
               </Grid>
 
-              <TextField
-                id="event-description"
-                label={t('eventManagement.form.description')}
-                value={form.description}
-                onChange={handleInputChange('description')}
-                required
-                variant={showValidation && errors.description ? 'error' : 'default'}
-                errorText={showValidation && errors.description ? t(errors.description) : undefined}
-              />
+              <div className="create-event-page__field create-event-page__field--full">
+                <TextArea
+                  id="event-description"
+                  label={t('eventManagement.form.description')}
+                  value={form.description}
+                  onChange={handleInputChange('description')}
+                  rows={5}
+                  required
+                  variant={showValidation && errors.description ? 'error' : 'default'}
+                  errorText={showValidation && errors.description ? t(errors.description) : undefined}
+                />
+              </div>
 
               {(showValidation && errors.location) && (
                 <p className="create-event-page__error" role="alert">
