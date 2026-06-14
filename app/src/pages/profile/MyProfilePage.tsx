@@ -38,8 +38,11 @@ export const MyProfilePage = (): React.JSX.Element => {
     setIsEditDialogOpen(false);
   }, [dispatch]);
 
+  // FIX: Unwrapping the Promise guarantees the React state tree syncs properly
   const handleApproveProfile = React.useCallback(() => {
-    dispatch(approveMyProfile());
+    dispatch(approveMyProfile())
+      .unwrap()
+      .catch((err) => console.error("Verification Failed:", err));
   }, [dispatch]);
 
   const friendRows = React.useMemo(
