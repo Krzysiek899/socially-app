@@ -253,4 +253,47 @@ describe('Discover page states', () => {
       expect(screen.getByRole('checkbox', { name: t('discover.filters.here_now') })).not.toBeChecked();
     });
   });
+
+  it('shows geolocation denied toast and returns to standard Discover', async () => {
+    const getCurrentPosition = jest.fn((_: PositionCallback, error: PositionErrorCallback) => {
+      error({ code: 1, message: 'denied', PERMISSION_DENIED: 1 } as GeolocationPositionError);
+    });
+    Object.defineProperty(global.navigator, 'geolocation', {
+      value: { getCurrentPosition },
+      configurable: true,
+    });
+
+    global.fetch = jest.fn(async () => ({
+      ok: true,
+      status: 200,
+      json: async () => [baseEvent],
+    })) as typeof fetch;
+
+    render(<App />);
+    fireEvent.click(await screen.findByRole('checkbox', { name: t('discover.filters.here_now') }));
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(t('discover.here_now.toast.permission_denied'));
+    expect(screen.getByRole('checkbox', { name: t('discover.filters.here_now') })).not.toBeChecked();
+  });
+
+  it('shows dedicated Here & Now empty state when no events match 5 km + 2h', async () => {
+    const getCurrentPosition = jest.fn((success: PositionCallback) => {
+      success({ coords: { latitude: 50.0614, longitude: 19.9366 } } as GeolocationPosition);
+    });
+    Object.defineProperty(global.navigator, 'geolocation', {
+      value: { getCurrentPosition },
+      configurable: true,
+    });
+
+    global.fetch = jest.fn(async () => ({
+      ok: true,
+      status: 200,
+      json: async () => [baseEvent],
+    })) as typeof fetch;
+
+    render(<App />);
+    fireEvent.click(await screen.findByRole('checkbox', { name: t('discover.filters.here_now') }));
+
+    expect(await screen.findByText(t('discover.state.empty_here_now'))).toBeInTheDocument();
+  });
 });

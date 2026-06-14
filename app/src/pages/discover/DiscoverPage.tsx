@@ -117,7 +117,7 @@ export const DiscoverPage = () => {
   const requestUserLocation = React.useCallback(() => {
     if (!navigator.geolocation) {
       dispatch(geolocationFailed());
-      notify({ variant: 'error', message: t('discover.errors.fetch_failed') });
+      notify({ variant: 'error', message: t('discover.here_now.toast.unavailable') });
       void dispatch(fetchDiscoverEvents());
       return;
     }
@@ -131,10 +131,17 @@ export const DiscoverPage = () => {
         }));
         void dispatch(fetchDiscoverEvents());
       },
-      () => {
+      (error) => {
         dispatch(geolocationFailed());
+        notify({
+          variant: 'error',
+          message: error.code === error.PERMISSION_DENIED
+            ? t('discover.here_now.toast.permission_denied')
+            : t('discover.here_now.toast.error'),
+        });
         void dispatch(fetchDiscoverEvents());
       },
+      { enableHighAccuracy: false, timeout: 7000, maximumAge: 60000 },
     );
   }, [dispatch, notify]);
 
@@ -336,7 +343,13 @@ export const DiscoverPage = () => {
                       {t(errorKey ?? 'discover.errors.fetch_failed')}
                     </p>
                   )}
-                  {status === 'succeeded' && items.length === 0 && <p className="discover__state">{t('discover.state.empty')}</p>}
+                  {status === 'succeeded' && items.length === 0 && (
+                    <p className="discover__state">
+                      {filters.hereNowEnabled
+                        ? t('discover.state.empty_here_now')
+                        : t('discover.state.empty')}
+                    </p>
+                  )}
                   {items.length > 0 && (
                     <ul className="discover__cards">
                       {items.map((event) => {
