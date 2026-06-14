@@ -71,10 +71,16 @@ describe('Friends mechanic contracts', () => {
 
   it('seeds Firebase users with preferred display name when available', () => {
     const myProfile = getMyProfileForUser('firebase-uid-123', 'Jan Kowalski');
-    const publicProfile = getPublicProfileForUser('user-1', 'firebase-uid-123', 'Jan Kowalski');
+    const publicProfile = getPublicProfileForUser('firebase-uid-123', 'firebase-uid-123', 'Jan Kowalski');
 
     expect(myProfile?.displayName).toBe('Jan Kowalski');
     expect(publicProfile?.displayName).toBe('Jan Kowalski');
+  });
+
+  it('does not override target public profile name with viewer display name', () => {
+    const publicProfile = getPublicProfileForUser('firebase-uid-999', 'org-anna', 'Jan Kowalski');
+
+    expect(publicProfile?.displayName).toBe('Anna Wójcik');
   });
 });
 

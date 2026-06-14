@@ -8,7 +8,7 @@ import {
   updateAuthoredEventPayloadSchema,
 } from '../../pages/event-management/dto/eventManagementSchemas.ts';
 import type { GeocodeResult } from '../../pages/event-management/domain/eventManagementModels.ts';
-import { getAuthorizedUserId } from '../auth/getAuthorizedUserId.ts';
+import { getAuthorizedUser, getAuthorizedUserId } from '../auth/getAuthorizedUserId.ts';
 import {
   createAuthoredEventForUser,
   getAuthoredEventByIdForUser,
@@ -17,6 +17,7 @@ import {
   handleJoinRequestForUser,
   joinEventForUser,
   leaveEventForUser,
+  upsertKnownUser,
   updateJoinRulesForUser,
   updateAuthoredEventForUser,
 } from '../events/store.ts';
@@ -217,10 +218,11 @@ export const eventManagementHandlers = [
     return HttpResponse.json({ result }, { status: 200 });
   }),
   http.post('/api/events', async ({ request }) => {
-    const userId = getAuthorizedUserId(request.headers.get('authorization'));
-    if (!userId) {
+    const authorizedUser = getAuthorizedUser(request.headers.get('authorization'));
+    if (!authorizedUser) {
       return HttpResponse.json({ message: 'unauthorized' }, { status: 401 });
     }
+    const { userId } = authorizedUser;
 
     const payloadResult = createEventPayloadSchema.safeParse(await request.json());
     if (!payloadResult.success) {
@@ -228,7 +230,9 @@ export const eventManagementHandlers = [
     }
 
     const payload = payloadResult.data;
-    const organizer = organizerByUserId[userId] ?? { displayName: 'Socially User' };
+    upsertKnownUser(userId, { displayName: authorizedUser.displayName });
+    const organizer = organizerByUserId[userId]
+      ?? (authorizedUser.displayName ? { displayName: authorizedUser.displayName } : { displayName: 'Socially User' });
     const createdEvent = createAuthoredEventForUser(userId, payload, organizer);
     if (!createdEvent) {
       return HttpResponse.json({ message: 'address_unresolvable' }, { status: 422 });
@@ -306,15 +310,17 @@ export const eventManagementHandlers = [
     return HttpResponse.json(result.event, { status: 200 });
   }),
   http.post('/api/events/:eventId/join', async ({ request, params }) => {
-    const userId = getAuthorizedUserId(request.headers.get('authorization'));
-    if (!userId) {
+    const authorizedUser = getAuthorizedUser(request.headers.get('authorization'));
+    if (!authorizedUser) {
       return HttpResponse.json({ message: 'unauthorized' }, { status: 401 });
     }
+    const { userId } = authorizedUser;
 
     if (typeof params.eventId !== 'string') {
       return HttpResponse.json({ message: 'not_found' }, { status: 404 });
     }
 
+    upsertKnownUser(userId, { displayName: authorizedUser.displayName });
     const result = joinEventForUser(userId, params.eventId);
     if (result.type === 'not_found') {
       return HttpResponse.json({ message: 'not_found' }, { status: 404 });

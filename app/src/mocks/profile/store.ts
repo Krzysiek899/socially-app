@@ -392,8 +392,8 @@ export const getPublicProfileForUser = (
   targetUserId: string,
   preferredDisplayName?: string,
 ) => {
-  ensureMockProfileSeedForUser(viewerUserId);
-  ensureMockProfileSeedForUser(targetUserId, preferredDisplayName);
+  ensureMockProfileSeedForUser(viewerUserId, preferredDisplayName);
+  ensureMockProfileSeedForUser(targetUserId);
   const base = publicProfileBaseByUserId.get(targetUserId);
   if (!base || !hasKnownUser(viewerUserId)) {
     return null;
