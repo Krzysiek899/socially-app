@@ -1,8 +1,8 @@
 import React, { useMemo, useRef } from 'react';
-import { CalendarDays, MapPinned, Search, SlidersHorizontal, Users } from 'lucide-react';
+import { CalendarDays, Funnel, MapPinned, Search, Users } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks.ts';
-import { Accordion, AppNavbar, Avatar, Badge, Button, DateField, Dropdown, TextField } from '../../shared/components/index.ts';
+import { Accordion, AppNavbar, Avatar, Badge, Button, DateField, Dropdown, TextField, useNotifications } from '../../shared/components/index.ts';
 import { t } from '../../i18n/index.ts';
 import { Cluster, Grid, Page, Section, Split, Stack } from '../../shared/layout/index.tsx';
 import { DiscoverMap } from './DiscoverMap.tsx';
@@ -11,6 +11,10 @@ import {
   dateFromSet,
   dateToSet,
   fetchDiscoverEvents,
+  geolocationFailed,
+  geolocationRequestStarted,
+  geolocationResolved,
+  hereNowToggled,
   priceFilterSet,
   searchQuerySet,
   selectedEventSet,
@@ -55,9 +59,18 @@ const formatAddress = (event: DiscoverEvent): string => {
 
 const getDisplayedAttendees = (attendees: DiscoverEvent['attendees']) => attendees.slice(0, 8);
 
+const formatAttendeesCount = (event: DiscoverEvent): string => {
+  if (event.participantCapacity) {
+    return `${event.attendeesCount}/${event.participantCapacity}`;
+  }
+
+  return `${event.attendeesCount}`;
+};
+
 export const DiscoverPage = () => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
+  const { notify } = useNotifications();
   const { items, status, errorKey, selectedEventId, filters } = useAppSelector((state) => state.discover);
   const prevSearchRef = useRef(filters.searchQuery);
   const itemRefs = useRef(new Map<string, HTMLLIElement>());
@@ -109,6 +122,48 @@ export const DiscoverPage = () => {
     itemRefs.current.delete(eventId);
   };
 
+  const requestUserLocation = React.useCallback(() => {
+    if (!navigator.geolocation) {
+      dispatch(geolocationFailed());
+      notify({ variant: 'error', message: t('discover.here_now.toast.unavailable') });
+      void dispatch(fetchDiscoverEvents());
+      return;
+    }
+
+    dispatch(geolocationRequestStarted());
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        dispatch(geolocationResolved({
+          lat: position.coords.latitude,
+          lng: position.coords.longitude,
+        }));
+        void dispatch(fetchDiscoverEvents());
+      },
+      (error) => {
+        dispatch(geolocationFailed());
+        notify({
+          variant: 'error',
+          message: error.code === error.PERMISSION_DENIED
+            ? t('discover.here_now.toast.permission_denied')
+            : t('discover.here_now.toast.error'),
+        });
+        void dispatch(fetchDiscoverEvents());
+      },
+      { enableHighAccuracy: false, timeout: 7000, maximumAge: 60000 },
+    );
+  }, [dispatch, notify]);
+
+  const handleHereNowToggle = React.useCallback(() => {
+    const enabled = !filters.hereNowEnabled;
+    dispatch(hereNowToggled(enabled));
+    if (enabled) {
+      requestUserLocation();
+      return;
+    }
+
+    void dispatch(fetchDiscoverEvents());
+  }, [dispatch, filters.hereNowEnabled, requestUserLocation]);
+
   const accordionItems = useMemo(
     () =>
       items.map((event) => {
@@ -122,47 +177,52 @@ export const DiscoverPage = () => {
               <strong>{event.title}</strong>
               <span><CalendarDays size={14} aria-hidden="true" />{formatDateTime(event.dateTime)}</span>
               <span>{formatPrice(event)}</span>
-              <span><Users size={14} aria-hidden="true" />{event.attendeesCount}</span>
+              <span><Users size={14} aria-hidden="true" />{formatAttendeesCount(event)}</span>
             </div>
           ),
           content: (
             <Stack gap="2" align="stretch" as="div" style={{ width: '100%' }}>
               <p>{event.description}</p>
               <div className="discover-card__meta">
-                <Stack gap="2">
+                <div className="discover-card__meta-row">
                   <span><MapPinned size={14} aria-hidden="true" />{formatAddress(event)}</span>
-                </Stack>
-              </div>
-              <div className="discover-card__organizer">
-                <Cluster gap="2" align="center">
-                  <Avatar name={event.organizer.displayName} src={event.organizer.avatarUrl} size="sm" />
-                  <span>{event.organizer.displayName}</span>
                   <Badge variant="info" size="sm">{t(`discover.category.${event.category}`)}</Badge>
-                  <Button
-                    type="button"
-                    size="sm"
-                    variant="ghost"
-                    onClick={() => navigate(`/app/users/${event.organizer.id}`)}
-                  >
-                    {t('profile.actions.view_public')}
-                  </Button>
-                </Cluster>
+                </div>
               </div>
-              <div className="discover-card__attendees" aria-label={t('discover.card.attendees')}>
-                <Cluster gap="1" align="center">
-                  {displayedAttendees.map((attendee) => (
-                    <Avatar
-                      key={attendee.id}
-                      name={attendee.displayName}
-                      src={attendee.avatarUrl}
-                      size="sm"
-                    />
-                  ))}
-                  {overflow > 0 && <Badge size="sm">+{overflow}</Badge>}
-                </Cluster>
+              <div className="discover-card__people-row">
+                <div className="discover-card__organizer-block">
+                  <span className="discover-card__people-label">{t('discover.details.organizer')}</span>
+                  <button
+                    type="button"
+                    className="discover-card__organizer-link"
+                    onClick={() => navigate(`/app/users/${event.organizer.id}`)}
+                    aria-label={event.organizer.displayName}
+                  >
+                    <Avatar name={event.organizer.displayName} src={event.organizer.avatarUrl} size="sm" />
+                    <span>{event.organizer.displayName}</span>
+                  </button>
+                </div>
+                <div className="discover-card__attendees-block" aria-label={t('discover.card.attendees')}>
+                  <span className="discover-card__people-label">
+                    {`${t('discover.card.attendees_header')} (${formatAttendeesCount(event)})`}
+                  </span>
+                  <div className="discover-card__attendees">
+                    <Cluster gap="1" align="center">
+                      {displayedAttendees.map((attendee) => (
+                        <Avatar
+                          key={attendee.id}
+                          name={attendee.displayName}
+                          src={attendee.avatarUrl}
+                          size="sm"
+                        />
+                      ))}
+                      {overflow > 0 && <Badge size="sm">+{overflow}</Badge>}
+                    </Cluster>
+                  </div>
+                </div>
               </div>
               <div className="discover-card__actions">
-                <Cluster justify="flex-end">
+                <Cluster justify="center">
                   <Button
                     type="button"
                     size="sm"
@@ -206,7 +266,18 @@ export const DiscoverPage = () => {
                 </header>
 
                 <section className="discover__filters" aria-label={t('discover.filters.label')}>
-                  <Grid columns={3} gap="2">
+                  <div className="discover__filters-row">
+                    <div className="discover__here-now-button">
+                      <Button
+                        type="button"
+                        size="md"
+                        variant={filters.hereNowEnabled ? 'primary' : 'attention'}
+                        onClick={handleHereNowToggle}
+                        aria-label={filters.hereNowEnabled ? t('discover.filters.all_mode') : t('discover.filters.here_now')}
+                      >
+                        {filters.hereNowEnabled ? t('discover.filters.all_mode') : t('discover.filters.here_now')}
+                      </Button>
+                    </div>
                     <TextField
                       id="discover-search"
                       label={t('discover.filters.search')}
@@ -215,27 +286,28 @@ export const DiscoverPage = () => {
                       leadingIcon={<Search size={16} />}
                       onChange={(event) => dispatch(searchQuerySet(event.target.value))}
                     />
-                    <Dropdown
-                      id="discover-price"
-                      label={t('discover.filters.price')}
-                      options={PRICE_OPTIONS.map((option) => ({ value: option.value, label: option.label }))}
-                      value={filters.price}
-                      onChange={(event) => dispatch(priceFilterSet(event.target.value as 'all' | 'free' | 'paid'))}
-                    />
-                    <Cluster align="end" justify="flex-start">
+                    <div className="discover__filters-more">
                       <Button
                         type="button"
-                        size="sm"
+                        size="md"
                         variant={advancedFiltersVisible ? 'primary' : 'secondary'}
                         onClick={() => setAdvancedFiltersVisible((value) => !value)}
                         aria-label={t('discover.filters.advanced')}
                       >
-                        <SlidersHorizontal size={16} />
+                        <Funnel size={16} />
                       </Button>
-                    </Cluster>
-                  </Grid>
+                    </div>
+                  </div>
                   {advancedFiltersVisible && (
-                    <Grid columns={2} gap="2">
+                    <>
+                      <Grid columns={3} gap="2">
+                        <Dropdown
+                          id="discover-price"
+                          label={t('discover.filters.price')}
+                          options={PRICE_OPTIONS.map((option) => ({ value: option.value, label: option.label }))}
+                          value={filters.price}
+                          onChange={(event) => dispatch(priceFilterSet(event.target.value as 'all' | 'free' | 'paid'))}
+                        />
                       <DateField
                         id="discover-date-from"
                         label={t('discover.filters.date.from')}
@@ -250,37 +322,38 @@ export const DiscoverPage = () => {
                         min={filters.dateFrom || undefined}
                         onChange={(event) => dispatch(dateToSet(event.target.value))}
                       />
-                    </Grid>
-                  )}
-                  <div className="discover__categories-label">{t('discover.filters.category')}</div>
-                  <div className="discover__category-chips" aria-label={t('discover.filters.category')}>
-                    <Cluster gap="1">
-                      {CATEGORY_OPTIONS.map((option) => {
-                        const selected = filters.categories.includes(option.value as DiscoverCategoryCode);
-                        return (
+                      </Grid>
+                      <div className="discover__categories-label">{t('discover.filters.category')}</div>
+                      <div className="discover__category-chips" aria-label={t('discover.filters.category')}>
+                        <Cluster gap="1">
+                          {CATEGORY_OPTIONS.map((option) => {
+                            const selected = filters.categories.includes(option.value as DiscoverCategoryCode);
+                            return (
+                              <Button
+                                key={option.value}
+                                type="button"
+                                size="sm"
+                                variant={selected ? 'primary' : 'secondary'}
+                                onClick={() => toggleCategory(option.value as DiscoverCategoryCode)}
+                                aria-label={option.label}
+                              >
+                                {option.label}
+                              </Button>
+                            );
+                          })}
                           <Button
-                            key={option.value}
                             type="button"
                             size="sm"
-                            variant={selected ? 'primary' : 'secondary'}
-                            onClick={() => toggleCategory(option.value as DiscoverCategoryCode)}
-                            aria-label={option.label}
+                            variant="ghost"
+                            onClick={() => dispatch(categoriesSet([]))}
+                            disabled={filters.categories.length === 0}
                           >
-                            {option.label}
+                            {t('discover.filters.category.clear')}
                           </Button>
-                        );
-                      })}
-                      <Button
-                        type="button"
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => dispatch(categoriesSet([]))}
-                        disabled={filters.categories.length === 0}
-                      >
-                        {t('discover.filters.category.clear')}
-                      </Button>
-                    </Cluster>
-                  </div>
+                        </Cluster>
+                      </div>
+                    </>
+                  )}
                 </section>
 
                 <section className="discover__list" aria-live="polite" aria-busy={status === 'loading'}>
@@ -290,7 +363,13 @@ export const DiscoverPage = () => {
                       {t(errorKey ?? 'discover.errors.fetch_failed')}
                     </p>
                   )}
-                  {status === 'succeeded' && items.length === 0 && <p className="discover__state">{t('discover.state.empty')}</p>}
+                  {status === 'succeeded' && items.length === 0 && (
+                    <p className="discover__state">
+                      {filters.hereNowEnabled
+                        ? t('discover.state.empty_here_now')
+                        : t('discover.state.empty')}
+                    </p>
+                  )}
                   {items.length > 0 && (
                     <ul className="discover__cards">
                       {items.map((event) => {

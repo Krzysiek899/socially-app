@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { Lock, Mail, ShieldCheck } from 'lucide-react';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks.ts';
 import { Button, Card, PasswordField, TextField } from '../../shared/components/index.ts';
@@ -14,6 +14,7 @@ export const LoginPage = () => {
   const location = useLocation();
   const authStatus = useAppSelector((state) => state.auth.status);
   const errorKey = useAppSelector((state) => state.auth.errorKey);
+  const session = useAppSelector((state) => state.auth.session);
   const sessionPersistencePreference = useAppSelector((state) => state.auth.sessionPersistencePreference);
   const [email, setEmail] = React.useState('');
   const [password, setPassword] = React.useState('');
@@ -21,6 +22,10 @@ export const LoginPage = () => {
 
   const params = new URLSearchParams(location.search);
   const returnTo = resolveReturnTo(params.get('returnTo'));
+
+  if (session) {
+    return <Navigate to="/app" replace />;
+  }
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();

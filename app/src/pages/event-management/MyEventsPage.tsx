@@ -4,7 +4,11 @@ import { useNavigate } from 'react-router-dom';
 import { AppNavbar, Badge, Button, Card } from '../../shared/components/index.ts';
 import { Cluster, Grid, Page, Section, Stack } from '../../shared/layout/index.tsx';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks.ts';
-import { fetchAuthoredEvents } from '../../redux/eventManagement/eventManagementSlice.ts';
+import {
+  fetchAuthoredEvents,
+  fetchParticipatingEvents,
+  leaveEventParticipation,
+} from '../../redux/eventManagement/eventManagementSlice.ts';
 import type { AuthoredEvent } from './domain/eventManagementModels.ts';
 import { t } from '../../i18n/index.ts';
 import './MyEventsPage.css';
@@ -35,10 +39,18 @@ const formatPrice = (event: AuthoredEvent): string => {
 export const MyEventsPage = () => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
-  const { authoredItems, authoredStatus, authoredErrorKey } = useAppSelector((state) => state.eventManagement);
+  const {
+    authoredItems,
+    authoredStatus,
+    authoredErrorKey,
+    participatingItems,
+    participatingStatus,
+    participatingErrorKey,
+  } = useAppSelector((state) => state.eventManagement);
 
   React.useEffect(() => {
     void dispatch(fetchAuthoredEvents());
+    void dispatch(fetchParticipatingEvents());
   }, [dispatch]);
 
   return (
@@ -68,60 +80,140 @@ export const MyEventsPage = () => {
               <p className="my-events-page__state">{t('eventManagement.state.empty')}</p>
             )}
 
-            {authoredItems.length > 0 && (
-              <Grid columns={2} gap="3">
-                {authoredItems.map((event) => (
-                  <Card
-                    key={event.id}
-                    as="article"
-                    variant="default"
-                    header={(
-                      <Stack gap="2">
-                        <Cluster justify="space-between" align="center">
-                          <h2 className="my-events-page__card-title">{event.title}</h2>
-                          <Cluster gap="1" align="center">
-                            <Badge size="sm" variant="info">{t(`discover.category.${event.category}`)}</Badge>
-                            <Badge size="sm" variant={event.management.isActive ? 'success' : 'neutral'}>
-                              {event.management.isActive ? t('eventManagement.manage.status.active') : t('eventManagement.manage.status.inactive')}
-                            </Badge>
+            <section aria-label={t('eventManagement.my_events.organized.title')}>
+              <Stack gap="3">
+                <h2 className="my-events-page__section-title">{t('eventManagement.my_events.organized.title')}</h2>
+                {authoredItems.length > 0 && (
+                  <Grid columns={2} gap="3">
+                    {authoredItems.map((event) => (
+                      <Card
+                        key={event.id}
+                        as="article"
+                        variant="default"
+                        header={(
+                          <Stack gap="2">
+                            <Cluster justify="space-between" align="center">
+                              <h3 className="my-events-page__card-title">{event.title}</h3>
+                              <Cluster gap="1" align="center">
+                                <Badge size="sm" variant="info">{t(`discover.category.${event.category}`)}</Badge>
+                                <Badge size="sm" variant={event.management.isActive ? 'success' : 'neutral'}>
+                                  {event.management.isActive ? t('eventManagement.manage.status.active') : t('eventManagement.manage.status.inactive')}
+                                </Badge>
+                              </Cluster>
+                            </Cluster>
+                            <p className="my-events-page__description">{event.description}</p>
+                          </Stack>
+                        )}
+                      >
+                        <Stack gap="2">
+                          <Cluster gap="2" align="center">
+                            <CalendarDays size={14} />
+                            <span>{formatDateTime(event.dateTime)}</span>
                           </Cluster>
-                        </Cluster>
-                        <p className="my-events-page__description">{event.description}</p>
-                      </Stack>
-                    )}
-                  >
-                    <Stack gap="2">
-                      <Cluster gap="2" align="center">
-                        <CalendarDays size={14} />
-                        <span>{formatDateTime(event.dateTime)}</span>
-                      </Cluster>
-                      <Cluster gap="2" align="center">
-                        <MapPinned size={14} />
-                        <span>{formatAddress(event)}</span>
-                      </Cluster>
-                      <Cluster gap="2" align="center">
-                        <Users size={14} />
-                        <span>{event.attendeesCount}</span>
-                        <span>{formatPrice(event)}</span>
-                      </Cluster>
-                      <Cluster justify="flex-end">
-                        <Button
-                          type="button"
-                          size="sm"
-                          variant="primary"
-                          onClick={() => navigate(`/app/my-events/${event.id}/manage`)}
-                        >
-                          {t('eventManagement.my_events.manage')}
-                        </Button>
-                        <Button type="button" size="sm" variant="secondary" onClick={() => navigate(`/app/events/${event.id}`)}>
-                          {t('eventManagement.my_events.details')}
-                        </Button>
-                      </Cluster>
-                    </Stack>
-                  </Card>
-                ))}
-              </Grid>
-            )}
+                          <Cluster gap="2" align="center">
+                            <MapPinned size={14} />
+                            <span>{formatAddress(event)}</span>
+                          </Cluster>
+                          <Cluster gap="2" align="center">
+                            <Users size={14} />
+                            <span>{event.attendeesCount}</span>
+                            <span>{formatPrice(event)}</span>
+                          </Cluster>
+                          <Cluster justify="flex-end">
+                            <Button
+                              type="button"
+                              size="sm"
+                              variant="primary"
+                              onClick={() => navigate(`/app/my-events/${event.id}/manage`)}
+                            >
+                              {t('eventManagement.my_events.manage')}
+                            </Button>
+                            <Button type="button" size="sm" variant="secondary" onClick={() => navigate(`/app/events/${event.id}`)}>
+                              {t('eventManagement.my_events.details')}
+                            </Button>
+                          </Cluster>
+                        </Stack>
+                      </Card>
+                    ))}
+                  </Grid>
+                )}
+              </Stack>
+            </section>
+
+            <section aria-label={t('eventManagement.my_events.participating.title')}>
+              <Stack gap="3">
+                <h2 className="my-events-page__section-title">{t('eventManagement.my_events.participating.title')}</h2>
+                {participatingStatus === 'loading' && (
+                  <p className="my-events-page__state">{t('eventManagement.my_events.participating.loading')}</p>
+                )}
+                {participatingStatus === 'failed' && (
+                  <p className="my-events-page__state my-events-page__state--error" role="alert">
+                    {t(participatingErrorKey ?? 'eventManagement.errors.fetch_failed')}
+                  </p>
+                )}
+                {participatingStatus === 'succeeded' && participatingItems.length === 0 && (
+                  <p className="my-events-page__state">{t('eventManagement.my_events.participating.empty')}</p>
+                )}
+                {participatingItems.length > 0 && (
+                  <Grid columns={2} gap="3">
+                    {participatingItems.map((event) => (
+                      <Card
+                        key={event.id}
+                        as="article"
+                        variant="default"
+                        header={(
+                          <Stack gap="2">
+                            <Cluster justify="space-between" align="center">
+                              <h3 className="my-events-page__card-title">{event.title}</h3>
+                              <Cluster gap="1" align="center">
+                                <Badge size="sm" variant="info">{t(`discover.category.${event.category}`)}</Badge>
+                                <Badge size="sm" variant={event.participation.state === 'pending' ? 'warning' : 'success'}>
+                                  {event.participation.state === 'pending'
+                                    ? t('eventManagement.my_events.participation.pending')
+                                    : t('eventManagement.my_events.participation.joined')}
+                                </Badge>
+                              </Cluster>
+                            </Cluster>
+                            <p className="my-events-page__description">{event.description}</p>
+                          </Stack>
+                        )}
+                      >
+                        <Stack gap="2">
+                          <Cluster gap="2" align="center">
+                            <CalendarDays size={14} />
+                            <span>{formatDateTime(event.dateTime)}</span>
+                          </Cluster>
+                          <Cluster gap="2" align="center">
+                            <MapPinned size={14} />
+                            <span>{formatAddress(event)}</span>
+                          </Cluster>
+                          <Cluster gap="2" align="center">
+                            <Users size={14} />
+                            <span>{event.attendeesCount}</span>
+                            <span>{formatPrice(event)}</span>
+                          </Cluster>
+                          <Cluster justify="flex-end">
+                            <Button type="button" size="sm" variant="secondary" onClick={() => navigate(`/app/events/${event.id}`)}>
+                              {t('eventManagement.my_events.details')}
+                            </Button>
+                            <Button
+                              type="button"
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => {
+                                void dispatch(leaveEventParticipation(event.id));
+                              }}
+                            >
+                              {t('eventManagement.my_events.leave')}
+                            </Button>
+                          </Cluster>
+                        </Stack>
+                      </Card>
+                    ))}
+                  </Grid>
+                )}
+              </Stack>
+            </section>
           </Stack>
         </Section>
       </Page>

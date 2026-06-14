@@ -46,3 +46,6 @@ export { ThemeToggle } from './ThemeToggle/ThemeToggle.tsx';
 
 export { AppNavbar } from './AppNavbar/AppNavbar.tsx';
 export type { AppNavbarProps } from './AppNavbar/AppNavbar.tsx';
+
+export { Page, Section, Stack, Cluster, Split, Grid } from '../layout/index.tsx';
+export type { PageProps, SectionProps, StackProps, ClusterProps, SplitProps, GridProps } from '../layout/index.tsx';

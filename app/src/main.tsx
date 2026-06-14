@@ -1,5 +1,6 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
+import './app/runtimeEnv.ts'
 import './tokens/primitive.css'
 import './tokens/semantic.css'
 import './index.css'

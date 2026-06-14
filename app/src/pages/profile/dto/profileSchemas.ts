@@ -12,12 +12,25 @@ export const myProfileSchema = z.object({
     displayName: z.string().min(1),
     avatarUrl: z.string().url().optional(),
   })),
+  incomingRequests: z.array(z.object({
+    id: z.string().min(1),
+    displayName: z.string().min(1),
+    avatarUrl: z.string().url().optional(),
+  })),
   groupsCount: z.number().int().min(0),
   groups: z.array(z.object({
     id: z.string().min(1),
     name: z.string().min(1),
     iconKey: z.enum(['sport', 'book', 'tech']),
   })),
+});
+
+export const friendMutationPayloadSchema = z.object({
+  targetUserId: z.string().min(1),
+});
+
+export const friendMutationResponseSchema = z.object({
+  ok: z.literal(true),
 });
 
 export const publicProfileReviewSchema = z.object({
@@ -52,7 +65,7 @@ export const publicProfileSchema = z.object({
   reviews: z.array(publicProfileReviewSchema),
   mutualFriends: z.array(publicProfileMutualFriendSchema),
   groups: z.array(publicProfileGroupSchema),
-  friendAction: z.enum(['can_send_request']),
+  friendAction: z.enum(['can_send_request', 'request_sent', 'respond_to_request', 'friends']),
 });
 
 

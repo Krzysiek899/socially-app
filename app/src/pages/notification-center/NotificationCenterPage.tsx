@@ -1,10 +1,10 @@
-import React, { useEffect, useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { Bell, User, Clock, Ticket, Compass } from 'lucide-react';
+import { Clock, Ticket, Compass } from 'lucide-react';
 import { fetchNotifications, markNotificationAsRead } from '../../redux/notification-center/notificationCenterSlice.ts';
 import { AppDispatch, RootState } from '../../redux/store.ts';
-import { AppNavbar } from "../../shared/components/AppNavbar/AppNavbar.tsx";
+import { AppNavbar, Page, Section, Stack } from "../../shared/components/index.ts";
 import { t } from '../../i18n/index.ts';
 import './NotificationCenter.css';
 
@@ -45,40 +45,27 @@ export const NotificationCenterPage = () => {
   };
 
   return (
-    <div className="notifications-layout">
-      <AppNavbar>
-        <AppNavbar.Brand>
-          <span style={{ fontWeight: 'bold', fontSize: '1.25rem', color: '#0F4A6A' }}>Socially</span>
-        </AppNavbar.Brand>
-        <AppNavbar.NavLink href="/discover">Odkrywaj</AppNavbar.NavLink>
-        <AppNavbar.NavLink href="/my-events">Moje wydarzenia</AppNavbar.NavLink>
-        <AppNavbar.Actions>
-          <button className="btn-primary" onClick={() => navigate('/app/events/create')}>Stwórz wydarzenie</button>
-          <button className="icon-btn" aria-label="Notifications" onClick={() => navigate('/app/notifications')}>
-            <Bell size={20} />
-          </button>
-          <button className="icon-btn" aria-label="Profile" onClick={() => navigate('/app/profile')}>
-            <User size={20} />
-          </button>
-        </AppNavbar.Actions>
-      </AppNavbar>
+    <Page maxWidth="lg">
+      <AppNavbar />
 
-      <main className="notifications-container">
+      <Section spacing="md">
         <h1 className="notifications__title">Centrum powiadomień</h1>
 
         {status === 'loading' && <p>{t('common.loading')}</p>}
         {status === 'failed' && <p className="discover__state--error">{t(errorKey || 'notifications.errors.fetch_failed')}</p>}
 
-        <div className="notifications-list">
+        <Stack gap="6">
           {groupedNotifications.today.length > 0 && (
             <div className="notifications-group">
-              {groupedNotifications.today.map((notif) => (
-                <NotificationCard 
-                  key={notif.id} 
-                  notification={notif} 
-                  onClick={() => handleNotificationClick(notif.id, notif.isRead, notif.type, notif.referenceId)} 
-                />
-              ))}
+              <Stack gap="3">
+                {groupedNotifications.today.map((notif) => (
+                  <NotificationCard 
+                    key={notif.id} 
+                    notification={notif} 
+                    onClick={() => handleNotificationClick(notif.id, notif.isRead, notif.type, notif.referenceId)} 
+                  />
+                ))}
+              </Stack>
             </div>
           )}
 
@@ -87,18 +74,20 @@ export const NotificationCenterPage = () => {
               <div className="notifications-group__divider">
                 <span>WCZORAJ</span>
               </div>
-              {groupedNotifications.yesterday.map((notif) => (
-                <NotificationCard 
-                  key={notif.id} 
-                  notification={notif} 
-                  onClick={() => handleNotificationClick(notif.id, notif.isRead, notif.type, notif.referenceId)} 
-                />
-              ))}
+              <Stack gap="3">
+                {groupedNotifications.yesterday.map((notif) => (
+                  <NotificationCard 
+                    key={notif.id} 
+                    notification={notif} 
+                    onClick={() => handleNotificationClick(notif.id, notif.isRead, notif.type, notif.referenceId)} 
+                  />
+                ))}
+              </Stack>
             </div>
           )}
-        </div>
-      </main>
-    </div>
+        </Stack>
+      </Section>
+    </Page>
   );
 };
 
