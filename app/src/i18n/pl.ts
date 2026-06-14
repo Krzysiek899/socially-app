@@ -60,6 +60,7 @@ export const plTranslations: Record<string, string> = {
   'discover.filters.date.to': 'Data do',
   'discover.filters.advanced': 'Pokaż dodatkowe filtry',
   'discover.filters.here_now': 'Tu i teraz',
+  'discover.filters.all_mode': 'Wszystko',
   'discover.state.loading': 'Ładowanie wydarzeń...',
   'discover.state.empty': 'Brak wydarzeń spełniających aktualne filtry.',
   'discover.state.empty_here_now': 'Brak wydarzeń w pobliżu rozpoczynających się w ciągu 2 godzin.',

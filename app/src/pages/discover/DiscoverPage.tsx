@@ -257,12 +257,12 @@ export const DiscoverPage = () => {
                     <div className="discover__here-now-button">
                       <Button
                         type="button"
-                        size="sm"
+                        size="md"
                         variant={filters.hereNowEnabled ? 'primary' : 'attention'}
                         onClick={handleHereNowToggle}
-                        aria-label={t('discover.filters.here_now')}
+                        aria-label={filters.hereNowEnabled ? t('discover.filters.all_mode') : t('discover.filters.here_now')}
                       >
-                        {t('discover.filters.here_now')}
+                        {filters.hereNowEnabled ? t('discover.filters.all_mode') : t('discover.filters.here_now')}
                       </Button>
                     </div>
                     <TextField
@@ -276,7 +276,7 @@ export const DiscoverPage = () => {
                     <div className="discover__filters-more">
                       <Button
                         type="button"
-                        size="sm"
+                        size="md"
                         variant={advancedFiltersVisible ? 'primary' : 'secondary'}
                         onClick={() => setAdvancedFiltersVisible((value) => !value)}
                         aria-label={t('discover.filters.advanced')}

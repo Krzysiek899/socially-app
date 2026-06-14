@@ -23,6 +23,7 @@
 }
 
 .discover__filters-row {
+  --discover-filter-control-height: 42px;
   display: grid;
   grid-template-columns: auto minmax(0, 1fr) auto;
   gap: var(--space-2);
@@ -35,6 +36,14 @@
 
 .discover__filters-more {
   align-self: end;
+}
+
+.discover__filters-row .input-field {
+  min-height: var(--discover-filter-control-height);
+}
+
+.discover__filters-row .btn {
+  min-height: var(--discover-filter-control-height);
 }
 
 .discover__categories-label {

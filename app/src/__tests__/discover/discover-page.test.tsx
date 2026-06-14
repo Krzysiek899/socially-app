@@ -59,6 +59,8 @@ const baseEvent = {
   ],
 };
 
+const hereNowButtonMatcher = new RegExp(`${t('discover.filters.here_now')}|${t('discover.filters.all_mode')}`);
+
 describe('Discover page states', () => {
   beforeEach(() => {
     localStorage.setItem(
@@ -224,11 +226,12 @@ describe('Discover page states', () => {
     })) as typeof fetch;
 
     render(<App />);
-    fireEvent.click(await screen.findByRole('button', { name: t('discover.filters.here_now') }));
+    fireEvent.click(await screen.findByRole('button', { name: hereNowButtonMatcher }));
 
     await waitFor(() => {
       expect(getCurrentPosition).toHaveBeenCalled();
     });
+    expect(screen.getByRole('button', { name: t('discover.filters.all_mode') })).toBeInTheDocument();
   });
 
   it('disables Here & Now when geolocation is denied', async () => {
@@ -247,10 +250,10 @@ describe('Discover page states', () => {
     })) as typeof fetch;
 
     render(<App />);
-    fireEvent.click(await screen.findByRole('button', { name: t('discover.filters.here_now') }));
+    fireEvent.click(await screen.findByRole('button', { name: hereNowButtonMatcher }));
 
     await waitFor(() => {
-      expect(screen.getByRole('button', { name: t('discover.filters.here_now') })).toHaveClass('btn--attention');
+      expect(screen.getByRole('button', { name: hereNowButtonMatcher })).toHaveClass('btn--attention');
     });
   });
 
@@ -270,10 +273,10 @@ describe('Discover page states', () => {
     })) as typeof fetch;
 
     render(<App />);
-    fireEvent.click(await screen.findByRole('button', { name: t('discover.filters.here_now') }));
+    fireEvent.click(await screen.findByRole('button', { name: hereNowButtonMatcher }));
 
     expect(await screen.findByRole('alert')).toHaveTextContent(t('discover.here_now.toast.permission_denied'));
-    expect(screen.getByRole('button', { name: t('discover.filters.here_now') })).toHaveClass('btn--attention');
+    expect(screen.getByRole('button', { name: hereNowButtonMatcher })).toHaveClass('btn--attention');
   });
 
   it('shows dedicated Here & Now empty state when no events match 5 km + 2h', async () => {
@@ -292,7 +295,7 @@ describe('Discover page states', () => {
     })) as typeof fetch;
 
     render(<App />);
-    fireEvent.click(await screen.findByRole('button', { name: t('discover.filters.here_now') }));
+    fireEvent.click(await screen.findByRole('button', { name: hereNowButtonMatcher }));
 
     expect(await screen.findByText(t('discover.state.empty_here_now'))).toBeInTheDocument();
   });
@@ -325,7 +328,7 @@ describe('Discover page states', () => {
     })) as typeof fetch;
 
     render(<App />);
-    fireEvent.click(await screen.findByRole('button', { name: t('discover.filters.here_now') }));
+    fireEvent.click(await screen.findByRole('button', { name: hereNowButtonMatcher }));
 
     const map = await screen.findByTestId('discover-map');
     expect(map).toBeInTheDocument();
