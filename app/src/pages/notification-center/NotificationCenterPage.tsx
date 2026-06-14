@@ -45,49 +45,51 @@ export const NotificationCenterPage = () => {
   };
 
   return (
-    <Page maxWidth="lg">
+    <main className="notifications-page">
       <AppNavbar />
 
-      <Section spacing="md">
-        <h1 className="notifications__title">Centrum powiadomień</h1>
+      <Page maxWidth="xl">
+        <Section spacing="md">
+          <h1 className="notifications__title">Centrum powiadomień</h1>
 
-        {status === 'loading' && <p>{t('common.loading')}</p>}
-        {status === 'failed' && <p className="discover__state--error">{t(errorKey || 'notifications.errors.fetch_failed')}</p>}
+          {status === 'loading' && <p>{t('common.loading')}</p>}
+          {status === 'failed' && <p className="discover__state--error">{t(errorKey || 'notifications.errors.fetch_failed')}</p>}
 
-        <Stack gap="6">
-          {groupedNotifications.today.length > 0 && (
-            <div className="notifications-group">
-              <Stack gap="3">
-                {groupedNotifications.today.map((notif) => (
-                  <NotificationCard
-                    key={notif.id}
-                    notification={notif}
-                    onClick={() => handleNotificationClick(notif.id, notif.isRead, notif.type, notif.referenceId)}
-                  />
-                ))}
-              </Stack>
-            </div>
-          )}
-
-          {groupedNotifications.yesterday.length > 0 && (
-            <div className="notifications-group">
-              <div className="notifications-group__divider">
-                <span>WCZORAJ</span>
+          <Stack gap="6">
+            {groupedNotifications.today.length > 0 && (
+              <div className="notifications-group">
+                <Stack gap="3">
+                  {groupedNotifications.today.map((notif) => (
+                    <NotificationCard
+                      key={notif.id}
+                      notification={notif}
+                      onClick={() => handleNotificationClick(notif.id, notif.isRead, notif.type, notif.referenceId)}
+                    />
+                  ))}
+                </Stack>
               </div>
-              <Stack gap="3">
-                {groupedNotifications.yesterday.map((notif) => (
-                  <NotificationCard
-                    key={notif.id}
-                    notification={notif}
-                    onClick={() => handleNotificationClick(notif.id, notif.isRead, notif.type, notif.referenceId)}
-                  />
-                ))}
-              </Stack>
-            </div>
-          )}
-        </Stack>
-      </Section>
-    </Page>
+            )}
+
+            {groupedNotifications.yesterday.length > 0 && (
+              <div className="notifications-group">
+                <div className="notifications-group__divider">
+                  <span>WCZORAJ</span>
+                </div>
+                <Stack gap="3">
+                  {groupedNotifications.yesterday.map((notif) => (
+                    <NotificationCard
+                      key={notif.id}
+                      notification={notif}
+                      onClick={() => handleNotificationClick(notif.id, notif.isRead, notif.type, notif.referenceId)}
+                    />
+                  ))}
+                </Stack>
+              </div>
+            )}
+          </Stack>
+        </Section>
+      </Page>
+    </main>
   );
 };
 

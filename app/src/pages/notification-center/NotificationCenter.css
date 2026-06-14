@@ -1,18 +1,8 @@
 /* ── Layout & Container ─────────────────────────────────────────────────── */
 
-.notifications-layout {
-  min-height: 100svh;
+.notifications-page {
+  min-height: 100vh;
   background: var(--color-surface-subtle);
-  display: flex;
-  flex-direction: column;
-}
-
-.notifications-container {
-  max-width: 800px;
-  width: 100%;
-  margin: 0 auto;
-  padding: var(--space-4, 2rem) var(--space-3);
-  flex: 1;
 }
 
 .notifications__title {
@@ -64,7 +54,7 @@
   display: grid;
   grid-template-columns: min-content 1fr auto;
   gap: var(--space-3);
-  background: var(--color-surface-primary);
+  background: var(--color-surface-raised);
   border: 1px solid var(--color-border-default);
   border-radius: var(--radius-md);
   padding: var(--space-3);
@@ -78,8 +68,8 @@
 
 /* Unread State */
 .notification-card--unread {
-  background: var(--color-surface-primary);
-  border-color: var(--color-border-default); /* Can highlight this if Figma requires */
+  background: var(--color-surface-raised);
+  border-color: var(--color-border-default);
 }
 
 /* ── Card: Icon / Avatar ────────────────────────────────────────────────── */
@@ -167,7 +157,7 @@
 .notification-card__unread-dot {
   width: 8px;
   height: 8px;
-  background-color: var(--color-primary-default, #007BFF); /* Adjust to your brand unread color */
+  background-color: var(--color-primary);
   border-radius: 50%;
   display: inline-block;
   margin-top: auto;
