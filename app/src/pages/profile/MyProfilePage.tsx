@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { BookOpen, CodeXml, UsersRound } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Avatar, Button, useNotifications } from '../../shared/components/index.ts';
@@ -7,14 +7,18 @@ import { logout } from '../../redux/auth/authSlice.ts';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks.ts';
 import {
   acceptFriendRequest,
+  approveMyProfile,
   fetchMyProfile,
   rejectFriendRequest,
   unfriendUser,
+  updateMyProfile,
 } from '../../redux/profile/profileSlice.ts';
 import { t } from '../../i18n/index.ts';
 import { MyProfileHero } from './components/MyProfileHero.tsx';
 import { MyProfileListCard, MyProfileListRow } from './components/MyProfileListCard.tsx';
 import { ProfileSurface } from './components/ProfileSurface.tsx';
+import { EditProfileDialog } from './components/EditProfileDialog.tsx';
+import type { UpdateProfileRequestDTO } from './dto/profileSchemas.ts';
 
 export const MyProfilePage = (): React.JSX.Element => {
   const navigate = useNavigate();
@@ -22,6 +26,8 @@ export const MyProfilePage = (): React.JSX.Element => {
   const { notify } = useNotifications();
   const [showAllGroups, setShowAllGroups] = React.useState(false);
   const { profile, status, errorKey } = useAppSelector((state) => state.profile.myProfile);
+
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
   const loadProfile = React.useCallback(() => {
     void dispatch(fetchMyProfile());
@@ -39,6 +45,26 @@ export const MyProfilePage = (): React.JSX.Element => {
     void dispatch(logout());
     navigate('/login', { replace: true });
   }, [dispatch, navigate]);
+
+  const handleSaveProfile = React.useCallback((data: UpdateProfileRequestDTO) => {
+    void dispatch(updateMyProfile(data));
+    setIsEditDialogOpen(false);
+  }, [dispatch]);
+
+  const handleApproveProfile = React.useCallback(() => {
+    void dispatch(approveMyProfile())
+      .unwrap()
+      .catch((errorKeyFromApi: unknown) => {
+        notify({
+          variant: 'error',
+          message: t(
+            typeof errorKeyFromApi === 'string'
+              ? errorKeyFromApi
+              : 'profile.errors.approve_failed',
+          ),
+        });
+      });
+  }, [dispatch, notify]);
 
   const handleUnfriend = React.useCallback((targetUserId: string) => {
     void dispatch(unfriendUser(targetUserId))
@@ -174,7 +200,12 @@ export const MyProfilePage = (): React.JSX.Element => {
     >
       {profile ? (
         <React.Fragment>
-          <MyProfileHero profile={profile} onLogout={handleLogout} />
+          <MyProfileHero
+            profile={profile}
+            onLogout={handleLogout}
+            onEdit={() => setIsEditDialogOpen(true)}
+            onApprove={handleApproveProfile}
+          />
           <Grid columns={2} gap="3">
             <MyProfileListCard
               title={t('profile.my.friends')}
@@ -200,6 +231,16 @@ export const MyProfilePage = (): React.JSX.Element => {
               emptyText={t('profile.my.empty_incoming_requests')}
             />
           </Grid>
+
+          <EditProfileDialog
+            isOpen={isEditDialogOpen}
+            onClose={() => setIsEditDialogOpen(false)}
+            onSave={handleSaveProfile}
+            initialData={{
+              displayName: profile.displayName,
+              bio: profile.bio,
+            }}
+          />
         </React.Fragment>
       ) : null}
     </ProfileSurface>

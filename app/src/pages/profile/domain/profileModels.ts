@@ -29,6 +29,7 @@ export type MyProfile = {
   incomingRequests: MyProfileIncomingRequest[];
   groupsCount: number;
   groups: MyProfileGroup[];
+  isApproved: boolean; 
 };
 
 export type PublicProfileReview = {

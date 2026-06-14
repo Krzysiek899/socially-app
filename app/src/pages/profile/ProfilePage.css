@@ -366,8 +366,6 @@
   color: var(--color-warning-strong, #f59e0b);
 }
 
-
-
 /* Nadpisanie koloru nieaktywnej gwiazdki na jasny szary o niskiej przezroczystości */
 [data-theme="dark"] .public-profile__star-button {
   color: rgba(255, 255, 255, 0.25);
@@ -387,7 +385,6 @@
   color: var(--color-text-subtle);
 }
 
-/* Responsywność */
 .group-details__title {
   margin: 0;
   color: var(--color-text-heading);
@@ -429,6 +426,7 @@
   justify-content: flex-start;
 }
 
+/* Responsywność */
 @media (max-width: 900px) {
   .profile-page__section-item-top,
   .my-profile__list-header {
@@ -446,4 +444,46 @@
   .my-profile__hero {
     grid-template-columns: 1fr;
   }
+}
+
+.my-profile__dialog-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.my-profile__dialog-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.my-profile__dialog-input-group label {
+  color: var(--color-text-heading);
+  font-size: var(--typography-label-size);
+  font-weight: bold;
+}
+
+.my-profile__dialog-textarea {
+  width: 100%;
+  min-height: 120px;
+  resize: vertical;
+  padding: var(--space-3);
+  border-radius: var(--radius-sm);
+  border: var(--border-width-default) solid var(--color-border-default);
+  background: var(--color-surface-subtle);
+  color: var(--color-text-default);
+  font-family: inherit;
+}
+
+.my-profile__dialog-textarea:focus {
+  outline: 2px solid var(--color-primary);
+  outline-offset: -1px;
+}
+
+.my-profile__dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-3);
+  margin-top: var(--space-2);
 }

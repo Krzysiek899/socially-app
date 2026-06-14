@@ -1,10 +1,10 @@
 import { useEffect, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { Clock, Ticket, Compass } from 'lucide-react';
+import { Clock, Compass, Ticket } from 'lucide-react';
 import { fetchNotifications, markNotificationAsRead } from '../../redux/notification-center/notificationCenterSlice.ts';
 import { AppDispatch, RootState } from '../../redux/store.ts';
-import { AppNavbar, Page, Section, Stack } from "../../shared/components/index.ts";
+import { AppNavbar, Page, Section, Stack } from '../../shared/components/index.ts';
 import { t } from '../../i18n/index.ts';
 import './NotificationCenter.css';
 
@@ -29,7 +29,7 @@ export const NotificationCenterPage = () => {
     if (!isRead) {
       dispatch(markNotificationAsRead(id));
     }
-    
+
     switch (type) {
       case 'USER_JOINED':
       case 'FRIEND_JOINED':
@@ -45,53 +45,53 @@ export const NotificationCenterPage = () => {
   };
 
   return (
-    <Page maxWidth="lg">
+    <main className="notifications-page">
       <AppNavbar />
 
-      <Section spacing="md">
-        <h1 className="notifications__title">Centrum powiadomień</h1>
+      <Page maxWidth="xl">
+        <Section spacing="md">
+          <h1 className="notifications__title">Centrum powiadomień</h1>
 
-        {status === 'loading' && <p>{t('common.loading')}</p>}
-        {status === 'failed' && <p className="discover__state--error">{t(errorKey || 'notifications.errors.fetch_failed')}</p>}
+          {status === 'loading' && <p>{t('common.loading')}</p>}
+          {status === 'failed' && <p className="discover__state--error">{t(errorKey || 'notifications.errors.fetch_failed')}</p>}
 
-        <Stack gap="6">
-          {groupedNotifications.today.length > 0 && (
-            <div className="notifications-group">
-              <Stack gap="3">
-                {groupedNotifications.today.map((notif) => (
-                  <NotificationCard 
-                    key={notif.id} 
-                    notification={notif} 
-                    onClick={() => handleNotificationClick(notif.id, notif.isRead, notif.type, notif.referenceId)} 
-                  />
-                ))}
-              </Stack>
-            </div>
-          )}
-
-          {groupedNotifications.yesterday.length > 0 && (
-            <div className="notifications-group">
-              <div className="notifications-group__divider">
-                <span>WCZORAJ</span>
+          <Stack gap="6">
+            {groupedNotifications.today.length > 0 && (
+              <div className="notifications-group">
+                <Stack gap="3">
+                  {groupedNotifications.today.map((notif) => (
+                    <NotificationCard
+                      key={notif.id}
+                      notification={notif}
+                      onClick={() => handleNotificationClick(notif.id, notif.isRead, notif.type, notif.referenceId)}
+                    />
+                  ))}
+                </Stack>
               </div>
-              <Stack gap="3">
-                {groupedNotifications.yesterday.map((notif) => (
-                  <NotificationCard 
-                    key={notif.id} 
-                    notification={notif} 
-                    onClick={() => handleNotificationClick(notif.id, notif.isRead, notif.type, notif.referenceId)} 
-                  />
-                ))}
-              </Stack>
-            </div>
-          )}
-        </Stack>
-      </Section>
-    </Page>
+            )}
+
+            {groupedNotifications.yesterday.length > 0 && (
+              <div className="notifications-group">
+                <div className="notifications-group__divider">
+                  <span>WCZORAJ</span>
+                </div>
+                <Stack gap="3">
+                  {groupedNotifications.yesterday.map((notif) => (
+                    <NotificationCard
+                      key={notif.id}
+                      notification={notif}
+                      onClick={() => handleNotificationClick(notif.id, notif.isRead, notif.type, notif.referenceId)}
+                    />
+                  ))}
+                </Stack>
+              </div>
+            )}
+          </Stack>
+        </Section>
+      </Page>
+    </main>
   );
 };
-
-/* ── SUB-COMPONENT: NOTIFICATION CARD ───────────────────────────────────── */
 
 interface NotificationCardProps {
   notification: {
@@ -113,7 +113,7 @@ interface NotificationCardProps {
 
 const NotificationCard = ({ notification, onClick }: NotificationCardProps) => {
   return (
-    <div 
+    <div
       className={`notification-card ${!notification.isRead ? 'notification-card--unread' : ''}`}
       onClick={onClick}
     >
@@ -122,7 +122,7 @@ const NotificationCard = ({ notification, onClick }: NotificationCardProps) => {
           <img src={notification.avatarUrl} alt="avatar" className="notification-card__avatar" />
         ) : (
           <div className="notification-card__icon-placeholder">
-             {notification.type === 'NEW_EVENT' ? <Compass size={24} /> : <Ticket size={24} />}
+            {notification.type === 'NEW_EVENT' ? <Compass size={24} /> : <Ticket size={24} />}
           </div>
         )}
       </div>
@@ -130,7 +130,7 @@ const NotificationCard = ({ notification, onClick }: NotificationCardProps) => {
       <div className="notification-card__content">
         <h3 className="notification-card__title">{notification.title}</h3>
         <p className="notification-card__message">{notification.message}</p>
-        
+
         {notification.eventMeta && (
           <div className="notification-card__meta">
             <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>

@@ -1,14 +1,19 @@
 import { http, HttpResponse } from 'msw';
-import { friendMutationPayloadSchema } from '../../pages/profile/dto/profileSchemas.ts';
+import {
+  friendMutationPayloadSchema,
+  updateProfileSchema,
+} from '../../pages/profile/dto/profileSchemas.ts';
 import { getAuthorizedUser, getAuthorizedUserId } from '../auth/getAuthorizedUserId.ts';
 import {
   acceptFriendRequest,
+  approveMyProfileForUser,
   getMyProfileForUser,
   getPublicProfileForUser,
   rejectFriendRequest,
   sendFriendRequest,
   submitReview,
   unfriendUsers,
+  updateMyProfileForUser,
 } from './store.ts';
 
 export const profileHandlers = [
@@ -45,7 +50,7 @@ export const profileHandlers = [
     const sanitizedProfile = {
       ...profile,
       reviews: profile.reviews.filter(
-        (review) => review.content && review.content.trim().length > 0
+        (review) => review.content && review.content.trim().length > 0,
       ),
     };
 
@@ -79,6 +84,7 @@ export const profileHandlers = [
 
     return HttpResponse.json({ message: 'error' }, { status: 500 });
   }),
+
   http.post('/api/profile/friends/request', async ({ request }) => {
     const userId = getAuthorizedUserId(request.headers.get('authorization'));
     if (!userId) {
@@ -103,6 +109,7 @@ export const profileHandlers = [
 
     return HttpResponse.json({ ok: true }, { status: 200 });
   }),
+
   http.post('/api/profile/friends/accept', async ({ request }) => {
     const userId = getAuthorizedUserId(request.headers.get('authorization'));
     if (!userId) {
@@ -127,6 +134,7 @@ export const profileHandlers = [
 
     return HttpResponse.json({ ok: true }, { status: 200 });
   }),
+
   http.post('/api/profile/friends/reject', async ({ request }) => {
     const userId = getAuthorizedUserId(request.headers.get('authorization'));
     if (!userId) {
@@ -151,6 +159,7 @@ export const profileHandlers = [
 
     return HttpResponse.json({ ok: true }, { status: 200 });
   }),
+
   http.post('/api/profile/friends/unfriend', async ({ request }) => {
     const userId = getAuthorizedUserId(request.headers.get('authorization'));
     if (!userId) {
@@ -174,5 +183,40 @@ export const profileHandlers = [
     }
 
     return HttpResponse.json({ ok: true }, { status: 200 });
+  }),
+
+  http.patch('/api/profile/me', async ({ request }) => {
+    const userId = getAuthorizedUserId(request.headers.get('authorization'));
+    if (!userId) {
+      return HttpResponse.json({ message: 'unauthorized' }, { status: 401 });
+    }
+
+    let payload: { displayName?: string; bio?: string };
+    try {
+      payload = updateProfileSchema.parse(await request.json());
+    } catch {
+      return HttpResponse.json({ message: 'request_invalid' }, { status: 400 });
+    }
+
+    const updatedProfile = updateMyProfileForUser(userId, payload);
+    if (!updatedProfile) {
+      return HttpResponse.json({ message: 'not_found' }, { status: 404 });
+    }
+
+    return HttpResponse.json(updatedProfile, { status: 200 });
+  }),
+
+  http.patch('/api/profile/me/approve', async ({ request }) => {
+    const userId = getAuthorizedUserId(request.headers.get('authorization'));
+    if (!userId) {
+      return HttpResponse.json({ message: 'unauthorized' }, { status: 401 });
+    }
+
+    const updatedProfile = approveMyProfileForUser(userId);
+    if (!updatedProfile) {
+      return HttpResponse.json({ message: 'not_found' }, { status: 404 });
+    }
+
+    return HttpResponse.json({ success: true, isApproved: updatedProfile.isApproved }, { status: 200 });
   }),
 ];

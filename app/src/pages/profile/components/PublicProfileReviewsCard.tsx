@@ -86,10 +86,9 @@ const handleSubmit = async () => {
                       </p>
                     </div>
                   </div>
-                 
-                  {review.content && review.content.trim().length > 0 && (
-                    <p className="public-profile__review-content">{review.content}</p>
-                  )}
+{review.content && review.content.trim().length > 0 && (
+  <p className="public-profile__review-content">{review.content}</p>
+)}
                 </article>
               ))}
             </Stack>

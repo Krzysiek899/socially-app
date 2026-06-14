@@ -240,6 +240,8 @@ export const plTranslations: Record<string, string> = {
   'profile.errors.request_invalid': 'Nieprawidłowe parametry profilu.',
   'profile.errors.not_found': 'Nie znaleziono profilu.',
   'profile.errors.submit_review_failed': 'Nie udało się zapisać Twojej opinii. Spróbuj ponownie.',
+  'profile.errors.update_failed': 'Nie udało się zaktualizować profilu.',
+  'profile.errors.approve_failed': 'Nie udało się zweryfikować profilu.',
   'common.cancel': 'Anuluj',
   'common.submit': 'Wyślij',
 
