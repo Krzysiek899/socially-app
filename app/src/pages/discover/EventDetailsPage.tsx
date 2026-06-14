@@ -145,7 +145,7 @@ export const EventDetailsPage = () => {
             <Cluster justify="space-between" align="center" gap="2">
               <Button type="button" variant="secondary" size="sm" onClick={goBack}>
                 <ArrowLeft size={16} style={{ marginRight: '6px' }} />
-                {t('discover.details.back')}
+                {t('common.back')}
               </Button>
               <Cluster gap="2">
                 {event && currentUserId === event.organizer.id && (
