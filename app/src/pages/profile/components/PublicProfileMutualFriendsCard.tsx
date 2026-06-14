@@ -13,7 +13,10 @@ export const PublicProfileMutualFriendsCard = ({
 }: PublicProfileMutualFriendsCardProps): React.JSX.Element => (
   <Card as="section" variant="raised">
     <Stack gap="3">
-      <h3 className="public-profile__card-title">{t('profile.public.mutual_friends')}</h3>
+      <div className="public-profile__card-title-row">
+        <h3 className="public-profile__card-title">{t('profile.public.mutual_friends')}</h3>
+        <span className="public-profile__count-chip">({friends.length})</span>
+      </div>
       {friends.length === 0 ? (
         <p className="public-profile__empty-text">{t('profile.public.empty_mutual_friends')}</p>
       ) : (

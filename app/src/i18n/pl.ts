@@ -227,6 +227,7 @@ export const plTranslations: Record<string, string> = {
   'profile.public.groups': 'Grupy',
   'profile.public.rating_label': 'Średnia ocena',
   'profile.public.reviews_count': 'opinii',
+  'profile.public.group_members_count': '{count} członków',
   'profile.public.empty_reviews': 'Brak opinii do wyświetlenia.',
   'profile.public.empty_mutual_friends': 'Brak wspólnych znajomych do wyświetlenia.',
   'profile.public.empty_groups': 'Brak grup do wyświetlenia.',

@@ -331,6 +331,12 @@ const getGroupIdsForUser = (userId: string): string[] =>
     .filter(([memberId]) => memberId === userId)
     .map(([, groupId]) => groupId);
 
+const getGroupMembersCount = (groupId: string): number =>
+  Array.from(groupMemberships)
+    .map((membershipKey) => membershipKey.split('::'))
+    .filter(([, memberGroupId]) => memberGroupId === groupId)
+    .length;
+
 const toPublicFriendAction = (state: ReturnType<typeof relationState>) => {
   if (state === 'outgoing_pending') {
     return 'request_sent' as const;
@@ -422,6 +428,8 @@ export const getPublicProfileForUser = (
       id: entry.id,
       name: entry.name,
       meta: entry.meta,
+      iconKey: entry.iconKey,
+      membersCount: getGroupMembersCount(entry.id),
     }));
 
   return publicProfileSchema.parse({

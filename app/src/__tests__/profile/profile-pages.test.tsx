@@ -87,11 +87,15 @@ const publicProfileResponse = {
       id: 'group-1',
       name: 'Jazz Kraków',
       meta: '5 wspólnych wydarzeń',
+      iconKey: 'sport',
+      membersCount: 124,
     },
     {
       id: 'group-2',
       name: 'Muzyka na żywo',
       meta: '2 wspólnych znajomych',
+      iconKey: 'book',
+      membersCount: 58,
     },
   ],
 };

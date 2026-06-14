@@ -224,29 +224,48 @@
   color: var(--color-primary);
 }
 
+.public-profile__hero-shell {
+  border-radius: var(--radius-md);
+  background: var(--color-surface-raised);
+  box-shadow: var(--elevation-2);
+  overflow: hidden;
+}
+
 .public-profile__hero {
   overflow: hidden;
-  border-radius: var(--radius-md);
 }
 
 .public-profile__hero-banner {
-  min-height: 9rem;
-  background: linear-gradient(135deg, rgba(27, 86, 128, 1) 0%, rgba(73, 137, 187, 1) 100%);
+  min-height: 8rem;
+  background: linear-gradient(112deg, rgba(14, 79, 133, 1) 0%, rgba(32, 167, 171, 1) 100%);
 }
 
 .public-profile__hero-content {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
-  gap: var(--space-6);
-  padding: 0 var(--space-6) var(--space-6);
-  margin-top: calc(var(--space-6) * -1);
+  gap: var(--space-4);
+  padding: var(--space-3) var(--space-5) var(--space-5);
 }
 
 .public-profile__hero-main {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
-  gap: var(--space-4);
-  align-items: end;
+  gap: var(--space-3);
+  align-items: start;
+}
+
+.public-profile__hero-avatar-wrap > .avatar {
+  border: 4px solid var(--color-surface-raised);
+  box-shadow: var(--elevation-1);
+}
+
+.public-profile__hero-avatar-wrap {
+  margin-top: calc(var(--space-5) * -1);
+}
+
+.public-profile__hero-text {
+  display: grid;
+  gap: var(--space-1);
 }
 
 .public-profile__hero-name,
@@ -258,7 +277,6 @@
 }
 
 .public-profile__hero-bio,
-.public-profile__hero-rating,
 .public-profile__card-subtitle,
 .public-profile__review-meta,
 .public-profile__review-content,
@@ -296,6 +314,17 @@
   gap: var(--space-3);
 }
 
+.public-profile__card-title-row {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-1);
+}
+
+.public-profile__count-chip {
+  color: var(--color-text-subtle);
+  font-size: var(--typography-label-size);
+}
+
 .public-profile__review-item,
 .public-profile__group-row {
   padding: var(--space-3);
@@ -304,6 +333,10 @@
 }
 
 .public-profile__group-row--button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
   width: 100%;
   background: transparent;
   text-align: left;
@@ -319,18 +352,35 @@
 
 .public-profile__review-item {
   display: grid;
-  gap: var(--space-3);
+  gap: var(--space-2);
+}
+
+.public-profile__review-header {
+  justify-content: space-between;
+}
+
+.public-profile__review-time {
+  margin: 0;
+  color: var(--color-text-subtle);
+  font-size: var(--typography-label-size);
+}
+
+.public-profile__review-meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.public-profile__review-star {
+  color: var(--color-border-default);
+}
+
+.public-profile__review-star--filled {
+  color: var(--color-warning-strong);
 }
 
 .public-profile__friend-name {
   color: var(--color-text-default);
-}
-
-/* Styl kontenera dla gwiazdek w pojedynczej opinii */
-.public-profile__review-meta {
-  display: flex;
-  align-items: center;
-  gap: var(--space-1);
 }
 
 /* Styl wewnętrzny formularza w Modalu */
@@ -383,6 +433,30 @@
   align-items: center;
   gap: 4px;
   color: var(--color-text-subtle);
+}
+
+.public-profile__group-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: var(--radius-sm);
+}
+
+.public-profile__group-icon--sport {
+  background-color: var(--color-primary-subtle);
+  color: var(--color-primary);
+}
+
+.public-profile__group-icon--book {
+  background-color: rgba(255, 163, 26, 0.16);
+  color: var(--color-warning-strong);
+}
+
+.public-profile__group-icon--tech {
+  background-color: rgba(27, 86, 128, 0.12);
+  color: var(--color-primary);
 }
 
 .group-details__title {
