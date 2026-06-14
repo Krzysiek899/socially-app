@@ -46,7 +46,7 @@ export const NotificationCenterPage = () => {
 
   return (
     <main className="notifications-page">
-      <AppNavbar />
+      <AppNavbar active="notifications" />
 
       <Page maxWidth="xl">
         <Section spacing="md">

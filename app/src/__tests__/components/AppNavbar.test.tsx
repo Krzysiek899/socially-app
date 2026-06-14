@@ -198,4 +198,32 @@ describe('AppNavbar profile menu', () => {
     expect(navbarAvatar).toBeInTheDocument();
     expect(within(navbarAvatar).getByAltText('Jan Kowalski')).toHaveAttribute('src', 'https://images.example.com/jan.png');
   });
+
+  it('does not mark discover as active on notifications page', async () => {
+    window.history.replaceState({}, '', '/app/notifications');
+    global.fetch = jest.fn(async () => ({
+      ok: true,
+      status: 200,
+      json: async () => [],
+    })) as typeof fetch;
+
+    render(<App />);
+
+    await screen.findByRole('heading', { name: 'Centrum powiadomień' });
+    expect(screen.getByRole('link', { name: 'Odkrywaj' })).not.toHaveClass('top-nav__link--active');
+  });
+
+  it('hides create event button on create event page', async () => {
+    window.history.replaceState({}, '', '/app/events/create');
+    global.fetch = jest.fn(async () => ({
+      ok: true,
+      status: 200,
+      json: async () => [],
+    })) as typeof fetch;
+
+    render(<App />);
+
+    await screen.findByRole('heading', { name: 'Stwórz wydarzenie' });
+    expect(screen.queryByRole('button', { name: 'Stwórz wydarzenie' })).not.toBeInTheDocument();
+  });
 });
