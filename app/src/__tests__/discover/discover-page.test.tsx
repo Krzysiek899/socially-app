@@ -296,4 +296,43 @@ describe('Discover page states', () => {
 
     expect(await screen.findByText(t('discover.state.empty_here_now'))).toBeInTheDocument();
   });
+
+  it('keeps list and map synchronized after Here & Now filtering', async () => {
+    const getCurrentPosition = jest.fn((success: PositionCallback) => {
+      success({ coords: { latitude: 52.2297, longitude: 21.0122 } } as GeolocationPosition);
+    });
+    Object.defineProperty(global.navigator, 'geolocation', {
+      value: { getCurrentPosition },
+      configurable: true,
+    });
+
+    global.fetch = jest.fn(async () => ({
+      ok: true,
+      status: 200,
+      json: async () => [
+        baseEvent,
+        {
+          ...baseEvent,
+          id: 'event-2',
+          title: 'Night Run',
+          category: 'SPORT',
+          location: {
+            lat: 52.2311,
+            lng: 21.0058,
+          },
+        },
+      ],
+    })) as typeof fetch;
+
+    render(<App />);
+    fireEvent.click(await screen.findByRole('checkbox', { name: t('discover.filters.here_now') }));
+
+    const map = await screen.findByTestId('discover-map');
+    expect(map).toBeInTheDocument();
+
+    const mapPins = screen.getAllByRole('button', { name: /map-pin-/i });
+    const cards = screen.getAllByRole('button', { name: /Frontend Meetup|Night Run/i });
+    expect(mapPins).toHaveLength(2);
+    expect(cards.length).toBeGreaterThanOrEqual(2);
+  });
 });
