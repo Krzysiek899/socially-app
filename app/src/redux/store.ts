@@ -4,6 +4,7 @@ import { discoverReducer } from './discover/discoverSlice.ts';
 import { eventManagementReducer } from './eventManagement/eventManagementSlice.ts';
 import { groupsReducer } from './groups/groupsSlice.ts';
 import { profileReducer } from './profile/profileSlice.ts';
+import { notificationCenterReducer } from './notification-center/notificationCenterSlice.ts';
 
 export const store = configureStore({
   reducer: {
@@ -12,6 +13,7 @@ export const store = configureStore({
     eventManagement: eventManagementReducer,
     groups: groupsReducer,
     profile: profileReducer,
+    notificationCenter: notificationCenterReducer,
   },
 });
 

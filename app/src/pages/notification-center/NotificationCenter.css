@@ -1,0 +1,207 @@
+/* ── Layout & Container ─────────────────────────────────────────────────── */
+
+.notifications-layout {
+  min-height: 100svh;
+  background: var(--color-surface-subtle);
+  display: flex;
+  flex-direction: column;
+}
+
+.notifications-container {
+  max-width: 800px;
+  width: 100%;
+  margin: 0 auto;
+  padding: var(--space-4, 2rem) var(--space-3);
+  flex: 1;
+}
+
+.notifications__title {
+  margin: 0 0 var(--space-4, 2rem) 0;
+  color: var(--color-text-heading);
+  font-size: clamp(1.75rem, 2vw, 2rem);
+  line-height: 1.2;
+}
+
+/* ── Lists & Groups ─────────────────────────────────────────────────────── */
+
+.notifications-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4, 2rem);
+}
+
+.notifications-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.notifications-group__divider {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: var(--space-3);
+  margin: var(--space-2) 0 var(--space-1) 0;
+}
+
+.notifications-group__divider span {
+  color: var(--color-text-default);
+  font-size: var(--typography-label-size, 0.75rem);
+  font-weight: var(--typography-label-weight, 600);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.notifications-group__divider::after {
+  content: "";
+  height: 1px;
+  background: var(--color-border-default);
+}
+
+/* ── Notification Card ──────────────────────────────────────────────────── */
+
+.notification-card {
+  display: grid;
+  grid-template-columns: min-content 1fr auto;
+  gap: var(--space-3);
+  background: var(--color-surface-primary);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  padding: var(--space-3);
+  cursor: pointer;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.notification-card:hover {
+  background-color: var(--color-surface-subtle);
+}
+
+/* Unread State */
+.notification-card--unread {
+  background: var(--color-surface-primary);
+  border-color: var(--color-border-default); /* Can highlight this if Figma requires */
+}
+
+/* ── Card: Icon / Avatar ────────────────────────────────────────────────── */
+
+.notification-card__icon-wrapper {
+  display: flex;
+  align-items: flex-start;
+  padding-top: 2px;
+}
+
+.notification-card__avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.notification-card__icon-placeholder {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--color-surface-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  border: 1px solid var(--color-border-default);
+}
+
+/* ── Card: Content ──────────────────────────────────────────────────────── */
+
+.notification-card__content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.notification-card__title {
+  margin: 0;
+  font-size: var(--typography-body-size, 1rem);
+  color: var(--color-text-heading);
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.notification-card__message {
+  margin: 0;
+  font-size: var(--typography-body-sm-size, 0.875rem);
+  color: var(--color-text-default);
+  line-height: 1.4;
+}
+
+.notification-card__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+  margin-top: var(--space-1);
+  font-size: var(--typography-body-sm-size, 0.875rem);
+  color: var(--color-text-default);
+}
+
+.notification-card__meta span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* ── Card: Actions & Time ───────────────────────────────────────────────── */
+
+.notification-card__actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: space-between;
+  min-width: 80px;
+}
+
+.notification-card__time {
+  font-size: var(--typography-body-sm-size, 0.875rem);
+  color: var(--color-text-default);
+  white-space: nowrap;
+}
+
+.notification-card__unread-dot {
+  width: 8px;
+  height: 8px;
+  background-color: var(--color-primary-default, #007BFF); /* Adjust to your brand unread color */
+  border-radius: 50%;
+  display: inline-block;
+  margin-top: auto;
+  margin-bottom: 4px;
+}
+
+/* ── Responsive ─────────────────────────────────────────────────────────── */
+
+@media (max-width: 600px) {
+  .notification-card {
+    grid-template-columns: min-content 1fr;
+    grid-template-areas: 
+      "icon content"
+      "icon actions";
+  }
+
+  .notification-card__icon-wrapper {
+    grid-area: icon;
+  }
+
+  .notification-card__content {
+    grid-area: content;
+  }
+
+  .notification-card__actions {
+    grid-area: actions;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: var(--space-2);
+  }
+
+  .notification-card__unread-dot {
+    margin-top: 0;
+    margin-bottom: 0;
+  }
+}
