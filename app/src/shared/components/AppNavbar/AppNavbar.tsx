@@ -50,7 +50,7 @@ export function AppNavbar({ active = 'discover' }: AppNavbarProps): React.JSX.El
 
   const handleOpenProfile = () => {
     setIsProfileMenuOpen(false);
-    navigate('/app/profile');
+    navigate('/profile');
   };
 
   const handleLogout = () => {
@@ -62,11 +62,11 @@ export function AppNavbar({ active = 'discover' }: AppNavbarProps): React.JSX.El
   return (
     <TopNav>
       <TopNav.Brand>Socially</TopNav.Brand>
-      <TopNav.NavLink href="/app" active={active === 'discover'}>{t('discover.nav.discover')}</TopNav.NavLink>
-      <TopNav.NavLink href="/app/my-events" active={active === 'my-events'}>{t('discover.nav.my_events')}</TopNav.NavLink>
+      <TopNav.NavLink href="/discover" active={active === 'discover'}>{t('discover.nav.discover')}</TopNav.NavLink>
+      <TopNav.NavLink href="/my-events" active={active === 'my-events'}>{t('discover.nav.my_events')}</TopNav.NavLink>
       <TopNav.Actions>
         {active !== 'create-event' ? (
-          <Button type="button" size="sm" variant="primary" onClick={() => navigate('/app/events/create')}>
+          <Button type="button" size="sm" variant="primary" onClick={() => navigate('/events/create')}>
             {t('discover.nav.create_event')}
           </Button>
         ) : null}
@@ -75,7 +75,7 @@ export function AppNavbar({ active = 'discover' }: AppNavbarProps): React.JSX.El
           size="sm"
           variant="ghost"
           aria-label={t('discover.nav.notifications')}
-          onClick={() => navigate('/app/notifications')}
+          onClick={() => navigate('/notifications')}
         >
           
           <Bell size={16} />

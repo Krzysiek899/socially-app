@@ -27,7 +27,7 @@ export const PublicProfileGroupsCard = ({
                 key={group.id}
                 type="button"
                 className="public-profile__group-row public-profile__group-row--button"
-                onClick={() => navigate(`/app/groups/${group.id}`)}
+                onClick={() => navigate(`/groups/${group.id}`)}
               >
                 <p className="public-profile__group-name">{group.name}</p>
                 <p className="public-profile__group-meta">{group.meta}</p>

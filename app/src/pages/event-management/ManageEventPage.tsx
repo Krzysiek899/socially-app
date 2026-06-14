@@ -128,7 +128,7 @@ export const ManageEventPage = () => {
   });
   const [localErrorKey, setLocalErrorKey] = React.useState<string | null>(null);
 
-  const goBack = useSmartBack('/app/my-events');
+  const goBack = useSmartBack('/my-events');
 
   React.useEffect(() => {
     if (!eventId) {
@@ -385,7 +385,7 @@ export const ManageEventPage = () => {
                               type="button"
                               size="sm"
                               variant="secondary"
-                              onClick={() => navigate(`/app/users/${participant.id}`)}
+                              onClick={() => navigate(`/users/${participant.id}`)}
                             >
                               {t('profile.actions.view_public')}
                             </Button>

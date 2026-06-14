@@ -5,7 +5,7 @@ export const buildReturnTo = (pathname: string, search: string, hash: string): s
   return encodeURIComponent(completePath);
 };
 
-export const resolveReturnTo = (rawReturnTo: string | null, fallback = '/app'): string => {
+export const resolveReturnTo = (rawReturnTo: string | null, fallback = '/discover'): string => {
   if (!rawReturnTo) {
     return fallback;
   }

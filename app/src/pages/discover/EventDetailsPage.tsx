@@ -72,7 +72,7 @@ export const EventDetailsPage = () => {
   const [event, setEvent] = React.useState<DiscoverEvent | null>(null);
   const displayAttendees = React.useMemo(() => (event ? getDisplayAttendees(event) : []), [event]);
   const hiddenAttendeesCount = event ? Math.max(event.attendeesCount - displayAttendees.length, 0) : 0;
-  const goBack = useSmartBack('/app');
+  const goBack = useSmartBack('/discover');
 
   const loadEvent = React.useCallback(async (signal: AbortSignal) => {
     if (!eventId || !token) {
@@ -157,7 +157,7 @@ export const EventDetailsPage = () => {
                     type="button"
                     variant="secondary"
                     size="sm"
-                    onClick={() => navigate(`/app/my-events/${event.id}/manage`)}
+                    onClick={() => navigate(`/my-events/${event.id}/manage`)}
                   >
                     {t('eventManagement.my_events.manage')}
                   </Button>
@@ -210,7 +210,7 @@ export const EventDetailsPage = () => {
                   <button
                     type="button"
                     className="event-details__meta-link"
-                    onClick={() => navigate(`/app/users/${event.organizer.id}`)}
+                    onClick={() => navigate(`/users/${event.organizer.id}`)}
                   >
                     {event.organizer.displayName}
                   </button>
@@ -240,7 +240,7 @@ export const EventDetailsPage = () => {
                         <button
                           type="button"
                           className="event-details__attendee-link"
-                          onClick={() => navigate(`/app/users/${attendee.id}`)}
+                          onClick={() => navigate(`/users/${attendee.id}`)}
                         >
                           {attendee.displayName}
                         </button>

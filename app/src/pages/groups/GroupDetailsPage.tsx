@@ -17,7 +17,7 @@ export const GroupDetailsPage = (): React.JSX.Element => {
   const { details, status, errorKey } = useAppSelector((state) => state.groups);
   const currentUserId = useAppSelector((state) => state.auth.session?.userId ?? null);
   const [isMutating, setIsMutating] = React.useState(false);
-  const goBack = useSmartBack('/app');
+  const goBack = useSmartBack('/discover');
 
   const loadGroup = React.useCallback(() => {
     if (!groupId) {
@@ -60,11 +60,11 @@ export const GroupDetailsPage = (): React.JSX.Element => {
 
   const handleMemberProfileClick = React.useCallback((memberId: string) => {
     if (currentUserId && memberId === currentUserId) {
-      navigate('/app/profile');
+      navigate('/profile');
       return;
     }
 
-    navigate(`/app/users/${memberId}`);
+    navigate(`/users/${memberId}`);
   }, [currentUserId, navigate]);
 
   return (

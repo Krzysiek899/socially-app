@@ -327,7 +327,7 @@ export const CreateEventPage = () => {
     const payload = toPayload(form, selectedAddressResult, selectedLocation);
     const result = await dispatch(createAuthoredEvent(payload));
     if (createAuthoredEvent.fulfilled.match(result)) {
-      navigate('/app/my-events');
+      navigate('/my-events');
     }
   };
 
@@ -522,7 +522,7 @@ export const CreateEventPage = () => {
               )}
 
               <Cluster justify="flex-end" gap="2">
-                <Button type="button" variant="secondary" onClick={() => navigate('/app/my-events')}>
+                <Button type="button" variant="secondary" onClick={() => navigate('/my-events')}>
                   {t('eventManagement.create.go_to_my_events')}
                 </Button>
                 <Button type="submit" disabled={createStatus === 'submitting'}>

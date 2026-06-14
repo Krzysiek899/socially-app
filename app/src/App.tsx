@@ -4,7 +4,6 @@ import { BrowserRouter, Navigate, Route, Routes, useLocation } from 'react-route
 import { NotificationProvider } from './shared/components/index.ts';
 import ReactGA from 'react-ga4';
 import { store } from './redux/store.ts';
-import { Playground } from './playground/Playground.tsx';
 import { AuthGuard } from './pages/auth/AuthGuard.tsx';
 import { LoginPage } from './pages/auth/LoginPage.tsx';
 import { RegistrationPage } from './pages/auth/RegistrationPage.tsx';
@@ -39,22 +38,21 @@ const PageTracker = () => {
 
 const AppRoutes = () => (
   <Routes>
-    <Route path="/playground" element={<Playground />} />
     <Route path="/login" element={<LoginPage />} />
     <Route path="/register" element={<RegistrationPage />} />
     <Route element={<AuthGuard />}>
-      <Route path="/app" element={<DiscoverPage />} />
-      <Route path="/app/events/:eventId" element={<EventDetailsPage />} />
-      <Route path="/app/events/create" element={<CreateEventPage />} />
-      <Route path="/app/my-events" element={<MyEventsPage />} />
-      <Route path="/app/my-events/:eventId/manage" element={<ManageEventPage />} />
-      <Route path="/app/notifications" element={<NotificationCenterPage />} />
-      <Route path="/app/groups/:groupId" element={<GroupDetailsPage />} />
-      <Route path="/app/profile" element={<MyProfilePage />} />
-      <Route path="/app/users/:userId" element={<PublicProfilePage />} />
+      <Route path="/discover" element={<DiscoverPage />} />
+      <Route path="/events/:eventId" element={<EventDetailsPage />} />
+      <Route path="/events/create" element={<CreateEventPage />} />
+      <Route path="/my-events" element={<MyEventsPage />} />
+      <Route path="/my-events/:eventId/manage" element={<ManageEventPage />} />
+      <Route path="/notifications" element={<NotificationCenterPage />} />
+      <Route path="/groups/:groupId" element={<GroupDetailsPage />} />
+      <Route path="/profile" element={<MyProfilePage />} />
+      <Route path="/users/:userId" element={<PublicProfilePage />} />
     </Route>
-    <Route path="/" element={<Navigate to="/app" replace />} />
-    <Route path="*" element={<Navigate to="/app" replace />} />
+    <Route path="/" element={<Navigate to="/discover" replace />} />
+    <Route path="*" element={<Navigate to="/discover" replace />} />
   </Routes>
 );
 

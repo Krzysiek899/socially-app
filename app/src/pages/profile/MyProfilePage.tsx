@@ -183,7 +183,7 @@ export const MyProfilePage = (): React.JSX.Element => {
           key={group.id}
           leading={<span className={`my-profile__group-icon my-profile__group-icon--${group.iconKey}`}>{icon}</span>}
           label={group.name}
-          onClick={() => navigate(`/app/groups/${group.id}`)}
+          onClick={() => navigate(`/groups/${group.id}`)}
         />
       );
     }),

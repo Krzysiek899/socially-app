@@ -64,7 +64,7 @@ export const MyEventsPage = () => {
               <h1>{t('eventManagement.my_events.title')}</h1>
               <p>{t('eventManagement.my_events.subtitle')}</p>
               <Cluster gap="2">
-                <Button type="button" onClick={() => navigate('/app/events/create')}>
+                <Button type="button" onClick={() => navigate('/events/create')}>
                   {t('eventManagement.my_events.create_cta')}
                 </Button>
               </Cluster>
@@ -124,11 +124,11 @@ export const MyEventsPage = () => {
                               type="button"
                               size="sm"
                               variant="primary"
-                              onClick={() => navigate(`/app/my-events/${event.id}/manage`)}
+                              onClick={() => navigate(`/my-events/${event.id}/manage`)}
                             >
                               {t('eventManagement.my_events.manage')}
                             </Button>
-                            <Button type="button" size="sm" variant="secondary" onClick={() => navigate(`/app/events/${event.id}`)}>
+                            <Button type="button" size="sm" variant="secondary" onClick={() => navigate(`/events/${event.id}`)}>
                               {t('eventManagement.my_events.details')}
                             </Button>
                           </Cluster>
@@ -193,7 +193,7 @@ export const MyEventsPage = () => {
                             <span>{formatPrice(event)}</span>
                           </Cluster>
                           <Cluster justify="flex-end">
-                            <Button type="button" size="sm" variant="secondary" onClick={() => navigate(`/app/events/${event.id}`)}>
+                            <Button type="button" size="sm" variant="secondary" onClick={() => navigate(`/events/${event.id}`)}>
                               {t('eventManagement.my_events.details')}
                             </Button>
                             <Button

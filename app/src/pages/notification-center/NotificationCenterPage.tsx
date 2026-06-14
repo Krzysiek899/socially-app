@@ -33,11 +33,11 @@ export const NotificationCenterPage = () => {
     switch (type) {
       case 'USER_JOINED':
       case 'FRIEND_JOINED':
-        navigate(`/app/users/${referenceId}`);
+        navigate(`/users/${referenceId}`);
         break;
       case 'NEW_EVENT':
       case 'SYSTEM_APPROVAL':
-        navigate(`/app/events/${referenceId}`);
+        navigate(`/events/${referenceId}`);
         break;
       default:
         break;
