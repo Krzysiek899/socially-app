@@ -16,6 +16,7 @@ export type MyProfileGroup = {
   id: string;
   name: string;
   iconKey: MyProfileGroupIconKey;
+  membersCount: number;
 };
 
 export type MyProfile = {

@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
-import { BookOpen, CodeXml, UsersRound } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Avatar, Button, useNotifications } from '../../shared/components/index.ts';
-import { Cluster, Grid } from '../../shared/layout/index.tsx';
+import { Cluster, Split, Stack } from '../../shared/layout/index.tsx';
 import { logout } from '../../redux/auth/authSlice.ts';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks.ts';
 import {
@@ -16,6 +15,7 @@ import {
 import { t } from '../../i18n/index.ts';
 import { MyProfileHero } from './components/MyProfileHero.tsx';
 import { MyProfileListCard, MyProfileListRow } from './components/MyProfileListCard.tsx';
+import { PublicProfileGroupsCard } from './components/PublicProfileGroupsCard.tsx';
 import { ProfileSurface } from './components/ProfileSurface.tsx';
 import { EditProfileDialog } from './components/EditProfileDialog.tsx';
 import type { UpdateProfileRequestDTO } from './dto/profileSchemas.ts';
@@ -24,7 +24,6 @@ export const MyProfilePage = (): React.JSX.Element => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const { notify } = useNotifications();
-  const [showAllGroups, setShowAllGroups] = React.useState(false);
   const { profile, status, errorKey } = useAppSelector((state) => state.profile.myProfile);
 
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -36,10 +35,6 @@ export const MyProfilePage = (): React.JSX.Element => {
   React.useEffect(() => {
     loadProfile();
   }, [loadProfile]);
-
-  React.useEffect(() => {
-    setShowAllGroups(false);
-  }, [profile?.id]);
 
   const handleLogout = React.useCallback(() => {
     void dispatch(logout());
@@ -162,33 +157,19 @@ export const MyProfilePage = (): React.JSX.Element => {
     [handleAcceptRequest, handleRejectRequest, profile],
   );
 
-  const visibleGroups = React.useMemo(() => {
+  const sharedGroups = React.useMemo(() => {
     if (!profile) {
       return [];
     }
 
-    return showAllGroups ? profile.groups : profile.groups.slice(0, 3);
-  }, [profile, showAllGroups]);
-
-  const groupRows = React.useMemo(
-    () => visibleGroups.map((group) => {
-      const icon = group.iconKey === 'sport'
-        ? <UsersRound size={18} aria-hidden="true" />
-        : group.iconKey === 'book'
-          ? <BookOpen size={18} aria-hidden="true" />
-          : <CodeXml size={18} aria-hidden="true" />;
-
-      return (
-        <MyProfileListRow
-          key={group.id}
-          leading={<span className={`my-profile__group-icon my-profile__group-icon--${group.iconKey}`}>{icon}</span>}
-          label={group.name}
-          onClick={() => navigate(`/groups/${group.id}`)}
-        />
-      );
-    }),
-    [navigate, visibleGroups],
-  );
+    return profile.groups.map((group) => ({
+      id: group.id,
+      name: group.name,
+      meta: '',
+      iconKey: group.iconKey,
+      membersCount: group.membersCount,
+    }));
+  }, [profile]);
 
   return (
     <ProfileSurface
@@ -206,31 +187,25 @@ export const MyProfilePage = (): React.JSX.Element => {
             onEdit={() => setIsEditDialogOpen(true)}
             onApprove={handleApproveProfile}
           />
-          <Grid columns={2} gap="3">
-            <MyProfileListCard
-              title={t('profile.my.friends')}
-              totalCount={profile.friendsCount}
-              countLabel={`${profile.friendsCount} ${t('profile.my.friends_count')}`}
-              items={friendRows}
-              emptyText={t('profile.my.empty_friends')}
-              ctaLabel={t('profile.my.show_all_friends')}
-            />
-            <MyProfileListCard
-              title={t('profile.my.groups')}
-              totalCount={profile.groupsCount}
-              countLabel={`${profile.groupsCount} ${t('profile.my.groups_count')}`}
-              items={groupRows}
-              emptyText={t('profile.my.empty_groups')}
-              ctaLabel={profile.groups.length > 3 && !showAllGroups ? t('profile.my.show_all_groups') : undefined}
-              onCtaClick={() => setShowAllGroups(true)}
-            />
-            <MyProfileListCard
-              title={t('profile.my.incoming_requests')}
-              countLabel={`${profile.incomingRequests.length}`}
-              items={incomingRequestRows}
-              emptyText={t('profile.my.empty_incoming_requests')}
-            />
-          </Grid>
+          <Split fraction="1/2" gap="3">
+            <Stack gap="3">
+              <MyProfileListCard
+                title={t('profile.my.friends')}
+                totalCount={profile.friendsCount}
+                countLabel={`${profile.friendsCount} ${t('profile.my.friends_count')}`}
+                items={friendRows}
+                emptyText={t('profile.my.empty_friends')}
+                ctaLabel={t('profile.my.show_all_friends')}
+              />
+              <MyProfileListCard
+                title={t('profile.my.incoming_requests')}
+                countLabel={`${profile.incomingRequests.length}`}
+                items={incomingRequestRows}
+                emptyText={t('profile.my.empty_incoming_requests')}
+              />
+            </Stack>
+            <PublicProfileGroupsCard groups={sharedGroups} />
+          </Split>
 
           <EditProfileDialog
             isOpen={isEditDialogOpen}

@@ -384,6 +384,7 @@ export const getMyProfileForUser = (userId: string, preferredDisplayName?: strin
       id: entry.id,
       name: entry.name,
       iconKey: entry.iconKey,
+      membersCount: getGroupMembersCount(entry.id),
     }));
 
   return myProfileSchema.parse({
