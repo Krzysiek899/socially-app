@@ -2,6 +2,7 @@ import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import App from '../../App.tsx';
 import { t } from '../../i18n/index.ts';
+import { fetchDiscoverEventsRequest } from '../../pages/discover/api/discoverApi.ts';
 
 jest.mock('../../pages/discover/DiscoverMap.tsx', () => ({
   DiscoverMap: ({
@@ -57,6 +58,8 @@ const baseEvent = {
     { id: 'u-2', displayName: 'Uczestnik B' },
   ],
 };
+
+const hereNowButtonMatcher = new RegExp(`${t('discover.filters.here_now')}|${t('discover.filters.all_mode')}`);
 
 describe('Discover page states', () => {
   beforeEach(() => {
@@ -157,5 +160,193 @@ describe('Discover page states', () => {
       expect(window.location.pathname).toBe('/app/events/event-1');
     });
     expect(await screen.findByRole('heading', { name: 'Frontend Meetup' })).toBeInTheDocument();
+  });
+
+  it('adds startsWithinMinutes query when Here & Now is active', async () => {
+    const fetchSpy = jest.fn(async () => ({
+      ok: true,
+      status: 200,
+      json: async () => [],
+    })) as typeof fetch;
+    global.fetch = fetchSpy;
+
+    await fetchDiscoverEventsRequest({
+      searchQuery: '',
+      categories: [],
+      price: 'all',
+      dateFrom: '',
+      dateTo: '',
+      hereNowEnabled: true,
+      startsWithinMinutes: 120,
+    }, 'token-user-1', new AbortController().signal);
+
+    const latestCall = fetchSpy.mock.calls.at(-1);
+    const url = latestCall ? String(latestCall[0]) : '';
+    expect(url).toContain('startsWithinMinutes=120');
+  });
+
+  it('shows only events from next 120 minutes in Here & Now mode', async () => {
+    const fetchSpy = jest.fn(async () => ({
+      ok: true,
+      status: 200,
+      json: async () => [baseEvent],
+    })) as typeof fetch;
+    global.fetch = fetchSpy;
+
+    const items = await fetchDiscoverEventsRequest({
+      searchQuery: '',
+      categories: [],
+      price: 'all',
+      dateFrom: '',
+      dateTo: '',
+      hereNowEnabled: true,
+      startsWithinMinutes: 120,
+    }, 'token-user-1', new AbortController().signal);
+
+    const latestCall = fetchSpy.mock.calls.at(-1);
+    const url = latestCall ? String(latestCall[0]) : '';
+    expect(url).toContain('startsWithinMinutes=120');
+    expect(items).toHaveLength(1);
+    expect(items[0]?.title).toContain('Frontend Meetup');
+  });
+
+  it('keeps Here & Now active after successful geolocation and applies radius filter', async () => {
+    const getCurrentPosition = jest.fn((success: PositionCallback) => {
+      success({ coords: { latitude: 52.2297, longitude: 21.0122 } } as GeolocationPosition);
+    });
+    Object.defineProperty(global.navigator, 'geolocation', {
+      value: { getCurrentPosition },
+      configurable: true,
+    });
+
+    global.fetch = jest.fn(async () => ({
+      ok: true,
+      status: 200,
+      json: async () => [baseEvent],
+    })) as typeof fetch;
+
+    render(<App />);
+    fireEvent.click(await screen.findByRole('button', { name: hereNowButtonMatcher }));
+
+    await waitFor(() => {
+      expect(getCurrentPosition).toHaveBeenCalled();
+    });
+    expect(screen.getByRole('button', { name: t('discover.filters.all_mode') })).toBeInTheDocument();
+  });
+
+  it('disables Here & Now when geolocation is denied', async () => {
+    const getCurrentPosition = jest.fn((_: PositionCallback, error: PositionErrorCallback) => {
+      error({ code: 1, message: 'denied', PERMISSION_DENIED: 1 } as GeolocationPositionError);
+    });
+    Object.defineProperty(global.navigator, 'geolocation', {
+      value: { getCurrentPosition },
+      configurable: true,
+    });
+
+    global.fetch = jest.fn(async () => ({
+      ok: true,
+      status: 200,
+      json: async () => [baseEvent],
+    })) as typeof fetch;
+
+    render(<App />);
+    fireEvent.click(await screen.findByRole('button', { name: hereNowButtonMatcher }));
+
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: hereNowButtonMatcher })).toHaveClass('btn--attention');
+    });
+  });
+
+  it('shows geolocation denied toast and returns to standard Discover', async () => {
+    const getCurrentPosition = jest.fn((_: PositionCallback, error: PositionErrorCallback) => {
+      error({ code: 1, message: 'denied', PERMISSION_DENIED: 1 } as GeolocationPositionError);
+    });
+    Object.defineProperty(global.navigator, 'geolocation', {
+      value: { getCurrentPosition },
+      configurable: true,
+    });
+
+    global.fetch = jest.fn(async () => ({
+      ok: true,
+      status: 200,
+      json: async () => [baseEvent],
+    })) as typeof fetch;
+
+    render(<App />);
+    fireEvent.click(await screen.findByRole('button', { name: hereNowButtonMatcher }));
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(t('discover.here_now.toast.permission_denied'));
+    expect(screen.getByRole('button', { name: hereNowButtonMatcher })).toHaveClass('btn--attention');
+  });
+
+  it('shows dedicated Here & Now empty state when no events match 5 km + 2h', async () => {
+    const getCurrentPosition = jest.fn((success: PositionCallback) => {
+      success({ coords: { latitude: 50.0614, longitude: 19.9366 } } as GeolocationPosition);
+    });
+    Object.defineProperty(global.navigator, 'geolocation', {
+      value: { getCurrentPosition },
+      configurable: true,
+    });
+
+    global.fetch = jest.fn(async () => ({
+      ok: true,
+      status: 200,
+      json: async () => [baseEvent],
+    })) as typeof fetch;
+
+    render(<App />);
+    fireEvent.click(await screen.findByRole('button', { name: hereNowButtonMatcher }));
+
+    expect(await screen.findByText(t('discover.state.empty_here_now'))).toBeInTheDocument();
+  });
+
+  it('keeps list and map synchronized after Here & Now filtering', async () => {
+    const getCurrentPosition = jest.fn((success: PositionCallback) => {
+      success({ coords: { latitude: 52.2297, longitude: 21.0122 } } as GeolocationPosition);
+    });
+    Object.defineProperty(global.navigator, 'geolocation', {
+      value: { getCurrentPosition },
+      configurable: true,
+    });
+
+    global.fetch = jest.fn(async () => ({
+      ok: true,
+      status: 200,
+      json: async () => [
+        baseEvent,
+        {
+          ...baseEvent,
+          id: 'event-2',
+          title: 'Night Run',
+          category: 'SPORT',
+          location: {
+            lat: 52.2311,
+            lng: 21.0058,
+          },
+        },
+      ],
+    })) as typeof fetch;
+
+    render(<App />);
+    fireEvent.click(await screen.findByRole('button', { name: hereNowButtonMatcher }));
+
+    const map = await screen.findByTestId('discover-map');
+    expect(map).toBeInTheDocument();
+
+    const mapPins = screen.getAllByRole('button', { name: /map-pin-/i });
+    const cards = screen.getAllByRole('button', { name: /Frontend Meetup|Night Run/i });
+    expect(mapPins).toHaveLength(2);
+    expect(cards.length).toBeGreaterThanOrEqual(2);
+  });
+
+  it('shows attendees as current/capacity when event has limit', async () => {
+    global.fetch = jest.fn(async () => ({
+      ok: true,
+      status: 200,
+      json: async () => [{ ...baseEvent, participantCapacity: 8 }],
+    })) as typeof fetch;
+
+    render(<App />);
+    expect(await screen.findByText('Uczestnicy (2/8)')).toBeInTheDocument();
   });
 });

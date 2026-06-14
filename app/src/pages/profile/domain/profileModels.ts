@@ -4,6 +4,12 @@ export type MyProfileFriend = {
   avatarUrl?: string;
 };
 
+export type MyProfileIncomingRequest = {
+  id: string;
+  displayName: string;
+  avatarUrl?: string;
+};
+
 export type MyProfileGroupIconKey = 'sport' | 'book' | 'tech';
 
 export type MyProfileGroup = {
@@ -20,6 +26,7 @@ export type MyProfile = {
   bio: string;
   friendsCount: number;
   friends: MyProfileFriend[];
+  incomingRequests: MyProfileIncomingRequest[];
   groupsCount: number;
   groups: MyProfileGroup[];
   isApproved: boolean; 
@@ -46,7 +53,11 @@ export type PublicProfileGroup = {
   meta: string;
 };
 
-export type PublicProfileFriendAction = 'can_send_request';
+export type PublicProfileFriendAction =
+  | 'can_send_request'
+  | 'request_sent'
+  | 'respond_to_request'
+  | 'friends';
 
 export type PublicProfile = {
   id: string;

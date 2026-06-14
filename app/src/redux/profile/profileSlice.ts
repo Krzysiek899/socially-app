@@ -1,13 +1,21 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import type { RootState } from '../store.ts';
-import { 
-  fetchMyProfileRequest, 
+import {
+  acceptFriendRequestRequest,
+  approveMyProfileRequest,
+  fetchMyProfileRequest,
   fetchPublicProfileRequest,
+  rejectFriendRequestRequest,
+  sendFriendRequestRequest,
   submitProfileReviewRequest,
+  unfriendUserRequest,
   updateMyProfileRequest,
-  approveMyProfileRequest
 } from '../../pages/profile/api/profileApi.ts';
-import type { MyProfile, PublicProfile, PublicProfileReview } from '../../pages/profile/domain/profileModels.ts';
+import type {
+  MyProfile,
+  PublicProfile,
+  PublicProfileReview,
+} from '../../pages/profile/domain/profileModels.ts';
 import type { CreateReviewRequestDTO, UpdateProfileRequestDTO } from '../../pages/profile/dto/profileSchemas.ts';
 
 type ProfileStatus = 'idle' | 'loading' | 'succeeded' | 'failed';
@@ -110,7 +118,7 @@ export const updateMyProfile = createAsyncThunk<
   { state: RootState; rejectValue: string }
 >('profile/updateMyProfile', async (payload, thunkApi) => {
   const token = thunkApi.getState().auth.session?.token;
-  
+
   if (!token) {
     return thunkApi.rejectWithValue('profile.errors.unauthorized');
   }
@@ -128,7 +136,7 @@ export const approveMyProfile = createAsyncThunk<
   { state: RootState; rejectValue: string }
 >('profile/approveMyProfile', async (_, thunkApi) => {
   const token = thunkApi.getState().auth.session?.token;
-  
+
   if (!token) {
     return thunkApi.rejectWithValue('profile.errors.unauthorized');
   }
@@ -141,13 +149,106 @@ export const approveMyProfile = createAsyncThunk<
   }
 });
 
+const refreshProfilesAfterRelationMutation = async (
+  thunkApi: {
+    dispatch: (action: unknown) => unknown;
+    getState: () => RootState;
+  },
+  targetUserId: string,
+): Promise<void> => {
+  await thunkApi.dispatch(fetchMyProfile());
+
+  const requestedUserId = thunkApi.getState().profile.publicProfile.requestedUserId;
+  const publicUserId = requestedUserId ?? targetUserId;
+  await thunkApi.dispatch(fetchPublicProfile(publicUserId));
+};
+
+export const sendFriendRequest = createAsyncThunk<
+  { ok: true },
+  string,
+  { state: RootState; rejectValue: string }
+>('profile/sendFriendRequest', async (targetUserId, thunkApi) => {
+  const token = thunkApi.getState().auth.session?.token;
+
+  if (!token) {
+    return thunkApi.rejectWithValue('profile.errors.unauthorized');
+  }
+
+  try {
+    const response = await sendFriendRequestRequest(targetUserId, token, thunkApi.signal);
+    await refreshProfilesAfterRelationMutation(thunkApi, targetUserId);
+    return response;
+  } catch (error) {
+    return thunkApi.rejectWithValue(getErrorKey(error, 'profile.errors.friend_request_failed'));
+  }
+});
+
+export const acceptFriendRequest = createAsyncThunk<
+  { ok: true },
+  string,
+  { state: RootState; rejectValue: string }
+>('profile/acceptFriendRequest', async (targetUserId, thunkApi) => {
+  const token = thunkApi.getState().auth.session?.token;
+
+  if (!token) {
+    return thunkApi.rejectWithValue('profile.errors.unauthorized');
+  }
+
+  try {
+    const response = await acceptFriendRequestRequest(targetUserId, token, thunkApi.signal);
+    await refreshProfilesAfterRelationMutation(thunkApi, targetUserId);
+    return response;
+  } catch (error) {
+    return thunkApi.rejectWithValue(getErrorKey(error, 'profile.errors.friend_accept_failed'));
+  }
+});
+
+export const rejectFriendRequest = createAsyncThunk<
+  { ok: true },
+  string,
+  { state: RootState; rejectValue: string }
+>('profile/rejectFriendRequest', async (targetUserId, thunkApi) => {
+  const token = thunkApi.getState().auth.session?.token;
+
+  if (!token) {
+    return thunkApi.rejectWithValue('profile.errors.unauthorized');
+  }
+
+  try {
+    const response = await rejectFriendRequestRequest(targetUserId, token, thunkApi.signal);
+    await refreshProfilesAfterRelationMutation(thunkApi, targetUserId);
+    return response;
+  } catch (error) {
+    return thunkApi.rejectWithValue(getErrorKey(error, 'profile.errors.friend_reject_failed'));
+  }
+});
+
+export const unfriendUser = createAsyncThunk<
+  { ok: true },
+  string,
+  { state: RootState; rejectValue: string }
+>('profile/unfriendUser', async (targetUserId, thunkApi) => {
+  const token = thunkApi.getState().auth.session?.token;
+
+  if (!token) {
+    return thunkApi.rejectWithValue('profile.errors.unauthorized');
+  }
+
+  try {
+    const response = await unfriendUserRequest(targetUserId, token, thunkApi.signal);
+    await refreshProfilesAfterRelationMutation(thunkApi, targetUserId);
+    return response;
+  } catch (error) {
+    return thunkApi.rejectWithValue(getErrorKey(error, 'profile.errors.friend_unfriend_failed'));
+  }
+});
+
 const profileSlice = createSlice({
   name: 'profile',
   initialState,
   reducers: {},
   extraReducers: (builder) => {
     builder
-      // --- fetchMyProfile ---
       .addCase(fetchMyProfile.pending, (state, action) => {
         state.myProfile.status = 'loading';
         state.myProfile.errorKey = null;
@@ -168,7 +269,6 @@ const profileSlice = createSlice({
         state.myProfile.currentRequestId = null;
       })
 
-      // --- fetchPublicProfile ---
       .addCase(fetchPublicProfile.pending, (state, action) => {
         state.publicProfile.status = 'loading';
         state.publicProfile.errorKey = null;
@@ -191,28 +291,33 @@ const profileSlice = createSlice({
         state.publicProfile.currentRequestId = null;
       })
 
-      // --- submitProfileReview ---
       .addCase(submitProfileReview.fulfilled, (state, action) => {
-        if (state.publicProfile.profile) {
-          const newReview = action.payload;
-          const currentProfile = state.publicProfile.profile;
-
-          currentProfile.reviews.unshift(newReview);
-          
-          const oldTotalScore = currentProfile.rating * currentProfile.reviewsCount;
-          currentProfile.reviewsCount += 1;
-          currentProfile.rating = (oldTotalScore + newReview.rating) / currentProfile.reviewsCount;
+        const currentProfile = state.publicProfile.profile;
+        if (!currentProfile) {
+          return;
         }
+
+        const newReview = action.payload;
+        const existingReviewIndex = currentProfile.reviews.findIndex((review) => review.id === newReview.id);
+
+        if (existingReviewIndex >= 0) {
+          const previous = currentProfile.reviews[existingReviewIndex];
+          currentProfile.reviews[existingReviewIndex] = newReview;
+          const total = currentProfile.rating * currentProfile.reviewsCount;
+          currentProfile.rating = (total - previous.rating + newReview.rating) / currentProfile.reviewsCount;
+          return;
+        }
+
+        currentProfile.reviews.unshift(newReview);
+        const oldTotalScore = currentProfile.rating * currentProfile.reviewsCount;
+        currentProfile.reviewsCount += 1;
+        currentProfile.rating = (oldTotalScore + newReview.rating) / currentProfile.reviewsCount;
       })
 
-      // --- updateMyProfile ---
       .addCase(updateMyProfile.fulfilled, (state, action) => {
-        if (state.myProfile.profile) {
-          state.myProfile.profile = action.payload;
-        }
+        state.myProfile.profile = action.payload;
       })
 
-      // --- approveMyProfile ---
       .addCase(approveMyProfile.fulfilled, (state, action) => {
         if (state.myProfile.profile) {
           state.myProfile.profile.isApproved = action.payload;

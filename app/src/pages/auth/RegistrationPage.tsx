@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { Lock, Mail, ShieldCheck, User } from 'lucide-react';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks.ts';
 import { Button, Card, PasswordField, TextField } from '../../shared/components/index.ts';
@@ -57,6 +57,7 @@ export const RegistrationPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const authStatus = useAppSelector((state) => state.auth.status);
+  const session = useAppSelector((state) => state.auth.session);
   const serverErrorKey = useAppSelector((state) => state.auth.errorKey);
 
   const [fullName, setFullName] = React.useState('');
@@ -76,6 +77,10 @@ export const RegistrationPage = () => {
   const showValidation = submitted;
   const isSubmitDisabled =
     authStatus === 'loading' || [fullName, email, password, confirmPassword].some((value) => value.trim().length === 0);
+
+  if (session) {
+    return <Navigate to="/app" replace />;
+  }
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
