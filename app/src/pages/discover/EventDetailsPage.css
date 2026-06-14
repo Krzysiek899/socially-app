@@ -14,6 +14,10 @@
   gap: var(--space-2);
 }
 
+.event-details__category-badge {
+  justify-self: start;
+}
+
 .event-details__header h1 {
   color: var(--color-text-heading);
   font-size: clamp(1.75rem, 2.8vw, 2.35rem);
@@ -52,24 +56,64 @@
   width: 2rem;
   height: 2rem;
   border-radius: var(--radius-sm);
-  background: var(--color-surface-subtle);
-  color: var(--color-primary-default);
+  background: var(--color-primary-subtle);
+  color: var(--color-primary);
   display: inline-flex;
   align-items: center;
   justify-content: center;
 }
 
+.event-details__meta-card--location .event-details__meta-icon {
+  background: var(--color-warning-subtle);
+  color: var(--color-warning-strong);
+}
+
+.event-details__meta-card--price .event-details__meta-icon {
+  background: var(--color-success-subtle);
+  color: var(--color-success-strong);
+}
+
+.event-details__meta-card--organizer .event-details__meta-icon {
+  background: var(--color-info-subtle);
+  color: var(--color-info);
+}
+
 .event-details__meta-label {
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  font-size: var(--typography-label-size);
+  font-size: var(--typography-body-sm-size);
   color: var(--color-text-subtle);
 }
 
 .event-details__meta-value {
   margin-top: var(--space-1);
   color: var(--color-text-heading);
-  font-weight: var(--typography-label-weight);
+  font-size: var(--typography-body-size);
+  line-height: var(--typography-body-line-height);
+  font-weight: var(--typography-body-weight);
+}
+
+.event-details__meta-link,
+.event-details__attendee-link {
+  border: 0;
+  background: transparent;
+  padding: 0;
+  color: var(--color-primary);
+  font: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+
+.event-details__meta-link:hover,
+.event-details__attendee-link:hover {
+  color: var(--color-primary-hover);
+  text-decoration: underline;
+}
+
+.event-details__meta-link:focus-visible,
+.event-details__attendee-link:focus-visible {
+  outline: var(--border-width-strong) solid var(--color-border-focus);
+  outline-offset: 2px;
 }
 
 .event-details__description-card,
@@ -92,9 +136,10 @@
   line-height: var(--typography-body-line-height);
 }
 
-.event-details__attendee-name {
+.event-details__attendee-link {
   color: var(--color-text-default);
   font-size: var(--typography-body-sm-size);
+  font-weight: var(--typography-body-weight);
 }
 
 .event-details__attendees-overflow {
