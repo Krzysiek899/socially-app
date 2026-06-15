@@ -15,7 +15,9 @@ if (gaMeasurementId) {
 }
 
 const bootstrap = async () => {
-  if (import.meta.env.DEV) {
+  const shouldStartMsw = import.meta.env.DEV || import.meta.env.VITE_ENABLE_MSW === 'true';
+
+  if (shouldStartMsw) {
     await startMockServiceWorker();
   }
 
