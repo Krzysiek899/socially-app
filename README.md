@@ -561,5 +561,69 @@ Aplikacja jest hostowana na Railway:
 
 ## 10. Raport Google Analytics
 
+W sekcji tej zaprezentowano przykładowe zrzuty ekranu z Google Analytics obrazujące podstawowe metryki ruchu i zaangażowania użytkowników w aplikacji. Zostały one wygenerowane w fazie testowej.
+
+**Zrzuty ekranu:**
+
+![Podsumowanie ruchu użytkowników na mapie](screenshots/goggle-analytics/Screenshot_google_analitics.png)
+*Widok mapy przedstawiający lokalizacje aktywnych użytkowników (Kraków) oraz podstawowe metryki: czas aktywności i liczba użytkowników na minutę.*
+
+![Przegląd metryk z podziałem na rodzaj i miejsce aktywności](screenshots/goggle-analytics/Screenshot_google_analitics2.png)
+*Zestawienie najważniejszych statystyk, z podziałem m.in. na konkretne ekrany/strony ("socially-app") oraz kluczowe zdarzenia (np. "page_view", "scroll", "session_start").*
+
+**Interpretacja i wnioski:**
+
+* **Aktywność lokalna:** Ruch został zarejestrowany głównie z okolic Krakowa, co świadczy o lokalnym charakterze przeprowadzanych testów, w pełni pokrywając się z założeniami aplikacji skupiającej się na wydarzeniach lokalnych.
+* **Rozkład aktywności w czasie:** Zauważono piki aktywności (wskazujące na krótkotrwałe testowanie funkcjonalności), zamiast równomiernego obciążenia serwisu, charakterystycznego dla aplikacji będącej w intensywnym użytku.
+* **Zaangażowanie na stronach:** Widoczna jest niska ogólna liczba zdarzeń i wyświetleń stron (np. 16 "page_view", 5 "scroll"). To po raz kolejny potwierdza, że aplikacja aktualnie znajduje się w środowisku testowym. Warto zaznaczyć, że system Analytics prawidłowo zlicza różne typy interakcji.
+* **Ograniczona różnorodność:** Brak danych o nowych użytkownikach (względem konkretnych źródeł) oraz powtarzalność informacji, potwierdzają małą skalę prowadzonych działań.
+
+Podsumowując, załączone zrzuty potwierdzają poprawną integrację z Google Analytics 4. Osiągnięte wyniki odzwierciedlają aktywność testową i potwierdzają sprawność infrastruktury analitycznej przed masowym wdrożeniem i testami z rzeczywistymi użytkownikami.
 ## 11. Raport ContentSquare (dawniej Hotjar)
 
+*Informacja: Z dniem 1 czerwca platforma Hotjar została zintegrowana i stała się częścią ekosystemu ContentSquare. Narzędzie wykorzystane do śledzenia zachowań użytkowników w naszej aplikacji operuje już pod nowym szyldem, zachowując przy tym sprawdzony, znany interfejs analizy wizualnej (heatmaps).*
+
+Poniżej przedstawiono analizę zachowań użytkowników na podstawie wygenerowanych map cieplnych oraz metryk sesji. 
+
+### Rozkład kliknięć i ruchu (Click & Move Distribution)
+Mapy te ilustrują miejsca, w które użytkownicy klikali najczęściej oraz ścieżki, po których poruszał się kursor.
+
+![Click/Move Distribution - Odkrywaj](screenshots/hotjar-contextsquare/hotjar_click%29disctribution/Screenshot_hotjar_heatmap_odkrywaj.png)
+_Rozkład interakcji w widoku Odkrywaj – wyraźna koncentracja kliknięć i ruchu kursora na markerach mapy oraz elementach nawigacyjnych._
+
+![Click/Move Distribution - Moje Wydarzenia](screenshots/hotjar-contextsquare/hotjar_click%29disctribution/Screenshot_hotjar_heatmap_moje_wydarzenie.png)
+_Rozkład interakcji w sekcji Moje wydarzenia – najczęstsze akcje skupiają się na górnym pasku nawigacji oraz przyciskach akcji na kartach wydarzeń._
+
+![Click/Move Distribution - Stwórz Wydarzenie](screenshots/hotjar-contextsquare/hotjar_click%29disctribution/Screenshot_hotjar_heatmap_stwórz_wydarzenie.png)
+_Rozkład interakcji w formularzu tworzenia wydarzenia – główna aktywność widoczna wokół pierwszych pól formularza (kategoria, data) oraz przycisku zatwierdzającego._
+
+![Click/Move Distribution - Twój Profil](screenshots/hotjar-contextsquare/hotjar_click%29disctribution/Screenshot_hotjar_heatmap_twój_profil.png)
+_Rozkład interakcji w profilu użytkownika – zauważalny ruch kursora po lewej stronie (skanowanie list znajomych) oraz kliknięcia w główne przyciski edycji i nawigację._
+
+**Interpretacja:**
+* **Centralna rola nawigacji:** Główne skupisko kliknięć (najgorętsze punkty) znajduje się na górnym pasku `AppNavbar`. Użytkownicy sprawnie przełączają się między widokami "Odkrywaj", "Moje wydarzenia" oraz menu profilu.
+* **Widoczność głównych akcji (CTA):** Przyciski takie jak "Stwórz wydarzenie" czy "Zarządzaj" są łatwo dostrzegalne i chętnie klikane, co potwierdza dobrą architekturę informacji.
+* **Eksploracja mapy i formularzy:** W widoku głównym widać wyraźne interakcje z markerami lokalizacyjnymi, a w formularzach kursor podąża za układem tekstu (F-Pattern), co udowadnia, że interfejs jest naturalny w odbiorze i łatwy do skanowania.
+
+### Podstawowe metryki sesji (Performance & Sessions)
+Poniższe zrzuty prezentują kluczowe wskaźniki zaangażowania i wydajności zarejestrowane przez ContentSquare.
+
+![Metryki - LCP](screenshots/hotjar-contextsquare/Screenshot_hotjar_LCP.png)
+
+_**LCP (Largest Contentful Paint): 0.76s** – Wskaźnik określający czas renderowania największego widocznego elementu tekstowego lub graficznego na stronie._
+
+![Metryki - Współczynnik odrzuceń](screenshots/hotjar-contextsquare/Screenshot_hotjar_bounce_rate.png)
+
+_**Współczynnik odrzuceń (Bounce Rate): 22.2%** – Procent sesji, podczas których użytkownik opuścił aplikację bez przechodzenia na żadną inną podstronę._
+
+![Metryki - Liczba sesji](screenshots/hotjar-contextsquare/Screenshot_hotjar_number_of_sessions.png)
+
+_**Liczba sesji (Number of sessions): 9** – Całkowita liczba unikalnych sesji zarejestrowanych w analizowanym przedziale czasowym (widoczny nagły wzrost w okolicach 14 czerwca)._
+
+![Metryki - Czas trwania sesji](screenshots/hotjar-contextsquare/Screenshot_hotjar_session_time.png)
+
+_**Czas trwania sesji (Session time): 26min 38s** – Średni czas mierzony od momentu wejścia do aplikacji do jej opuszczenia przez użytkownika._
+
+**Jak czytać te dane i interpretacja wyników:**
+* **Wydajność (LCP = 0.76s):** Wynik ten jest wybitnie dobry. Zgodnie z wytycznymi Google Core Web Vitals, wskaźnik LCP powinien wynosić poniżej 2.5s. Oznacza to, że aplikacja ładuje się błyskawicznie, zapewniając użytkownikom natychmiastowy dostęp do treści i świetne odczucia z użytkowania (UX).
+* **Charakterystyka ruchu (Środowisko testowe):** Niewielka liczba sesji (9) w zestawieniu z ekstremalnie długim średnim czasem trwania wizyty (ponad 26 minut) oraz bardzo niskim współczynnikiem odrzuceń (22.2%) jednoznacznie wskazuje, że nie jest to ruch organiczny. Powyższe dane idealnie obrazują sesje testowe (QA/Development), podczas których twórca aplikacji lub tester precyzyjnie sprawdzał formularze, nawigację i logikę działania na wielu podstronach, bez pośpiechu opuszczania serwisu.
